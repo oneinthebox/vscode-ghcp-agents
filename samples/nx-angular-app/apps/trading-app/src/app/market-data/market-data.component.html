@@ -1,0 +1,208 @@
+<div class="row g-1">
+  <!-- Top Movers -->
+  <div class="col-12 mb-1">
+    <div class="d-flex align-items-center gap-2 px-2 py-1 border-bottom border-secondary"
+         style="background-color: #111827; font-size: 0.65rem;">
+      <span class="text-secondary text-uppercase" style="letter-spacing: 0.5px; font-weight: 600;">
+        Market Data
+      </span>
+      <button class="btn btn-sm py-0 px-2"
+              [class.btn-outline-success]="!isLive"
+              [class.btn-outline-danger]="isLive"
+              (click)="toggleLiveData()"
+              style="font-size: 0.6rem;">
+        {{ isLive ? 'STOP' : 'START' }} LIVE
+      </button>
+      <!-- OLD pattern: *ngIf instead of @if -->
+      <span *ngIf="isLive" class="badge bg-success" style="font-size: 0.5rem;">STREAMING</span>
+      <span class="ms-auto text-secondary" style="font-size: 0.6rem;">
+        {{ quotes.length }} instruments
+      </span>
+    </div>
+  </div>
+
+  <!-- Top Movers Cards -->
+  <div class="col-12 mb-1">
+    <div class="d-flex gap-1 px-1 overflow-auto">
+      <!-- OLD pattern: *ngFor instead of @for -->
+      <div *ngFor="let mover of topMovers"
+           class="card bg-dark border-secondary flex-shrink-0"
+           style="width: 140px; font-size: 0.65rem; cursor: pointer;"
+           (click)="selectQuote(mover)">
+        <div class="card-body p-1">
+          <div class="d-flex justify-content-between mb-1">
+            <span style="color: #00d4aa; font-weight: 700; font-size: 0.7rem;">{{ mover.ticker }}</span>
+            <span [class]="getChangeClass(mover.change)" style="font-size: 0.6rem;">
+              {{ getChangeArrow(mover.change) }} {{ mover.changePercent > 0 ? '+' : '' }}{{ mover.changePercent.toFixed(2) }}%
+            </span>
+          </div>
+          <div style="font-family: 'Courier New', monospace;">
+            <span class="text-light">${{ mover.lastPrice.toFixed(2) }}</span>
+          </div>
+          <div class="text-secondary" style="font-size: 0.55rem;">
+            Vol: {{ formatVolume(mover.volume) }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quotes Grid -->
+  <div class="col-12">
+    <div class="card bg-dark border-secondary">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-dark table-sm table-hover mb-0"
+                 style="font-size: 0.65rem; font-family: 'Courier New', monospace;">
+            <thead>
+              <tr style="font-size: 0.58rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">
+                <th class="border-secondary px-1 py-1" style="position: sticky; left: 0; background: #1f2937; z-index: 1;">Ticker</th>
+                <th class="border-secondary px-1 py-1">Company</th>
+                <th class="border-secondary px-1 py-1 text-end">Last</th>
+                <th class="border-secondary px-1 py-1 text-end">Chg</th>
+                <th class="border-secondary px-1 py-1 text-end">Chg %</th>
+                <th class="border-secondary px-1 py-1 text-end">Bid</th>
+                <th class="border-secondary px-1 py-1 text-end">Ask</th>
+                <th class="border-secondary px-1 py-1 text-end">Bid Sz</th>
+                <th class="border-secondary px-1 py-1 text-end">Ask Sz</th>
+                <th class="border-secondary px-1 py-1 text-end">Volume</th>
+                <th class="border-secondary px-1 py-1 text-end">VWAP</th>
+                <th class="border-secondary px-1 py-1 text-end">Open</th>
+                <th class="border-secondary px-1 py-1 text-end">High</th>
+                <th class="border-secondary px-1 py-1 text-end">Low</th>
+                <th class="border-secondary px-1 py-1 text-end">Prev</th>
+                <th class="border-secondary px-1 py-1 text-end">Mkt Cap</th>
+                <th class="border-secondary px-1 py-1 text-end">P/E</th>
+                <th class="border-secondary px-1 py-1 text-end">EPS</th>
+                <th class="border-secondary px-1 py-1 text-end">Div %</th>
+                <th class="border-secondary px-1 py-1 text-end">52w Hi</th>
+                <th class="border-secondary px-1 py-1 text-end">52w Lo</th>
+                <th class="border-secondary px-1 py-1">Exch</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- OLD pattern: *ngFor instead of @for -->
+              <tr *ngFor="let q of quotes"
+                  [class.table-active]="selectedQuote?.ticker === q.ticker"
+                  (click)="selectQuote(q)"
+                  style="cursor: pointer;">
+                <td class="border-secondary px-1 py-0"
+                    style="position: sticky; left: 0; background: inherit; z-index: 1; color: #00d4aa; font-weight: 700;">
+                  {{ q.ticker }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-truncate" style="max-width: 120px; color: #b0bec5;">
+                  {{ q.companyName }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-light fw-bold">
+                  ${{ q.lastPrice.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end" [class]="getChangeClass(q.change)">
+                  {{ q.change >= 0 ? '+' : '' }}{{ q.change.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end" [class]="getChangeClass(q.changePercent)">
+                  {{ getChangeArrow(q.changePercent) }} {{ q.changePercent >= 0 ? '+' : '' }}{{ q.changePercent.toFixed(2) }}%
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-success" style="font-size: 0.6rem;">
+                  ${{ q.bidPrice.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-danger" style="font-size: 0.6rem;">
+                  ${{ q.askPrice.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-secondary" style="font-size: 0.6rem;">
+                  {{ q.bidSize }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-secondary" style="font-size: 0.6rem;">
+                  {{ q.askSize }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-light">
+                  {{ formatVolume(q.volume) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-secondary">
+                  ${{ q.vwap.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-secondary">
+                  ${{ q.openPrice.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-success" style="font-size: 0.6rem;">
+                  ${{ q.dayHigh.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-danger" style="font-size: 0.6rem;">
+                  ${{ q.dayLow.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-secondary">
+                  ${{ q.prevClose.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-light">
+                  {{ formatMarketCap(q.marketCap) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-secondary">
+                  {{ q.peRatio.toFixed(1) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-secondary">
+                  ${{ q.eps.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end" style="font-size: 0.6rem;"
+                    [class]="q.dividendYield > 0 ? 'text-warning' : 'text-secondary'">
+                  {{ q.dividendYield > 0 ? q.dividendYield.toFixed(2) + '%' : '--' }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-secondary" style="font-size: 0.6rem;">
+                  ${{ q.fiftyTwoWeekHigh.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-end text-secondary" style="font-size: 0.6rem;">
+                  ${{ q.fiftyTwoWeekLow.toFixed(2) }}
+                </td>
+                <td class="border-secondary px-1 py-0 text-secondary" style="font-size: 0.6rem;">
+                  {{ q.exchange }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quote Detail Panel -->
+  <div *ngIf="selectedQuote" class="col-12 mt-1">
+    <div class="card bg-dark border-secondary">
+      <div class="card-header p-1 border-secondary d-flex justify-content-between"
+           style="background-color: #111827; font-size: 0.7rem;">
+        <span>
+          <span style="color: #00d4aa; font-weight: 700;">{{ selectedQuote.ticker }}</span>
+          <span class="text-secondary ms-2">{{ selectedQuote.companyName }}</span>
+        </span>
+        <span class="text-secondary" style="font-size: 0.6rem;">
+          {{ selectedQuote.exchange }} | Last: {{ selectedQuote.lastUpdated | date:'HH:mm:ss' }}
+        </span>
+      </div>
+      <div class="card-body p-1">
+        <div class="row g-1" style="font-size: 0.65rem; font-family: 'Courier New', monospace;">
+          <div class="col-2">
+            <span class="text-secondary">Last:</span>
+            <span class="text-light fw-bold ms-1">${{ selectedQuote.lastPrice.toFixed(2) }}</span>
+          </div>
+          <div class="col-2">
+            <span class="text-secondary">Bid:</span>
+            <span class="text-success ms-1">${{ selectedQuote.bidPrice.toFixed(2) }} x{{ selectedQuote.bidSize }}</span>
+          </div>
+          <div class="col-2">
+            <span class="text-secondary">Ask:</span>
+            <span class="text-danger ms-1">${{ selectedQuote.askPrice.toFixed(2) }} x{{ selectedQuote.askSize }}</span>
+          </div>
+          <div class="col-2">
+            <span class="text-secondary">Spread:</span>
+            <span class="text-light ms-1">${{ (selectedQuote.askPrice - selectedQuote.bidPrice).toFixed(2) }}</span>
+          </div>
+          <div class="col-2">
+            <span class="text-secondary">VWAP:</span>
+            <span class="text-light ms-1">${{ selectedQuote.vwap.toFixed(2) }}</span>
+          </div>
+          <div class="col-2">
+            <span class="text-secondary">Vol:</span>
+            <span class="text-light ms-1">{{ formatVolume(selectedQuote.volume) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,52 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/jest.config.[jt]s"
+    ],
+    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json"]
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"],
+      "cache": true
+    },
+    "test": {
+      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
+      "cache": true
+    },
+    "lint": {
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "cache": true
+    }
+  },
+  "generators": {
+    "@nx/angular:component": {
+      "style": "scss"
+    }
+  },
+  "enforce-module-boundaries": {
+    "enforceBuildableLibDependency": true,
+    "allow": [],
+    "depConstraints": [
+      {
+        "sourceTag": "scope:portfolio-app",
+        "onlyDependOnLibsWithTags": ["scope:shared"]
+      },
+      {
+        "sourceTag": "scope:trading-app",
+        "onlyDependOnLibsWithTags": ["scope:shared"]
+      },
+      {
+        "sourceTag": "scope:shared",
+        "onlyDependOnLibsWithTags": ["scope:shared"]
+      }
+    ]
+  },
+  "defaultProject": "portfolio-app"
+}

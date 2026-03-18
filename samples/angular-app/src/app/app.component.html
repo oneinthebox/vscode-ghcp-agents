@@ -1,0 +1,57 @@
+<div class="app-container">
+  <mat-toolbar color="primary" class="app-toolbar">
+    <button mat-icon-button (click)="toggleSidenav()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <span class="toolbar-logo">RFM</span>
+    <span style="margin-left: 8px; font-size: 11px; opacity: 0.8;">{{ title }}</span>
+    <span class="toolbar-spacer"></span>
+    <span style="font-size: 10px; margin-right: 12px; opacity: 0.7;">Market: OPEN</span>
+    <span style="font-size: 10px; margin-right: 12px; opacity: 0.7;">As of: Dec 12, 2024 16:00 ET</span>
+    <button mat-icon-button matTooltip="Notifications">
+      <mat-icon matBadge="3" matBadgeSize="small" matBadgeColor="warn">notifications</mat-icon>
+    </button>
+    <button mat-icon-button matTooltip="Settings">
+      <mat-icon>settings</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <mat-sidenav-container style="flex: 1;">
+    <mat-sidenav [opened]="sidenavOpened" mode="side" class="app-sidenav">
+      <div class="nav-section-title">Navigation</div>
+      <div *ngFor="let item of navItems"
+           class="nav-item"
+           [class.active]="isActive(item.route)"
+           (click)="navigateTo(item.route)">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+      </div>
+
+      <mat-divider style="margin: 8px 0; border-color: #455a64;"></mat-divider>
+
+      <div class="nav-section-title">Quick Stats</div>
+      <div style="padding: 4px 16px; color: #90a4ae; font-size: 10px;">
+        <div style="margin-bottom: 4px;">
+          <span>Total AUM</span>
+          <span style="float: right; color: #b2dfdb;">$2.64B</span>
+        </div>
+        <div style="margin-bottom: 4px;">
+          <span>Active Funds</span>
+          <span style="float: right; color: #b2dfdb;">6</span>
+        </div>
+        <div style="margin-bottom: 4px;">
+          <span>Open Orders</span>
+          <span style="float: right; color: #ffcc80;">3</span>
+        </div>
+        <div>
+          <span>Positions</span>
+          <span style="float: right; color: #b2dfdb;">15</span>
+        </div>
+      </div>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="main-content">
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

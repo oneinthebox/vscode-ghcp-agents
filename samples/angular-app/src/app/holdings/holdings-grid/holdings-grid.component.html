@@ -1,0 +1,166 @@
+<div>
+  <div class="section-header">Cross-Fund Holdings Grid</div>
+
+  <!-- Summary Row -->
+  <div class="card-grid" style="margin-bottom: 8px;">
+    <mat-card class="data-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 9px; text-transform: uppercase; color: #78909c; letter-spacing: 1px;">Total Positions</div>
+          <div style="font-size: 16px; font-weight: 700; color: #1a237e;">{{ dataSource.filteredData.length }}</div>
+        </div>
+        <mat-icon style="font-size: 28px; color: #c5cae9;">view_list</mat-icon>
+      </div>
+    </mat-card>
+    <mat-card class="data-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 9px; text-transform: uppercase; color: #78909c; letter-spacing: 1px;">Total Mkt Value</div>
+          <div style="font-size: 16px; font-weight: 700; color: #1a237e;">{{ formatValue(getTotalMarketValue()) }}</div>
+        </div>
+        <mat-icon style="font-size: 28px; color: #c5cae9;">monetization_on</mat-icon>
+      </div>
+    </mat-card>
+    <mat-card class="data-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 9px; text-transform: uppercase; color: #78909c; letter-spacing: 1px;">Total Unrlzd P&L</div>
+          <div style="font-size: 16px; font-weight: 700;"
+               [ngClass]="getTotalPnl() >= 0 ? 'positive' : 'negative'">
+            {{ formatValue(getTotalPnl()) }}
+          </div>
+        </div>
+        <mat-icon style="font-size: 28px; color: #c5cae9;">trending_up</mat-icon>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Filters -->
+  <div class="search-container">
+    <mat-form-field appearance="outline" style="flex: 1; margin-bottom: -16px;">
+      <mat-label>Filter by ticker, name, or sector</mat-label>
+      <input matInput [(ngModel)]="filterText" (keyup)="applyFilter()" placeholder="Type to filter...">
+      <mat-icon matSuffix>filter_list</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="width: 140px; margin-bottom: -16px;">
+      <mat-label>Sector</mat-label>
+      <mat-select [(ngModel)]="selectedSector" (selectionChange)="filterBySector()">
+        <mat-option value="">All</mat-option>
+        <mat-option *ngFor="let sector of sectors" [value]="sector">{{ sector }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="width: 120px; margin-bottom: -16px;">
+      <mat-label>Fund</mat-label>
+      <mat-select [(ngModel)]="selectedFund" (selectionChange)="filterBySector()">
+        <mat-option value="">All</mat-option>
+        <mat-option *ngFor="let fund of fundIds" [value]="fund">{{ fund }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-icon-button (click)="clearFilters()" matTooltip="Clear Filters">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="28"></mat-spinner>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <div style="font-size: 10px; color: #78909c; margin-bottom: 4px;">
+      Showing {{ dataSource.filteredData.length }} of {{ holdings.length }} positions
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table mat-table [dataSource]="dataSource" matSort class="dense-table">
+
+        <ng-container matColumnDef="fundId">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Fund</th>
+          <td mat-cell *matCellDef="let h" class="ticker-cell" style="font-size: 10px;">{{ h.fundId }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="ticker">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Ticker</th>
+          <td mat-cell *matCellDef="let h" class="ticker-cell">{{ h.ticker }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="companyName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Company</th>
+          <td mat-cell *matCellDef="let h" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; font-size: 10px;">
+            {{ h.companyName }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="sector">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Sector</th>
+          <td mat-cell *matCellDef="let h" style="font-size: 10px;">{{ h.sector }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="assetClass">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Class</th>
+          <td mat-cell *matCellDef="let h" style="font-size: 10px;">{{ h.assetClass }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="shares">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Shares</th>
+          <td mat-cell *matCellDef="let h" class="numeric-cell">{{ h.shares | number }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="avgCost">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Avg Cost</th>
+          <td mat-cell *matCellDef="let h" class="numeric-cell">${{ h.avgCost.toFixed(2) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="currentPrice">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Price</th>
+          <td mat-cell *matCellDef="let h" class="numeric-cell">${{ h.currentPrice.toFixed(2) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="marketValue">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Mkt Value</th>
+          <td mat-cell *matCellDef="let h" class="numeric-cell">{{ formatValue(h.marketValue) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="weight">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Wt%</th>
+          <td mat-cell *matCellDef="let h" class="numeric-cell">
+            {{ h.weight.toFixed(1) }}%
+            <div class="allocation-bar" style="width: 40px; display: inline-block; vertical-align: middle; margin-left: 4px;">
+              <div class="fill" [style.width.%]="h.weight * 4"></div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="unrealizedPnl">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Unrlzd P&L</th>
+          <td mat-cell *matCellDef="let h" class="numeric-cell"
+              [ngClass]="h.unrealizedPnl >= 0 ? 'positive' : 'negative'">
+            {{ formatValue(h.unrealizedPnl) }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="unrealizedPnlPercent">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>P&L%</th>
+          <td mat-cell *matCellDef="let h" class="numeric-cell"
+              [ngClass]="h.unrealizedPnlPercent >= 0 ? 'positive' : 'negative'">
+            {{ h.unrealizedPnlPercent >= 0 ? '+' : '' }}{{ h.unrealizedPnlPercent.toFixed(2) }}%
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="dateAdded">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Added</th>
+          <td mat-cell *matCellDef="let h" style="font-size: 10px;">{{ h.dateAdded }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <mat-paginator [pageSizeOptions]="[10, 25, 50]" pageSize="25" showFirstLastButtons
+                   style="font-size: 11px;">
+    </mat-paginator>
+  </div>
+</div>

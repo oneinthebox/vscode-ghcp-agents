@@ -1,0 +1,209 @@
+# ORCH Audit Boundaries Configuration
+# Defines allowed tools and file scope per agent.
+# The audit framework enforces these at runtime via hooks.
+
+agents:
+  showcase:
+    allowed_tools:
+      - codebase
+      - terminal
+      - edit
+    allowed_scope:
+      - ".github/references/**"
+      - ".github/skills/present/**"
+      - ".github/skills/dashboard/**"
+      - ".orch/audit/**"
+      - ".orch/plans/**"
+      - "docs-registry.yaml"
+      - "PROJECT.md"
+      - "README.md"
+      - "*.html"
+    blocked_commands:
+      - "rm -rf"
+      - "git push"
+
+  docs:
+    allowed_tools:
+      - codebase
+      - terminal
+      - fetch
+      - edit
+    allowed_scope:
+      - ".github/references/**"
+      - "docs/staging/**"
+      - "docs-registry.yaml"
+      # Read access for source-embedded doc extraction (JSDoc, TSDoc, Compodoc, PyDoc, Javadoc)
+      - "src/**"
+      - "app/**"
+      - "lib/**"
+      - "packages/**"
+      - "*.json"          # package.json, tsconfig.json for compodoc
+      - "*.toml"          # pyproject.toml for sphinx
+      - "*.xml"           # pom.xml for javadoc
+    blocked_commands:
+      - "rm -rf"
+      - "git push"
+      - "git reset"
+
+  angular:
+    allowed_tools:
+      - codebase
+      - terminal
+      - edit
+    allowed_scope:
+      - "src/**/*.ts"
+      - "src/**/*.html"
+      - "src/**/*.scss"
+      - "src/**/*.spec.ts"
+      - "libs/**/*.ts"
+      - "libs/**/*.html"
+      - "libs/**/*.scss"
+      - "libs/**/*.spec.ts"
+      - "apps/**/*.ts"
+      - "apps/**/*.html"
+      - "apps/**/*.scss"
+      - "angular.json"
+      - "tsconfig*.json"
+      - "nx.json"
+      - "project.json"
+      - "package.json"
+      - "jest.config.*"
+      - "playwright.config.*"
+      - "cypress.config.*"
+      - ".github/references/**"  # read reference guides
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+      - "nx reset"
+
+  audit:
+    allowed_tools:
+      - codebase
+      - terminal
+    allowed_scope:
+      - ".orch/audit/**"
+      - ".github/skills/*/SKILL.md"    # read skill definitions for benchmark
+    blocked_commands:
+      - "rm -rf"
+      - "git push"
+      - "git reset"
+
+  # ── Sub-Agent Workers (internal, not user-invocable) ──
+
+  scan-worker:
+    allowed_tools:
+      - codebase
+      - terminal
+    allowed_scope:
+      - "src/**"
+      - "app/**"
+      - "libs/**"
+      - ".github/references/scans/**"
+      - "*.json"
+      - "*.toml"
+      - "*.xml"
+    blocked_commands:
+      - "rm -rf"
+      - "git push"
+      - "git reset"
+
+  migrate-worker:
+    allowed_tools:
+      - codebase
+      - terminal
+      - edit
+    allowed_scope:
+      - "src/**/*.ts"
+      - "src/**/*.html"
+      - "src/**/*.scss"
+      - "src/**/*.spec.ts"
+      - "libs/**/*.ts"
+      - "libs/**/*.html"
+      - "libs/**/*.scss"
+      - "angular.json"
+      - "tsconfig*.json"
+      - "package.json"
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"
+      - "git reset --hard"
+
+  doc-convert-worker:
+    allowed_tools:
+      - codebase
+      - terminal
+      - fetch
+      - edit
+    allowed_scope:
+      - ".github/references/**"
+      - "docs/staging/**"
+      - "src/**"
+      - "app/**"
+      - "lib/**"
+    blocked_commands:
+      - "rm -rf"
+      - "git push"
+
+  # ── Future Domain Agents ──
+
+  backend-springboot:
+    allowed_tools:
+      - codebase
+      - terminal
+      - edit
+    allowed_scope:
+      - "src/**/*.java"
+      - "src/**/*.xml"
+      - "src/**/*.properties"
+      - "src/**/*.yml"
+      - "pom.xml"
+      - "build.gradle"
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"
+
+  backend-fastapi:
+    allowed_tools:
+      - codebase
+      - terminal
+      - edit
+    allowed_scope:
+      - "src/**/*.py"
+      - "app/**/*.py"
+      - "tests/**/*.py"
+      - "requirements.txt"
+      - "pyproject.toml"
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"
+
+  ops-ci:
+    allowed_tools:
+      - codebase
+      - terminal
+      - edit
+    allowed_scope:
+      - ".github/workflows/**"
+      - ".github/actions/**"
+      - "Dockerfile"
+      - "docker-compose*.yml"
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"
+
+  ops-cd:
+    allowed_tools:
+      - codebase
+      - terminal
+      - edit
+    allowed_scope:
+      - "deploy/**"
+      - "infra/**"
+      - "k8s/**"
+      - "helm/**"
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"
+      - "kubectl delete"

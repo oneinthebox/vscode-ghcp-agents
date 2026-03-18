@@ -1,0 +1,30 @@
+{
+  "name": "@orch/cli",
+  "version": "0.1.0",
+  "description": "ORCH CLI — install, manage, and update ORCH agents, skills, and audit for your projects",
+  "bin": {
+    "orch": "./dist/bin/orch.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/bin/orch.js",
+    "dev": "ts-node bin/orch.ts"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "yaml": "^2.4.0",
+    "inquirer": "^8.2.6",
+    "glob": "^10.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/node": "^20.0.0",
+    "@types/inquirer": "^8.2.0",
+    "ts-node": "^10.9.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

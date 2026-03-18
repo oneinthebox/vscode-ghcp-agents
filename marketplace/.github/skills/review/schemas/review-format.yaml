@@ -1,0 +1,35 @@
+# Review output format schema
+# Used by /review skill to structure feedback consistently
+
+review:
+  sections:
+    summary:
+      required: true
+      description: "1-2 sentence overview of findings"
+
+    issues:
+      required: true
+      items:
+        severity:
+          enum: [error, warning, info]
+          description: "error = must fix, warning = should fix, info = consider"
+        title:
+          required: true
+          max_length: 80
+        file:
+          required: true
+          format: "path:line"
+        what:
+          required: true
+          description: "What's wrong — specific, not vague"
+        why:
+          required: true
+          description: "Why it matters — impact on quality/security/maintainability"
+        fix:
+          required: true
+          description: "Specific fix suggestion with code example"
+
+    positive_observations:
+      required: true
+      min_items: 1
+      description: "Always include at least one thing done well"

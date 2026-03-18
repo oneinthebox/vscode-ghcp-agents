@@ -1,0 +1,219 @@
+<div *ngIf="isLoading" class="loading-container">
+  <mat-spinner diameter="28"></mat-spinner>
+</div>
+
+<div *ngIf="!isLoading && !fund" style="text-align: center; padding: 24px;">
+  <mat-icon style="font-size: 32px; color: #b0bec5;">error_outline</mat-icon>
+  <div style="margin-top: 8px; font-size: 12px; color: #78909c;">Fund not found</div>
+  <button mat-button color="primary" (click)="goBack()">Back to Funds</button>
+</div>
+
+<div *ngIf="!isLoading && fund">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+    <button mat-icon-button (click)="goBack()" matTooltip="Back to Funds">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="ticker-cell" style="font-size: 14px;">{{ fund.ticker }}</span>
+    <span style="font-size: 13px; font-weight: 500;">{{ fund.name }}</span>
+    <span class="status-badge" [ngClass]="fund.status.toLowerCase()">{{ fund.status }}</span>
+    <span style="flex: 1;"></span>
+    <div style="text-align: right;">
+      <div style="font-size: 14px; font-weight: 600;">NAV: ${{ fund.nav.toFixed(2) }}</div>
+      <div [ngClass]="fund.navChangePercent >= 0 ? 'positive' : 'negative'" style="font-size: 10px;">
+        {{ fund.navChangePercent >= 0 ? '+' : '' }}{{ fund.navChangePercent.toFixed(2) }}%
+      </div>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Fund Summary Cards -->
+  <div class="card-grid" style="margin-top: 8px;">
+    <mat-card class="data-card">
+      <mat-card-title>Fund Info</mat-card-title>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; font-size: 11px;">
+        <div style="color: #78909c;">Type</div><div>{{ fund.type }}</div>
+        <div style="color: #78909c;">Strategy</div><div>{{ fund.strategy }}</div>
+        <div style="color: #78909c;">Manager</div><div>{{ fund.manager }}</div>
+        <div style="color: #78909c;">Benchmark</div><div style="font-size: 10px;">{{ fund.benchmark }}</div>
+        <div style="color: #78909c;">Inception</div><div>{{ fund.inceptionDate }}</div>
+        <div style="color: #78909c;">Expense Ratio</div><div>{{ fund.expenseRatio }}%</div>
+      </div>
+    </mat-card>
+
+    <mat-card class="data-card">
+      <mat-card-title>Performance</mat-card-title>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; font-size: 11px;">
+        <div style="color: #78909c;">YTD Return</div>
+        <div [ngClass]="fund.ytdReturn >= 0 ? 'positive' : 'negative'" class="numeric-cell">
+          {{ fund.ytdReturn >= 0 ? '+' : '' }}{{ fund.ytdReturn.toFixed(1) }}%
+        </div>
+        <div style="color: #78909c;">1Y Return</div>
+        <div [ngClass]="fund.oneYearReturn >= 0 ? 'positive' : 'negative'" class="numeric-cell">
+          {{ fund.oneYearReturn >= 0 ? '+' : '' }}{{ fund.oneYearReturn.toFixed(1) }}%
+        </div>
+        <div style="color: #78909c;">3Y Return</div>
+        <div class="numeric-cell">
+          <span *ngIf="fund.threeYearReturn > 0">{{ fund.threeYearReturn.toFixed(1) }}%</span>
+          <span *ngIf="fund.threeYearReturn === 0" style="color: #b0bec5;">N/A</span>
+        </div>
+        <div style="color: #78909c;">5Y Return</div>
+        <div class="numeric-cell">
+          <span *ngIf="fund.fiveYearReturn > 0">{{ fund.fiveYearReturn.toFixed(1) }}%</span>
+          <span *ngIf="fund.fiveYearReturn === 0" style="color: #b0bec5;">N/A</span>
+        </div>
+        <div style="color: #78909c;">Sharpe Ratio</div>
+        <div class="numeric-cell">{{ fund.sharpeRatio.toFixed(2) }}</div>
+        <div style="color: #78909c;">Std Dev</div>
+        <div class="numeric-cell">{{ fund.standardDeviation.toFixed(1) }}%</div>
+      </div>
+    </mat-card>
+
+    <mat-card class="data-card">
+      <mat-card-title>Portfolio Summary</mat-card-title>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; font-size: 11px;">
+        <div style="color: #78909c;">AUM</div>
+        <div class="numeric-cell">{{ formatValue(fund.aum) }}</div>
+        <div style="color: #78909c;">Holdings</div>
+        <div class="numeric-cell">{{ holdings.length }}</div>
+        <div style="color: #78909c;">Mkt Value</div>
+        <div class="numeric-cell">{{ formatValue(getTotalMarketValue()) }}</div>
+        <div style="color: #78909c;">Total P&L</div>
+        <div class="numeric-cell" [ngClass]="getTotalPnl() >= 0 ? 'positive' : 'negative'">
+          {{ formatValue(getTotalPnl()) }}
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Sector Allocation -->
+  <div *ngIf="sectorAllocations.length > 0" style="margin-top: 12px;">
+    <div class="section-header">Sector Allocation</div>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 4px; max-width: 400px;">
+      <div *ngFor="let alloc of sectorAllocations"
+           style="display: grid; grid-template-columns: 100px 1fr 50px; gap: 8px; align-items: center; font-size: 11px;">
+        <span>{{ alloc.sector }}</span>
+        <div class="allocation-bar">
+          <div class="fill" [style.width.%]="(alloc.weight / getMaxAllocationWeight()) * 100"></div>
+        </div>
+        <span class="numeric-cell">{{ alloc.weight.toFixed(1) }}%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Holdings Table -->
+  <div *ngIf="holdings.length > 0" style="margin-top: 12px;">
+    <div class="section-header">Holdings ({{ holdings.length }})</div>
+    <table mat-table [dataSource]="holdingsDataSource" class="dense-table">
+
+      <ng-container matColumnDef="ticker">
+        <th mat-header-cell *matHeaderCellDef>Ticker</th>
+        <td mat-cell *matCellDef="let h" class="ticker-cell">{{ h.ticker }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="companyName">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let h" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">
+          {{ h.companyName }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="sector">
+        <th mat-header-cell *matHeaderCellDef>Sector</th>
+        <td mat-cell *matCellDef="let h" style="font-size: 10px;">{{ h.sector }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="shares">
+        <th mat-header-cell *matHeaderCellDef>Shares</th>
+        <td mat-cell *matCellDef="let h" class="numeric-cell">{{ h.shares | number }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="avgCost">
+        <th mat-header-cell *matHeaderCellDef>Avg Cost</th>
+        <td mat-cell *matCellDef="let h" class="numeric-cell">${{ h.avgCost.toFixed(2) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="currentPrice">
+        <th mat-header-cell *matHeaderCellDef>Price</th>
+        <td mat-cell *matCellDef="let h" class="numeric-cell">${{ h.currentPrice.toFixed(2) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="marketValue">
+        <th mat-header-cell *matHeaderCellDef>Mkt Value</th>
+        <td mat-cell *matCellDef="let h" class="numeric-cell">{{ formatValue(h.marketValue) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="weight">
+        <th mat-header-cell *matHeaderCellDef>Wt%</th>
+        <td mat-cell *matCellDef="let h" class="numeric-cell">{{ h.weight.toFixed(1) }}%</td>
+      </ng-container>
+
+      <ng-container matColumnDef="unrealizedPnl">
+        <th mat-header-cell *matHeaderCellDef>Unrlzd P&L</th>
+        <td mat-cell *matCellDef="let h" class="numeric-cell"
+            [ngClass]="h.unrealizedPnl >= 0 ? 'positive' : 'negative'">
+          {{ formatValue(h.unrealizedPnl) }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="unrealizedPnlPercent">
+        <th mat-header-cell *matHeaderCellDef>P&L%</th>
+        <td mat-cell *matCellDef="let h" class="numeric-cell"
+            [ngClass]="h.unrealizedPnlPercent >= 0 ? 'positive' : 'negative'">
+          {{ h.unrealizedPnlPercent >= 0 ? '+' : '' }}{{ h.unrealizedPnlPercent.toFixed(2) }}%
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="holdingColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: holdingColumns;"></tr>
+    </table>
+  </div>
+
+  <!-- Recent Trades -->
+  <div *ngIf="recentTrades.length > 0" style="margin-top: 12px;">
+    <div class="section-header">Recent Orders</div>
+    <table mat-table [dataSource]="recentTrades" class="dense-table">
+
+      <ng-container matColumnDef="ticker">
+        <th mat-header-cell *matHeaderCellDef>Ticker</th>
+        <td mat-cell *matCellDef="let t" class="ticker-cell">{{ t.ticker }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="side">
+        <th mat-header-cell *matHeaderCellDef>Side</th>
+        <td mat-cell *matCellDef="let t">
+          <span [ngClass]="t.side === 'BUY' ? 'positive' : 'negative'" style="font-weight: 600;">
+            {{ t.side }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="quantity">
+        <th mat-header-cell *matHeaderCellDef>Qty</th>
+        <td mat-cell *matCellDef="let t" class="numeric-cell">{{ t.quantity | number }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="price">
+        <th mat-header-cell *matHeaderCellDef>Price</th>
+        <td mat-cell *matCellDef="let t" class="numeric-cell">${{ t.price.toFixed(2) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let t">
+          <span class="status-badge" [ngClass]="t.status.toLowerCase()">{{ t.status }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>Date</th>
+        <td mat-cell *matCellDef="let t" style="font-size: 10px;">
+          {{ t.createdAt | date:'MM/dd HH:mm' }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="tradeColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: tradeColumns;"></tr>
+    </table>
+  </div>
+</div>
