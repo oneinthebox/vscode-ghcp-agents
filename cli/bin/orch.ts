@@ -10,6 +10,7 @@
  *   orch status                     Show installed components + doc freshness
  *   orch doctor                     Check compatibility + health
  *   orch override <action>          Manage team overrides
+ *   orch reset                      Remove all ORCH files from project
  */
 
 import { Command } from 'commander';
@@ -19,6 +20,7 @@ import { updateCommand } from '../src/commands/update';
 import { statusCommand } from '../src/commands/status';
 import { doctorCommand } from '../src/commands/doctor';
 import { overrideCommand } from '../src/commands/override';
+import { resetCommand } from '../src/commands/reset';
 
 const program = new Command();
 
@@ -64,5 +66,12 @@ program
   .argument('[skill]', 'Skill name to override')
   .option('--team <name>', 'Team name')
   .action(overrideCommand);
+
+program
+  .command('reset')
+  .description('Remove all ORCH files from the project (uses manifest to track what was installed)')
+  .option('--dry-run', 'Show what would be removed without actually removing')
+  .option('--force', 'Force remove known ORCH directories even without manifest')
+  .action(resetCommand);
 
 program.parse();

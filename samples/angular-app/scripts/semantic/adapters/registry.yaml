@@ -1,0 +1,52 @@
+# Semantic Analysis Adapter Registry
+# Maps languages to their LST tools and adapter scripts.
+# The /proof and /migrate skills use this to select the right adapter.
+
+adapters:
+  typescript:
+    tool: ts-morph
+    install: "npm install -D ts-morph"
+    status: active
+    scripts:
+      generate-summary: adapters/typescript/generate-summary.ts
+      analyze-imports: adapters/typescript/analyze-imports.ts
+      analyze-migrations: adapters/typescript/analyze-migrations.ts
+      transform: adapters/typescript/transform.ts
+    file_patterns:
+      - "**/*.ts"
+      - "**/*.tsx"
+    project_markers:
+      - "tsconfig.json"
+      - "angular.json"
+      - "nx.json"
+
+  java:
+    tool: TBD  # JavaParser + JavaSymbolSolver, or Moderne/OpenRewrite
+    install: TBD
+    status: planned
+    scripts:
+      generate-summary: adapters/java/generate-summary.java
+      analyze-imports: adapters/java/analyze-imports.java
+      analyze-migrations: adapters/java/analyze-migrations.java
+      transform: adapters/java/transform.java
+    file_patterns:
+      - "**/*.java"
+    project_markers:
+      - "pom.xml"
+      - "build.gradle"
+
+  python:
+    tool: TBD  # libcst (Meta's Concrete Syntax Tree)
+    install: TBD
+    status: planned
+    scripts:
+      generate-summary: adapters/python/generate-summary.py
+      analyze-imports: adapters/python/analyze-imports.py
+      analyze-migrations: adapters/python/analyze-migrations.py
+      transform: adapters/python/transform.py
+    file_patterns:
+      - "**/*.py"
+    project_markers:
+      - "pyproject.toml"
+      - "requirements.txt"
+      - "setup.py"

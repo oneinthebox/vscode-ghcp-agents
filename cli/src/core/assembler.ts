@@ -99,11 +99,18 @@ export function executeAssembly(
   plan: AssemblyPlan,
   marketplacePath: string,
   targetPath: string
-): { copied: number; errors: string[] } {
+): { copied: number; skipped: number; errors: string[] } {
   const mp = path.resolve(marketplacePath);
   const target = path.resolve(targetPath);
   let copied = 0;
+  let skipped = 0;
   const errors: string[] = [];
+  const manifest: { files: string[]; directories: string[]; installedAt: string; marketplace: string } = {
+    files: [],
+    directories: [],
+    installedAt: new Date().toISOString(),
+    marketplace: mp,
+  };
 
   // Create target directories
   const dirs = [
@@ -116,22 +123,29 @@ export function executeAssembly(
   ];
   for (const dir of dirs) {
     fs.mkdirSync(path.join(target, dir), { recursive: true });
+    manifest.directories.push(dir);
   }
 
   // Copy agents
   for (const agent of plan.agents) {
     const src = path.join(mp, '.github', 'agents', agent);
-    const dest = path.join(target, '.github', 'agents', agent);
-    if (copyFile(src, dest)) copied++;
+    const relativeDest = path.join('.github', 'agents', agent);
+    const dest = path.join(target, relativeDest);
+    const result = safeCopy(src, dest);
+    if (result === 'copied') { copied++; manifest.files.push(relativeDest); }
+    else if (result === 'skipped') skipped++;
     else errors.push(`Agent not found: ${agent}`);
   }
 
   // Copy skills (full directories)
   for (const skill of plan.skills) {
     const src = path.join(mp, '.github', 'skills', skill);
-    const dest = path.join(target, '.github', 'skills', skill);
+    const relativeDir = path.join('.github', 'skills', skill);
+    const dest = path.join(target, relativeDir);
     if (fs.existsSync(src)) {
-      copyDir(src, dest);
+      const files = safeCopyDir(src, dest, relativeDir);
+      manifest.files.push(...files);
+      manifest.directories.push(relativeDir);
       copied++;
     } else {
       errors.push(`Skill not found: ${skill}`);
@@ -141,68 +155,148 @@ export function executeAssembly(
   // Copy instructions
   for (const instr of plan.instructions) {
     const src = path.join(mp, '.github', 'instructions', instr);
-    const dest = path.join(target, '.github', 'instructions', instr);
-    if (copyFile(src, dest)) copied++;
+    const relativeDest = path.join('.github', 'instructions', instr);
+    const dest = path.join(target, relativeDest);
+    const result = safeCopy(src, dest);
+    if (result === 'copied') { copied++; manifest.files.push(relativeDest); }
+    else if (result === 'skipped') skipped++;
     else errors.push(`Instruction not found: ${instr}`);
   }
 
   // Copy hooks
   for (const hook of plan.hooks) {
     const src = path.join(mp, '.github', 'hooks', hook);
-    const dest = path.join(target, '.github', 'hooks', hook);
-    if (copyFile(src, dest)) copied++;
+    const relativeDest = path.join('.github', 'hooks', hook);
+    const dest = path.join(target, relativeDest);
+    const result = safeCopy(src, dest);
+    if (result === 'copied') { copied++; manifest.files.push(relativeDest); }
+    else if (result === 'skipped') skipped++;
   }
 
   // Copy audit scripts
   for (const script of plan.auditScripts) {
     const src = path.join(mp, 'scripts', 'audit', script);
-    const dest = path.join(target, 'scripts', 'audit', script);
-    if (copyFile(src, dest)) {
+    const relativeDest = path.join('scripts', 'audit', script);
+    const dest = path.join(target, relativeDest);
+    const result = safeCopy(src, dest);
+    if (result === 'copied') {
       copied++;
-      // Preserve executable permission
+      manifest.files.push(relativeDest);
       fs.chmodSync(dest, 0o755);
-    }
+    } else if (result === 'skipped') skipped++;
   }
 
   // Copy semantic adapters
   for (const adapter of plan.semanticAdapters) {
     const src = path.join(mp, 'scripts', 'semantic', 'adapters', adapter);
-    const dest = path.join(target, 'scripts', 'semantic', 'adapters', adapter);
+    const relativeDir = path.join('scripts', 'semantic', 'adapters', adapter);
+    const dest = path.join(target, relativeDir);
     if (fs.existsSync(src)) {
       fs.mkdirSync(path.join(target, 'scripts', 'semantic', 'adapters'), { recursive: true });
-      copyDir(src, dest);
+      const files = safeCopyDir(src, dest, relativeDir);
+      manifest.files.push(...files);
+      manifest.directories.push(relativeDir);
       copied++;
     }
   }
 
+  // Copy adapter registry
+  const adapterRegSrc = path.join(mp, 'scripts', 'semantic', 'adapters', 'registry.yaml');
+  if (fs.existsSync(adapterRegSrc)) {
+    const relDest = path.join('scripts', 'semantic', 'adapters', 'registry.yaml');
+    const result = safeCopy(adapterRegSrc, path.join(target, relDest));
+    if (result === 'copied') { manifest.files.push(relDest); }
+  }
+
   // Copy audit config
   const configSrc = path.join(mp, '.orch', 'audit', 'config');
-  const configDest = path.join(target, '.orch', 'audit', 'config');
+  const configRelDir = path.join('.orch', 'audit', 'config');
+  const configDest = path.join(target, configRelDir);
   if (fs.existsSync(configSrc)) {
-    copyDir(configSrc, configDest);
+    const files = safeCopyDir(configSrc, configDest, configRelDir);
+    manifest.files.push(...files);
     copied++;
   }
 
   // Copy skill-overrides README
   const overridesSrc = path.join(mp, '.github', 'skill-overrides', 'README.md');
-  const overridesDest = path.join(target, '.github', 'skill-overrides', 'README.md');
-  copyFile(overridesSrc, overridesDest);
+  const overridesRelDest = path.join('.github', 'skill-overrides', 'README.md');
+  const overridesResult = safeCopy(overridesSrc, path.join(target, overridesRelDest));
+  if (overridesResult === 'copied') manifest.files.push(overridesRelDest);
 
-  // Write docs-registry.yaml with project-specific sources
-  if (plan.registrySources.length > 0) {
+  // Write docs-registry.yaml
+  const registryRelPath = 'docs-registry.yaml';
+  const registryDest = path.join(target, registryRelPath);
+  if (plan.registrySources.length > 0 && !fs.existsSync(registryDest)) {
     const registryContent = {
       version: 1,
       sources: plan.registrySources,
     };
     fs.writeFileSync(
-      path.join(target, 'docs-registry.yaml'),
+      registryDest,
       `# ORCH Documentation Registry\n# Generated by: orch init\n# Manage with: @docs /packs\n\n` +
-      JSON.stringify(registryContent, null, 2) // simplified — should use yaml library
+      JSON.stringify(registryContent, null, 2)
     );
+    manifest.files.push(registryRelPath);
     copied++;
+  } else if (fs.existsSync(registryDest)) {
+    skipped++;
   }
 
-  return { copied, errors };
+  // Write manifest (always overwrite — it's ORCH's own file)
+  const manifestPath = path.join(target, '.orch', 'manifest.json');
+  fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+
+  return { copied, skipped, errors };
+}
+
+// ── Helpers ──
+
+/**
+ * Copy a file safely — skip if destination exists and is different (user may have customized)
+ * Returns: 'copied' | 'skipped' | 'not-found'
+ */
+function safeCopy(src: string, dest: string): 'copied' | 'skipped' | 'not-found' {
+  if (!fs.existsSync(src)) return 'not-found';
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+
+  if (fs.existsSync(dest)) {
+    // File exists — check if it's the same content
+    const srcContent = fs.readFileSync(src);
+    const destContent = fs.readFileSync(dest);
+    if (srcContent.equals(destContent)) {
+      return 'skipped'; // Same content, no action needed
+    }
+    // Different content — back up existing, then overwrite
+    const backupPath = dest + '.orch-backup';
+    fs.copyFileSync(dest, backupPath);
+  }
+
+  fs.copyFileSync(src, dest);
+  return 'copied';
+}
+
+/**
+ * Copy a directory safely, returns list of relative file paths copied
+ */
+function safeCopyDir(src: string, dest: string, relativeBase: string): string[] {
+  const files: string[] = [];
+  fs.mkdirSync(dest, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    const relativePath = path.join(relativeBase, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...safeCopyDir(srcPath, destPath, relativePath));
+    } else {
+      const result = safeCopy(srcPath, destPath);
+      if (result === 'copied' || result === 'skipped') {
+        files.push(relativePath);
+      }
+    }
+  }
+  return files;
 }
 
 // ── Helpers ──
