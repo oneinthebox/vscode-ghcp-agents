@@ -44,7 +44,24 @@ Doc-code drift is one of the biggest sources of bugs during migrations. This ski
 - Critical: {n}, Moderate: {n}, Aligned: {n}
 
 ### Recommended Actions
-1. {specific actions for each critical drift item}
+
+For each drift item, produce a specific, executable recommendation:
+
+| # | Classification | Action | Command | Target |
+|---|---------------|--------|---------|--------|
+| 1 | Doc stale | Reference doc outdated | Run `orch update` to get latest from maintainer | `.github/references/{path}` |
+| 2 | Code wrong | Fix code to match doc | `@angular /refactor {file}` | `src/app/services/{file}.ts` |
+| 3 | Code wrong | Replace console.log | `@angular /elevate audit` | `src/app/services/{file}.ts` |
+| 4 | Code wrong | Replace hardcoded styles | `@angular /hds audit` | `src/app/components/{dir}/` |
+| 5 | Ambiguous | Human decision needed | — | See details below |
+
+Each recommendation specifies:
+- The agent to invoke (@angular or @docs)
+- The exact skill and sub-command
+- The specific file or scope to target
+- Whether it's "update doc" or "fix code" based on drift classification
+
+Ambiguous items (auth, security, data areas) are never auto-resolved — always flag for human decision with full context.
 ```
 
 ## Classification Rules
@@ -52,6 +69,23 @@ Doc-code drift is one of the biggest sources of bugs during migrations. This ski
 - **Doc likely stale**: 80%+ of codebase does X, doc says Y → suggest updating doc
 - **Code likely wrong**: 5% of files deviate from documented standard → suggest fixing code
 - **Ambiguous**: ~50/50 split or critical area (auth, security, data) → flag for human decision, NEVER auto-resolve
+
+## Workflow Integration
+
+### Prerequisites
+
+| Prerequisite | Why | Type |
+|-------------|-----|------|
+| `/proof` scan | Drift compares scan data against reference docs — cannot run without scan output | Required |
+
+If no scan snapshot exists for the app, tell the user:
+"No scan data found for {app}. Run `@docs /proof {app}` first, then re-run /drift."
+
+### Post-actions
+
+The actionable recommendations table IS the post-action. Each row is a specific skill invocation the user (or @orch in auto-mode) can execute. No additional post-actions needed.
+
+Update `.orch/workflow/` stage status to `completed` if running within a workflow.
 
 ## Validation
 

@@ -141,13 +141,17 @@ Always use HDS tokens — never hardcode colors, spacing, typography, or breakpo
 
 ### Themed Components
 ```typescript
-// ✅ HDS-themed AG Grid
+// ✅ HDS-themed PrimeNG (preferred component library)
+import { HdsPrimeNgModule } from '@yourorg/hds';
+
+// ✅ HDS-themed AG Grid (for advanced data grids)
 import { HdsAgGridModule } from '@yourorg/hds';
 
-// ✅ HDS-themed Plotly
+// ✅ HDS-themed Plotly (for charts/visualizations)
 import { HdsPlotlyModule } from '@yourorg/hds';
 
-// ❌ Raw third-party
+// ❌ Raw third-party — always use HDS-themed wrappers
+import { ButtonModule } from 'primeng/button';
 import { AgGridModule } from 'ag-grid-angular';
 import { PlotlyModule } from 'angular-plotly.js';
 ```

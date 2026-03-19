@@ -726,9 +726,12 @@ sequenceDiagram
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|-----------|
-| Customizations go stale | High | Medium | Registry tracks freshness; `/doc-status` surfaces staleness |
+| Customizations go stale | High | Medium | Registry tracks freshness; `/packs` surfaces staleness |
 | Teams don't adopt | Medium | High | Start with pilot teams; demonstrate measurable value before org rollout |
 | Instructions conflict across domains | Medium | Medium | One domain = one focus; clear `applyTo` scoping |
 | Token budget exceeded | Medium | Medium | Strict 500-line limit per reference doc; curate aggressively |
-| External doc sites change structure | Medium | Low | `/doc-refresh` re-converts; snapshot previous version |
+| External doc sites change structure | Medium | Low | `/packs refresh` re-converts; snapshot previous version |
 | Migration skills produce incorrect transformations | Low | High | Always run build + tests after migration; human review required |
+| **Windows incompatibility** | **High** | **High** | **All 15 audit/migration `.sh` scripts and 1 `.py` script are bash/python-only. They will not execute on Windows (cmd.exe or PowerShell). Audit hooks silently fail — no data captured. Mitigation: rewrite all 16 scripts as Node.js (`.js`) to eliminate bash/python/jq/grep dependencies. CLI TypeScript code is cross-platform. ts-morph adapters are cross-platform. Only the runtime hook scripts need rewriting. Tracked for future sprint.** |
+| Windows notification gap | Medium | Low | `notify.sh` has macOS (`osascript`) and Linux (`notify-send`) paths but no Windows path. Add PowerShell `BurntToast` or `[System.Windows.Forms.MessageBox]` support when scripts are rewritten to Node.js. |
+| `jq` dependency on non-dev machines | Medium | Medium | All `.sh` scripts depend on `jq` for JSON parsing. Not installed by default on any OS. Eliminated when scripts are rewritten to Node.js (native `JSON.parse`). |

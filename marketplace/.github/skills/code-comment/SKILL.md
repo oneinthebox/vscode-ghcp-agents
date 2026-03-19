@@ -79,6 +79,14 @@ Unified skill for source code documentation quality. Consolidates audit, generat
 Total: {n} doc comments across {n} files.
 ```
 
+## Auto mode behavior
+
+Follows `.github/instructions/auto-mode.instructions.md`:
+- **Audit** (read-only): runs immediately, no approval needed
+- **Generate / Repair** (write): show plan, get one approval, then process all files without per-file pauses. Pause only for ambiguous format decisions.
+
+Post-execution: always produce a summary with files processed, APIs documented, and any items needing human review.
+
 ## Validation
 
 - Project compiles after changes

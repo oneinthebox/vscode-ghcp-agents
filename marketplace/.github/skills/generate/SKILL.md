@@ -17,8 +17,7 @@ Determine the domain from:
 ## Steps
 
 1. Detect domain.
-2. Check for overrides: `.github/skill-overrides/generate/overrides.yaml`
-3. Load domain-specific reference: [references/{domain}.md](references/)
+2. Load domain-specific reference: [references/{domain}.md](references/)
 4. Load domain-specific templates: [templates/{domain}/](templates/)
 5. Study domain-specific examples: [examples/{domain}/](examples/)
 6. Ask user what to generate (component, service, route, etc.) if not clear from prompt.
@@ -52,6 +51,29 @@ Determine the domain from:
 | Route | `route.py`, `test_route.py` |
 | Service | `service.py`, `test_service.py` |
 | Model | `model.py` |
+
+## Workflow Integration
+
+### Prerequisites
+
+None required. `/generate` can run standalone at any time.
+
+### Post-actions (recommended)
+
+After generating code:
+1. `/code-comment generate` on the new files — ensure TSDoc/JSDoc is present on all public APIs
+2. `/test generate` for the new files — ensure test coverage from day one
+
+### Quality chain (post-generation)
+
+After generating files:
+1. Run build verification (existing step 9)
+2. Run `/code-comment audit` on generated files — report if any public APIs lack docs
+3. Recommend `/test generate` if test files were not already part of the scaffold
+
+List these as "Recommended next steps" in the summary. Do not prompt for each one.
+
+Update `.orch/workflow/` stage status to `completed` if running within a workflow.
 
 ## Validation
 

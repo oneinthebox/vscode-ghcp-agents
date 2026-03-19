@@ -25,8 +25,7 @@ Elevate is the organization's platform service layer:
 
 ## Steps
 
-1. Check for overrides: `.github/skill-overrides/elevate/overrides.yaml`
-2. Load references:
+1. Load references:
    - Auth: [references/auth.md](references/auth.md)
    - Logging: [references/logging.md](references/logging.md)
    - Config: [references/config.md](references/config.md)
@@ -45,6 +44,56 @@ Elevate is the organization's platform service layer:
 - **Preferences** — always PreferencesService. Never `localStorage`/`sessionStorage` directly.
 - **Components** — always `@yourorg/elevate-common` for buttons, forms, inputs, tables. Never raw HTML or Material.
 - **Imports** — always from public API (`@yourorg/elevate`). Never deep imports into `src/lib/`.
+
+## Audit sub-command (/elevate audit)
+
+When invoked as `/elevate audit` or `/elevate audit {scope}`:
+
+### Steps
+
+1. Scan the target scope (default: `src/`) for TypeScript files.
+2. Detect anti-patterns that should use Elevate services:
+   - `console.log`, `console.warn`, `console.error` → should use LoggingService
+   - `localStorage.getItem`, `localStorage.setItem`, `sessionStorage.*` → should use PreferencesService
+   - `environment.ts` imports for config values → should use ConfigService
+   - Direct token/auth handling → should use AuthService
+3. For each violation, identify the correct Elevate replacement.
+4. Produce a structured report.
+
+### Output
+
+```markdown
+## Elevate Audit — {scope}
+
+### Violations
+| File | Line | Anti-pattern | Replacement |
+|------|------|-------------|-------------|
+| `trade.service.ts` | 34 | `console.log(...)` | `this.logger.info(...)` via LoggingService |
+| `prefs.service.ts` | 12 | `localStorage.getItem('theme')` | `this.prefs.get('ui.theme')` via PreferencesService |
+| `config.service.ts` | 5 | `import { environment }` | `this.config.get('apiUrl')` via ConfigService |
+
+### Summary
+- Files scanned: {N}
+- console.log violations: {N}
+- localStorage violations: {N}
+- environment.ts violations: {N}
+- Auth violations: {N}
+
+### Auto-fix
+Run `@angular /refactor --elevate-compliance {scope}` to automatically replace anti-patterns with Elevate services.
+```
+
+## Workflow Integration
+
+### Prerequisites
+
+None. `/elevate audit` can run standalone at any time.
+
+### Post-actions (recommended)
+
+After audit finds violations: `/refactor --elevate-compliance {scope}` to auto-fix.
+
+Update `.orch/workflow/` stage status to `completed` if running within a workflow.
 
 ## Validation
 

@@ -432,9 +432,35 @@ If a test needs 5 assertions, it might be testing too many things.
 Playwright/Cypress should select by `data-testid`, not CSS class or text content.
 
 ### 6. Playwright for new e2e tests, Cypress for existing
-Don't migrate existing Cypress tests unless they need significant changes. New e2e tests use Playwright. Use `/angular-migrate-playwright` skill for bulk migration.
+Don't migrate existing Cypress tests unless they need significant changes. New e2e tests use Playwright. Consider migrating from Cypress to Playwright for improved reliability, parallel execution, and multi-browser support.
 
 ---
+
+## Recommended Libraries
+
+### UI Component Library: PrimeNG
+PrimeNG is the standard component library for Angular projects. Use PrimeNG (via `@yourorg/hds` theming) for all UI components: tables, dialogs, dropdowns, menus, calendars, etc.
+
+| Need | Use | Not |
+|------|-----|-----|
+| Rich UI components | PrimeNG (themed via `@yourorg/hds`) | Angular Material, raw HTML |
+| Data grids | AG Grid (themed via `@yourorg/hds`) | PrimeNG Table (for complex grid cases) |
+| Charts / visualizations | Plotly (themed via `@yourorg/hds`) | Chart.js, D3 directly |
+| E2E tests | Playwright | Cypress (migrate existing when practical) |
+| Unit tests | Jest | Karma (deprecated in Angular 18+) |
+
+### Why PrimeNG over Angular Material
+- Richer component set (80+ components vs ~30)
+- Better enterprise features: advanced data tables, tree tables, org charts
+- Theming via PrimeNG Design Tokens integrates with `@yourorg/hds`
+- Version alignment with Angular major versions (PrimeNG 19 → Angular 19, etc.)
+
+### Why Playwright over Cypress
+- Native multi-browser support (Chromium, Firefox, WebKit)
+- Parallel test execution out of the box
+- Better Angular integration via `@playwright/test`
+- Auto-wait eliminates flaky tests from timing issues
+- Vitest integration path for Angular 21+
 
 ## Internal Library Usage (@yourorg)
 
@@ -444,6 +470,7 @@ Don't migrate existing Cypress tests unless they need significant changes. New e
 | Buttons, inputs, forms | `@yourorg/elevate-common` | Raw HTML or Material |
 | Data tables | `@yourorg/hds` themed AG Grid | Raw `ag-grid-angular` |
 | Charts | `@yourorg/hds` themed Plotly | Raw `angular-plotly.js` |
+| Rich UI components | `@yourorg/hds` themed PrimeNG | Raw `primeng` |
 | Theming / tokens | `@yourorg/hds` CSS variables | Hardcoded colors/spacing |
 | Auth / login | `@yourorg/elevate` AuthModule | Custom auth implementation |
 | Logging | `@yourorg/elevate` LoggingService | `console.log` |

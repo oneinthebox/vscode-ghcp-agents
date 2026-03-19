@@ -3,7 +3,8 @@
  */
 
 import { detectProject } from '../core/project-detector';
-import { banner, section, statusRow, kv, info, summary, withSpinner, sleep } from '../utils/ui';
+import { verifyIntegrity, OrchManifest } from '../core/assembler';
+import { banner, section, statusRow, kv, info, warn, summary, withSpinner, sleep } from '../utils/ui';
 import { getNodeVersionInfo, getNodeStatusMessage, detectPlatform, detectNodeManager } from '../utils/node-version';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -65,7 +66,7 @@ export async function doctorCommand(): Promise<void> {
     warnings++;
   }
 
-  // 3. Audit hooks
+  // 4. Audit hooks
   await section('Audit Hooks');
   const hooksDir = path.join(projectPath, '.github', 'hooks');
   for (const hook of ['audit-lifecycle.json', 'audit-prompts.json', 'audit-tools.json', 'audit-scope.json']) {
@@ -78,7 +79,7 @@ export async function doctorCommand(): Promise<void> {
     }
   }
 
-  // 4. Audit config
+  // 5. Audit config
   await section('Audit Config');
   for (const file of ['boundaries.yaml', 'adherence-rules.yaml']) {
     const filePath = path.join(projectPath, '.orch', 'audit', 'config', file);
@@ -91,7 +92,7 @@ export async function doctorCommand(): Promise<void> {
     }
   }
 
-  // 5. Audit scripts
+  // 6. Audit scripts
   await section('Audit Scripts');
   const scriptsDir = path.join(projectPath, 'scripts', 'audit');
   const requiredScripts = [
@@ -109,7 +110,7 @@ export async function doctorCommand(): Promise<void> {
     }
   }
 
-  // 6. Semantic adapter
+  // 7. Semantic adapter
   await section('Semantic Analysis');
   if (project.type === 'angular') {
     const adapterPath = path.join(projectPath, 'scripts', 'semantic', 'adapters', 'typescript');
@@ -122,7 +123,7 @@ export async function doctorCommand(): Promise<void> {
     }
   }
 
-  // 7. Agents + skills
+  // 8. Agents + skills
   await section('Agents');
   const agentsDir = path.join(projectPath, '.github', 'agents');
   if (fs.existsSync(agentsDir)) {
@@ -150,18 +151,53 @@ export async function doctorCommand(): Promise<void> {
     issues++;
   }
 
-  // 8. Doc freshness
+  // 9. Integrity (checksum verification)
+  await section('Integrity');
+  const manifestPath = path.join(projectPath, '.orch', 'manifest.json');
+  if (fs.existsSync(manifestPath)) {
+    const manifest: OrchManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    if (manifest.checksums && Object.keys(manifest.checksums).length > 0) {
+      const integrity = verifyIntegrity(projectPath, manifest);
+
+      if (integrity.matched.length > 0) {
+        statusRow(`${integrity.matched.length} files match checksums`, 'ok');
+        ok++;
+      }
+      if (integrity.modified.length > 0) {
+        statusRow(`${integrity.modified.length} file(s) modified locally`, 'warn');
+        for (const f of integrity.modified) {
+          warn(`  ${f}`);
+        }
+        info("Run 'orch update' to restore originals");
+        warnings++;
+      }
+      if (integrity.missing.length > 0) {
+        statusRow(`${integrity.missing.length} file(s) missing`, 'fail');
+        for (const f of integrity.missing) {
+          warn(`  ${f}`);
+        }
+        issues++;
+      }
+    } else {
+      info('No checksums in manifest — run orch update to generate');
+    }
+  } else {
+    statusRow('Manifest', 'fail', 'MISSING — run orch init');
+    issues++;
+  }
+
+  // 10. Reference Docs (core-packs)
   await section('Reference Docs');
   const registryPath = path.join(projectPath, 'docs-registry.yaml');
   if (fs.existsSync(registryPath)) {
     const content = fs.readFileSync(registryPath, 'utf8');
-    const currentCount = (content.match(/status: current/g) || []).length;
-    const staleCount = (content.match(/status: stale/g) || []).length;
-    const draftCount = (content.match(/status: draft/g) || []).length;
+    const currentCount = (content.match(/["']?status["']?\s*:\s*["']?current/g) || []).length;
+    const staleCount = (content.match(/["']?status["']?\s*:\s*["']?stale/g) || []).length;
+    const draftCount = (content.match(/["']?status["']?\s*:\s*["']?draft/g) || []).length;
 
-    if (currentCount > 0) { statusRow(`${currentCount} current`, 'ok'); ok++; }
-    if (staleCount > 0) { statusRow(`${staleCount} stale`, 'warn', "run '@docs /packs refresh --stale'"); warnings++; }
-    if (draftCount > 0) { statusRow(`${draftCount} draft`, 'warn', "run '@docs /packs convert'"); warnings++; }
+    if (currentCount > 0) { statusRow(`${currentCount} current (core-pack)`, 'ok'); ok++; }
+    if (staleCount > 0) { statusRow(`${staleCount} stale`, 'warn', "run 'orch update' to get latest from maintainer"); warnings++; }
+    if (draftCount > 0) { statusRow(`${draftCount} draft`, 'info', 'not yet converted by maintainer'); }
     if (currentCount === 0 && staleCount === 0 && draftCount === 0) {
       statusRow('Registry empty', 'info', 'No sources registered yet');
     }

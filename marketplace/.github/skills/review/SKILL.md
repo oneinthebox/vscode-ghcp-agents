@@ -13,8 +13,7 @@ Same as /generate — detect from active agent, project files, or file context.
 ## Steps
 
 1. Detect domain.
-2. Check for overrides: `.github/skill-overrides/review/overrides.yaml`
-3. Load domain-specific anti-patterns: [references/{domain}/anti-patterns.md](references/)
+2. Load domain-specific anti-patterns: [references/{domain}/anti-patterns.md](references/)
 4. Read the diff or files to review.
 5. Check each change against:
    - Anti-pattern checklist (domain-specific)
@@ -58,6 +57,44 @@ Same as /generate — detect from active agent, project files, or file context.
 ### Positive Observations
 - {things done well — always include at least one}
 ```
+
+## Strict Mode (--strict)
+
+When invoked with `--strict` (e.g., `/review --strict`):
+- Treat all Warnings as Errors (they become "must fix before merge").
+- Add additional checks not in normal mode:
+  - HDS token compliance — scan for hardcoded colors/spacing that should use `var(--hds-*)`
+  - Elevate compliance — scan for `console.log`, `localStorage`, `environment.ts` imports
+  - Test coverage regression — compare against baseline if one exists
+- Output includes a binary PASS/FAIL verdict at the end.
+
+Strict mode is designed for pre-merge verification workflows.
+
+### Strict mode output addition
+
+Add to the end of the normal review output:
+
+```markdown
+### Verdict
+| Check | Result |
+|-------|--------|
+| Code review | {N} errors (including warnings promoted to errors in --strict) |
+| HDS compliance | PASS / FAIL ({N} hardcoded values found) |
+| Elevate compliance | PASS / FAIL ({N} violations found) |
+| **Overall** | **PASS / FAIL** |
+```
+
+## Workflow Integration
+
+### Prerequisites
+
+None. `/review` can run standalone at any time.
+
+### Post-actions
+
+None. `/review` is typically a terminal skill — its output is the deliverable.
+
+Update `.orch/workflow/` stage status to `completed` if running within a workflow.
 
 ## Validation
 

@@ -1,20 +1,27 @@
 {
   "name": "orch-status",
   "displayName": "ORCH Status",
-  "description": "Glanceable status bar for ORCH agent sessions — shows work progress and quality indicator. Notifications only for interrupt-worthy events.",
-  "version": "0.1.0",
+  "description": "Status bar + workflow panel for ORCH agent sessions — shows work progress, quality indicator, and interactive workflow stage tracker with visual pills.",
+  "version": "0.2.0",
   "publisher": "orch-team",
   "engines": {
     "vscode": "^1.103.0"
   },
   "categories": ["Other"],
-  "activationEvents": ["workspaceContains:.orch/audit"],
+  "activationEvents": [
+    "workspaceContains:.orch/audit",
+    "workspaceContains:.orch/workflow"
+  ],
   "main": "./extension.js",
   "contributes": {
     "commands": [
       {
         "command": "orch.showSessionStatus",
         "title": "ORCH: Show Session Status"
+      },
+      {
+        "command": "orch.showWorkflow",
+        "title": "ORCH: Show Workflow Panel"
       }
     ]
   }

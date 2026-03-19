@@ -117,6 +117,33 @@ function detectNodeProject(root: string, info: ProjectInfo): void {
     info.recommendations.push('Migrate from Protractor to Playwright (Protractor is deprecated)');
   }
 
+  // Library recommendations
+  if (info.type === 'angular') {
+    const altUiLibs: Record<string, string> = {
+      '@angular/material': 'Angular Material',
+      '@ng-bootstrap/ng-bootstrap': 'ng-bootstrap',
+      'ngx-bootstrap': 'ngx-bootstrap',
+      'bootstrap': 'Bootstrap',
+      'devextreme-angular': 'DevExtreme',
+      '@coreui/angular': 'CoreUI',
+      '@nebular/theme': 'Nebular',
+    };
+
+    const detectedAlts = Object.entries(altUiLibs)
+      .filter(([dep]) => deps[dep])
+      .map(([, name]) => name);
+
+    if (!deps['primeng'] && detectedAlts.length === 0) {
+      info.recommendations.push('PrimeNG is the recommended component library — consider adding it');
+    }
+    if (deps['primeng'] && detectedAlts.length > 0) {
+      info.recommendations.push(`Both PrimeNG and ${detectedAlts.join(', ')} detected — prefer PrimeNG for new components`);
+    }
+    if (!deps['primeng'] && detectedAlts.length > 0) {
+      info.recommendations.push(`Consider migrating from ${detectedAlts.join(', ')} to PrimeNG for richer component support`);
+    }
+  }
+
   // Angular version-specific recommendations
   const angularVersion = parseVersion(deps['@angular/core']);
   if (angularVersion) {

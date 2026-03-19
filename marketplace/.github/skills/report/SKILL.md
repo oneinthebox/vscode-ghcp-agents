@@ -67,6 +67,43 @@ Reads audit data from `.orch/audit/` and produces formatted reports. The user ca
 1. {prioritized list of things that need attention}
 ```
 
+## Recommendations & Trends
+
+### Trend analysis
+
+When the date range spans 2+ weeks, add a trend section:
+
+```markdown
+### Trends (last {N} weeks)
+| Metric | Week 1 | Week 2 | Week 3 | Trend |
+|--------|--------|--------|--------|-------|
+| Sessions/day | 12 | 15 | 18 | ↑ increasing |
+| Avg adherence | 94% | 91% | 88% | ↓ declining |
+| Token consumption | 45K | 52K | 61K | ↑ increasing |
+| Violations | 0 | 1 | 3 | ↑ increasing |
+```
+
+### Actionable recommendations
+
+Based on the data, produce prioritized recommendations:
+
+```markdown
+### Recommendations
+| Priority | Recommendation | Data Signal | Action |
+|----------|---------------|-------------|--------|
+| HIGH | Investigate @angular adherence decline | 94% → 88% over 3 weeks | Review recent instruction changes, check for new anti-patterns |
+| MEDIUM | Consider model switch for /generate | GPT-4.1 scores 12% higher on scaffold tasks | Run `@audit /benchmark models for /generate` |
+| LOW | Stale reference docs | 3 references > 30 days old | Run `orch update` to get latest from maintainer |
+```
+
+### Recommendation rules
+
+- Adherence declining 3+ percentage points over 2 weeks → HIGH priority
+- Token consumption increasing 30%+ with no session count increase → MEDIUM
+- Any tool boundary violations → HIGH
+- Stale docs detected → LOW (unless migration workflow is active, then HIGH)
+- Repeated violations of the same type → HIGH (pattern, not incident)
+
 ## Validation
 
 - Report covers all sessions in the date range

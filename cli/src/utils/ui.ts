@@ -34,11 +34,11 @@ export async function withSpinner<T>(
   const spinner = ora({ text, color: 'cyan' }).start();
   try {
     const result = await task();
-    spinner.succeed(options?.successText || text);
+    spinner.succeed(chalk.white(options?.successText || text));
     await sleep(PAUSE.brief);
     return result;
   } catch (err: any) {
-    spinner.fail(options?.failText || `${text} — ${err.message}`);
+    spinner.fail(chalk.red(options?.failText || `${text} — ${err.message}`));
     throw err;
   }
 }
@@ -55,11 +55,11 @@ export async function withSpinnerSync<T>(
   await sleep(options?.pauseMs ?? PAUSE.standard);
   try {
     const result = task();
-    spinner.succeed(options?.successText || text);
+    spinner.succeed(chalk.white(options?.successText || text));
     await sleep(PAUSE.brief);
     return result;
   } catch (err: any) {
-    spinner.fail(options?.failText || `${text} — ${err.message}`);
+    spinner.fail(chalk.red(options?.failText || `${text} — ${err.message}`));
     throw err;
   }
 }
@@ -68,28 +68,28 @@ export async function withSpinnerSync<T>(
  * Show a success line (✓)
  */
 export function success(text: string): void {
-  console.log(`  ${chalk.green('✓')} ${text}`);
+  console.log(`  ${chalk.green('✓')} ${chalk.white(text)}`);
 }
 
 /**
  * Show a failure line (✗)
  */
 export function fail(text: string): void {
-  console.log(`  ${chalk.red('✗')} ${text}`);
+  console.log(`  ${chalk.red('✗')} ${chalk.red(text)}`);
 }
 
 /**
  * Show a warning line (⚠)
  */
 export function warn(text: string): void {
-  console.log(`  ${chalk.yellow('⚠')} ${text}`);
+  console.log(`  ${chalk.yellow('⚠')} ${chalk.yellow(text)}`);
 }
 
 /**
  * Show an info line (ℹ)
  */
 export function info(text: string): void {
-  console.log(`  ${chalk.blue('ℹ')} ${text}`);
+  console.log(`  ${chalk.blue('ℹ')} ${chalk.blueBright(text)}`);
 }
 
 /**
@@ -98,7 +98,7 @@ export function info(text: string): void {
 export async function section(title: string): Promise<void> {
   await sleep(PAUSE.section);
   console.log('');
-  console.log(chalk.bold(title));
+  console.log(chalk.bold.white(title));
 }
 
 /**
@@ -113,7 +113,7 @@ export function divider(): void {
  */
 export function banner(command: string): void {
   console.log('');
-  console.log(chalk.bold.cyan(`ORCH ${command}`));
+  console.log(chalk.bold.cyan('ORCH') + ' ' + chalk.bold.white(command));
   console.log('');
 }
 
@@ -121,7 +121,7 @@ export function banner(command: string): void {
  * Print a key-value pair
  */
 export function kv(key: string, value: string): void {
-  console.log(`  ${chalk.dim(key + ':')} ${value}`);
+  console.log(`  ${chalk.dim(key + ':')} ${chalk.cyan(value)}`);
 }
 
 /**
@@ -134,7 +134,23 @@ export function statusRow(name: string, status: 'ok' | 'warn' | 'fail' | 'info',
     fail: chalk.red('✗'),
     info: chalk.blue('ℹ'),
   }[status];
-  console.log(`  ${icon} ${name}${detail ? chalk.dim(` — ${detail}`) : ''}`);
+
+  const nameColor = {
+    ok: chalk.white(name),
+    warn: chalk.yellow(name),
+    fail: chalk.red(name),
+    info: chalk.white(name),
+  }[status];
+
+  console.log(`  ${icon} ${nameColor}${detail ? chalk.dim(` — ${detail}`) : ''}`);
+}
+
+/**
+ * Print a count badge
+ */
+export function badge(label: string, count: number, color: 'green' | 'yellow' | 'red' | 'cyan' = 'cyan'): void {
+  const colorFn = { green: chalk.green, yellow: chalk.yellow, red: chalk.red, cyan: chalk.cyan }[color];
+  console.log(`  ${colorFn.bold(`${count}`)} ${chalk.dim(label)}`);
 }
 
 /**
@@ -148,6 +164,7 @@ export async function summary(stats: { ok: number; warn: number; fail: number })
   if (stats.fail === 0 && stats.warn === 0) {
     console.log(chalk.green.bold('✓ All checks passed'));
   } else {
+    if (stats.ok > 0) console.log(chalk.green(`✓ ${stats.ok} passed`));
     if (stats.fail > 0) console.log(chalk.red.bold(`✗ ${stats.fail} issue(s) — fix required`));
     if (stats.warn > 0) console.log(chalk.yellow(`⚠ ${stats.warn} warning(s) — review recommended`));
   }

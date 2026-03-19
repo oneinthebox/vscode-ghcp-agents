@@ -56,6 +56,42 @@ Full matrix tables: Core Platform, UI Libraries, Build & Test Tooling, Interop.i
 ### Issues Found
 ```
 
+## Migration skills mapping
+
+When producing an "Upgrade Path" output, include an ordered list of `/migrate` sub-commands consumable by @orch for building migration workflow plans:
+
+```markdown
+### Migration Skills to Run (ordered)
+1. `/migrate upgrade typescript 5.2 -> 5.5` — confidence: high
+2. `/migrate upgrade angular 17 -> 18` — confidence: medium
+3. `/migrate upgrade angular 18 -> 19` — confidence: medium
+4. `/migrate standalone` — confidence: high
+5. `/migrate control-flow` — confidence: high
+6. `/migrate inject` — confidence: high
+7. `/migrate signals` — confidence: low
+8. `/migrate upgrade primeng 16 -> 18` — confidence: low
+```
+
+Each entry includes:
+- The exact `/migrate` sub-command to run
+- The confidence level (from `/migrate`'s confidence classification: high = mechanical, medium = CLI-driven, low = semantic)
+- The dependency order (items earlier in the list must complete before later items)
+
+@orch uses this output to build the migration workflow plan and determine auto-mode behavior per phase.
+
+## Workflow Integration
+
+### Prerequisites
+
+None. `/version-matrix` can run standalone at any time.
+
+### Post-actions (recommended)
+
+When run before a migration: the output feeds directly into `/migrate` planning.
+When run standalone and incompatibilities are found: recommend `/migrate` to resolve them.
+
+Update `.orch/workflow/` stage status to `completed` if running within a workflow.
+
 ## Validation
 
 - Every public library has data in known-compatibility.yaml

@@ -14,8 +14,7 @@ Same as /generate — detect from active agent, project files, or file context.
 ## Steps
 
 1. Detect domain and project version.
-2. Check for overrides: `.github/skill-overrides/refactor/overrides.yaml`
-3. Load domain-specific reference: [references/{domain}.md](references/)
+2. Load domain-specific reference: [references/{domain}.md](references/)
 4. Study before/after examples: [examples/{domain}/](examples/)
 5. Read the target file(s).
 6. Identify modernization opportunities based on current version's best practices.

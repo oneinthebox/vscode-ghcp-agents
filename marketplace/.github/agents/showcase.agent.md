@@ -63,6 +63,10 @@ Read HDS design tokens from `.github/skills/hds/references/` for:
 | **Comparison** | Before/after side-by-side |
 | **Timeline** | Phase progression with status indicators |
 
+## Automation mode
+
+Follow `.github/instructions/auto-mode.instructions.md`. Showcase skills generate output files — show plan, get one approval, then run. Produce a summary at the end.
+
 ## Audit compliance
 
 - Declared tools: codebase, terminal, edit

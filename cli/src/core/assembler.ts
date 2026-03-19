@@ -7,6 +7,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as crypto from 'crypto';
+import * as yaml from 'yaml';
 import { ProjectInfo } from './project-detector';
 import { MarketplaceContents } from './marketplace';
 
@@ -21,13 +23,128 @@ export interface AssemblyPlan {
   boundaryConfig: any;      // boundaries.yaml content for this project
 }
 
+export interface DocPackManifest {
+  pack: string;
+  description: string;
+  sources: any[];
+}
+
+export interface OrchManifest {
+  files: string[];
+  directories: string[];
+  checksums: Record<string, string>;
+  installedAt: string;
+  marketplace: string;
+}
+
+/**
+ * Compute SHA-256 hash of a file
+ */
+export function computeChecksum(filePath: string): string {
+  const content = fs.readFileSync(filePath);
+  return 'sha256:' + crypto.createHash('sha256').update(content).digest('hex');
+}
+
+/**
+ * Verify integrity of installed files against manifest checksums.
+ * Returns { matched, modified, missing } arrays of relative file paths.
+ */
+export function verifyIntegrity(
+  projectPath: string,
+  manifest: OrchManifest
+): { matched: string[]; modified: string[]; missing: string[] } {
+  const matched: string[] = [];
+  const modified: string[] = [];
+  const missing: string[] = [];
+
+  for (const [relPath, expectedHash] of Object.entries(manifest.checksums)) {
+    const fullPath = path.join(projectPath, relPath);
+    if (!fs.existsSync(fullPath)) {
+      missing.push(relPath);
+    } else {
+      const actualHash = computeChecksum(fullPath);
+      if (actualHash === expectedHash) {
+        matched.push(relPath);
+      } else {
+        modified.push(relPath);
+      }
+    }
+  }
+
+  return { matched, modified, missing };
+}
+
+/**
+ * Load a doc pack from marketplace/doc-packs/{domain}.yaml,
+ * replace {version} placeholders, and tag each source with managed_by.
+ */
+export function loadDocPack(
+  marketplacePath: string,
+  domain: string,
+  version: string
+): any[] {
+  const packPath = path.join(path.resolve(marketplacePath), 'doc-packs', `${domain}.yaml`);
+  if (!fs.existsSync(packPath)) {
+    return [];
+  }
+
+  const raw = fs.readFileSync(packPath, 'utf8');
+  const pack = yaml.parse(raw) as DocPackManifest;
+
+  if (!pack || !Array.isArray(pack.sources)) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const results: any[] = [];
+  for (const source of pack.sources) {
+    // Deep-clone and replace {version} placeholders in string fields
+    const templated = JSON.parse(
+      JSON.stringify(source).replace(/\{version\}/g, version)
+    );
+    templated.managed_by = `pack:${domain}`;
+    // Deduplicate by id (e.g., templated v17 entry colliding with static v17 entry)
+    if (!seen.has(templated.id)) {
+      seen.add(templated.id);
+      results.push(templated);
+    }
+  }
+  return results;
+}
+
+/**
+ * List all available doc packs from marketplace/doc-packs/
+ */
+export function listDocPacks(marketplacePath: string): DocPackManifest[] {
+  const packsDir = path.join(path.resolve(marketplacePath), 'doc-packs');
+  if (!fs.existsSync(packsDir)) {
+    return [];
+  }
+
+  const packs: DocPackManifest[] = [];
+  for (const file of fs.readdirSync(packsDir)) {
+    if (!file.endsWith('.yaml')) continue;
+    try {
+      const raw = fs.readFileSync(path.join(packsDir, file), 'utf8');
+      const pack = yaml.parse(raw) as DocPackManifest;
+      if (pack && pack.pack && Array.isArray(pack.sources)) {
+        packs.push(pack);
+      }
+    } catch {
+      // Skip malformed pack files
+    }
+  }
+  return packs;
+}
+
 /**
  * Create an assembly plan based on detected project and requested domains
  */
 export function createAssemblyPlan(
   project: ProjectInfo,
   marketplace: MarketplaceContents,
-  domains: string[]
+  domains: string[],
+  marketplacePath?: string
 ): AssemblyPlan {
   const plan: AssemblyPlan = {
     agents: [],
@@ -40,9 +157,17 @@ export function createAssemblyPlan(
     boundaryConfig: {},
   };
 
-  // Always include audit agent
-  plan.agents.push('audit.agent.md');
-  plan.skills.push('report', 'benchmark', 'context');
+  // Audit hooks + scripts + config are always included (via plan.hooks and plan.auditScripts above)
+  // But @audit AGENT is opt-in — install via: orch install @audit
+
+  // Always include docs agent — every project needs scan, explain, drift, packs
+  plan.agents.push('docs.agent.md', 'scan-worker.agent.md', 'doc-convert-worker.agent.md');
+  plan.skills.push('packs', 'proof', 'drift', 'code-comment', 'version-matrix', 'explain');
+  plan.instructions.push(
+    'doc-conversion.instructions.md',
+    'auto-mode.instructions.md',
+    'workflows.instructions.md'
+  );
 
   for (const domain of domains) {
     switch (domain) {
@@ -58,16 +183,17 @@ export function createAssemblyPlan(
         );
         plan.semanticAdapters.push('typescript');
 
-        // Register reference docs based on detected Angular version
-        plan.registrySources.push(
-          ...getAngularRegistrySources(project.versions['@angular/core'])
-        );
+        // Load full doc pack instead of 2 hardcoded sources
+        if (marketplacePath) {
+          const angularVersion = project.versions['@angular/core']?.match(/(\d+)/)?.[1] || '19';
+          plan.registrySources.push(
+            ...loadDocPack(marketplacePath, 'angular', angularVersion)
+          );
+        }
         break;
 
       case 'docs':
-        plan.agents.push('docs.agent.md', 'scan-worker.agent.md', 'doc-convert-worker.agent.md');
-        plan.skills.push('packs', 'proof', 'drift', 'code-comment', 'version-matrix');
-        plan.instructions.push('doc-conversion.instructions.md');
+        // Already included by default — no additional action needed
         break;
 
       case 'springboot':
@@ -105,17 +231,18 @@ export function executeAssembly(
   let copied = 0;
   let skipped = 0;
   const errors: string[] = [];
-  const manifest: { files: string[]; directories: string[]; installedAt: string; marketplace: string } = {
+  const manifest: OrchManifest = {
     files: [],
     directories: [],
+    checksums: {},
     installedAt: new Date().toISOString(),
     marketplace: mp,
   };
 
-  // Create target directories
+  // Create target directories (no skill-overrides — dropped)
   const dirs = [
     '.github/agents', '.github/skills', '.github/instructions',
-    '.github/hooks', '.github/skill-overrides',
+    '.github/hooks', '.github/references',
     '.orch/audit/config', '.orch/audit/sessions', '.orch/audit/tokens',
     '.orch/audit/metrics/daily', '.orch/audit/metrics/weekly',
     '.orch/plans',
@@ -132,9 +259,17 @@ export function executeAssembly(
     const relativeDest = path.join('.github', 'agents', agent);
     const dest = path.join(target, relativeDest);
     const result = safeCopy(src, dest);
-    if (result === 'copied') { copied++; manifest.files.push(relativeDest); }
-    else if (result === 'skipped') skipped++;
-    else errors.push(`Agent not found: ${agent}`);
+    if (result === 'copied') {
+      copied++;
+      manifest.files.push(relativeDest);
+
+      manifest.checksums[relativeDest] = computeChecksum(dest);
+    } else if (result === 'skipped') {
+      skipped++;
+      manifest.checksums[relativeDest] = computeChecksum(dest);
+    } else {
+      errors.push(`Agent not found: ${agent}`);
+    }
   }
 
   // Copy skills (full directories)
@@ -144,7 +279,12 @@ export function executeAssembly(
     const dest = path.join(target, relativeDir);
     if (fs.existsSync(src)) {
       const files = safeCopyDir(src, dest, relativeDir);
-      manifest.files.push(...files);
+      for (const f of files) {
+        manifest.files.push(f);
+        const fullPath = path.join(target, f);
+
+        manifest.checksums[f] = computeChecksum(fullPath);
+      }
       manifest.directories.push(relativeDir);
       copied++;
     } else {
@@ -158,9 +298,17 @@ export function executeAssembly(
     const relativeDest = path.join('.github', 'instructions', instr);
     const dest = path.join(target, relativeDest);
     const result = safeCopy(src, dest);
-    if (result === 'copied') { copied++; manifest.files.push(relativeDest); }
-    else if (result === 'skipped') skipped++;
-    else errors.push(`Instruction not found: ${instr}`);
+    if (result === 'copied') {
+      copied++;
+      manifest.files.push(relativeDest);
+
+      manifest.checksums[relativeDest] = computeChecksum(dest);
+    } else if (result === 'skipped') {
+      skipped++;
+      manifest.checksums[relativeDest] = computeChecksum(dest);
+    } else {
+      errors.push(`Instruction not found: ${instr}`);
+    }
   }
 
   // Copy hooks
@@ -169,8 +317,15 @@ export function executeAssembly(
     const relativeDest = path.join('.github', 'hooks', hook);
     const dest = path.join(target, relativeDest);
     const result = safeCopy(src, dest);
-    if (result === 'copied') { copied++; manifest.files.push(relativeDest); }
-    else if (result === 'skipped') skipped++;
+    if (result === 'copied') {
+      copied++;
+      manifest.files.push(relativeDest);
+
+      manifest.checksums[relativeDest] = computeChecksum(dest);
+    } else if (result === 'skipped') {
+      skipped++;
+      manifest.checksums[relativeDest] = computeChecksum(dest);
+    }
   }
 
   // Copy audit scripts
@@ -183,7 +338,11 @@ export function executeAssembly(
       copied++;
       manifest.files.push(relativeDest);
       fs.chmodSync(dest, 0o755);
-    } else if (result === 'skipped') skipped++;
+      manifest.checksums[relativeDest] = computeChecksum(dest);
+    } else if (result === 'skipped') {
+      skipped++;
+      manifest.checksums[relativeDest] = computeChecksum(dest);
+    }
   }
 
   // Copy semantic adapters
@@ -194,7 +353,10 @@ export function executeAssembly(
     if (fs.existsSync(src)) {
       fs.mkdirSync(path.join(target, 'scripts', 'semantic', 'adapters'), { recursive: true });
       const files = safeCopyDir(src, dest, relativeDir);
-      manifest.files.push(...files);
+      for (const f of files) {
+        manifest.files.push(f);
+        manifest.checksums[f] = computeChecksum(path.join(target, f));
+      }
       manifest.directories.push(relativeDir);
       copied++;
     }
@@ -205,7 +367,10 @@ export function executeAssembly(
   if (fs.existsSync(adapterRegSrc)) {
     const relDest = path.join('scripts', 'semantic', 'adapters', 'registry.yaml');
     const result = safeCopy(adapterRegSrc, path.join(target, relDest));
-    if (result === 'copied') { manifest.files.push(relDest); }
+    if (result === 'copied') {
+      manifest.files.push(relDest);
+      manifest.checksums[relDest] = computeChecksum(path.join(target, relDest));
+    }
   }
 
   // Copy audit config
@@ -214,30 +379,42 @@ export function executeAssembly(
   const configDest = path.join(target, configRelDir);
   if (fs.existsSync(configSrc)) {
     const files = safeCopyDir(configSrc, configDest, configRelDir);
-    manifest.files.push(...files);
+    for (const f of files) {
+      manifest.files.push(f);
+      manifest.checksums[f] = computeChecksum(path.join(target, f));
+    }
     copied++;
   }
 
-  // Copy skill-overrides README
-  const overridesSrc = path.join(mp, '.github', 'skill-overrides', 'README.md');
-  const overridesRelDest = path.join('.github', 'skill-overrides', 'README.md');
-  const overridesResult = safeCopy(overridesSrc, path.join(target, overridesRelDest));
-  if (overridesResult === 'copied') manifest.files.push(overridesRelDest);
+  // Copy pre-converted reference docs from marketplace
+  const refscopied = copyReferenceDocs(mp, target, plan.registrySources, manifest);
+  copied += refscopied;
 
-  // Write docs-registry.yaml
+  // Write docs-registry.yaml — set status: current for sources with .md files
   const registryRelPath = 'docs-registry.yaml';
   const registryDest = path.join(target, registryRelPath);
   if (plan.registrySources.length > 0 && !fs.existsSync(registryDest)) {
+    const today = new Date().toISOString().split('T')[0];
+    for (const source of plan.registrySources) {
+      if (source.output) {
+        const mdPath = path.join(target, source.output);
+        if (fs.existsSync(mdPath)) {
+          source.status = 'current';
+          source.last_refreshed = today;
+        }
+      }
+    }
     const registryContent = {
       version: 1,
       sources: plan.registrySources,
     };
     fs.writeFileSync(
       registryDest,
-      `# ORCH Documentation Registry\n# Generated by: orch init\n# Manage with: @docs /packs\n\n` +
-      JSON.stringify(registryContent, null, 2)
+      `# ORCH Documentation Registry\n# Generated by: orch init\n# Manage with: @docs /packs status\n# Core-pack sources are maintained centrally. Run 'orch update' for latest.\n\n` +
+      yaml.stringify(registryContent, { lineWidth: 0 })
     );
     manifest.files.push(registryRelPath);
+    manifest.checksums[registryRelPath] = computeChecksum(registryDest);
     copied++;
   } else if (fs.existsSync(registryDest)) {
     skipped++;
@@ -249,6 +426,57 @@ export function executeAssembly(
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 
   return { copied, skipped, errors };
+}
+
+/**
+ * Copy pre-converted reference docs (.md files) from marketplace to target.
+ * Only copies files that match output paths in the assembly plan's registry sources.
+ */
+function copyReferenceDocs(
+  mp: string,
+  target: string,
+  registrySources: any[],
+  manifest: OrchManifest
+): number {
+  let copied = 0;
+  const refsDir = path.join(mp, '.github', 'references');
+  if (!fs.existsSync(refsDir)) return 0;
+
+  // Build a set of expected output paths from registry sources
+  const expectedOutputs = new Set<string>();
+  for (const source of registrySources) {
+    if (source.output) {
+      expectedOutputs.add(source.output);
+    }
+  }
+
+  // Walk marketplace references and copy matching files
+  const walk = (dir: string, relBase: string) => {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const srcPath = path.join(dir, entry.name);
+      const relPath = path.join(relBase, entry.name);
+      if (entry.isDirectory()) {
+        walk(srcPath, relPath);
+      } else if (entry.name.endsWith('.md') || entry.name.endsWith('.json')) {
+        const refRelPath = path.join('.github', 'references', relPath);
+        // Copy if it matches an expected output or is in the references tree
+        if (expectedOutputs.has(refRelPath) || expectedOutputs.size === 0) {
+          const dest = path.join(target, refRelPath);
+          const result = safeCopy(srcPath, dest);
+          if (result === 'copied') {
+            copied++;
+            manifest.files.push(refRelPath);
+      
+            manifest.checksums[refRelPath] = computeChecksum(dest);
+          }
+        }
+      }
+    }
+  };
+
+  walk(refsDir, '');
+  return copied;
 }
 
 // ── Helpers ──
@@ -299,58 +527,3 @@ function safeCopyDir(src: string, dest: string, relativeBase: string): string[] 
   return files;
 }
 
-// ── Helpers ──
-
-function copyFile(src: string, dest: string): boolean {
-  if (!fs.existsSync(src)) return false;
-  fs.mkdirSync(path.dirname(dest), { recursive: true });
-  fs.copyFileSync(src, dest);
-  return true;
-}
-
-function copyDir(src: string, dest: string): void {
-  fs.mkdirSync(dest, { recursive: true });
-  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
-    const srcPath = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
-    if (entry.isDirectory()) {
-      copyDir(srcPath, destPath);
-    } else {
-      fs.copyFileSync(srcPath, destPath);
-    }
-  }
-}
-
-function getAngularRegistrySources(angularVersion: string | undefined): any[] {
-  const version = angularVersion?.match(/(\d+)/)?.[1] || '19';
-  const sources: any[] = [];
-
-  // Add sources for the detected Angular version
-  sources.push({
-    id: `angular-essentials-v${version}`,
-    name: `Angular Essentials v${version}`,
-    type: 'url',
-    origin: 'https://angular.dev/essentials',
-    format: 'html',
-    output: `.github/references/angular/v${version}/essentials-guide.md`,
-    scope: 'frontend-ts-angular',
-    version: `${version}.x`,
-    last_refreshed: null,
-    status: 'draft',
-  });
-
-  // Migration guides (always useful)
-  sources.push({
-    id: 'angular-migrations-overview',
-    name: 'Angular Migrations Overview',
-    type: 'url',
-    origin: 'https://angular.dev/reference/migrations',
-    format: 'html',
-    output: '.github/references/angular/migrations/overview-guide.md',
-    scope: 'frontend-ts-angular',
-    last_refreshed: null,
-    status: 'draft',
-  });
-
-  return sources;
-}

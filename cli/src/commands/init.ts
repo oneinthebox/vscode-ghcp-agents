@@ -5,8 +5,9 @@
 import { detectProject } from '../core/project-detector';
 import { readMarketplace } from '../core/marketplace';
 import { createAssemblyPlan, executeAssembly } from '../core/assembler';
-import { banner, section, kv, success, warn, info, withSpinner, withSpinnerSync, summary, divider, sleep } from '../utils/ui';
+import { banner, section, kv, success, fail, warn, info, withSpinner, withSpinnerSync, summary, divider, sleep } from '../utils/ui';
 import * as path from 'path';
+import * as fs from 'fs';
 
 export async function initCommand(options: any): Promise<void> {
   const projectPath = process.cwd();
@@ -15,6 +16,35 @@ export async function initCommand(options: any): Promise<void> {
   banner('init');
 
   // Step 1: Detect project
+  // Pre-flight: backup existing .github if present
+  const githubDir = path.join(projectPath, '.github');
+  const githubBackup = path.join(projectPath, '.github.pre-orch');
+
+  if (fs.existsSync(githubDir) && !fs.existsSync(githubBackup)) {
+    await withSpinner(
+      'Backing up existing .github',
+      async () => {
+        copyDirRecursive(githubDir, githubBackup);
+        await sleep(200);
+      },
+      { successText: 'Backed up .github → .github.pre-orch' }
+    );
+  }
+
+  // Pre-flight: check this is a valid project
+  const hasPackageJson = fs.existsSync(path.join(projectPath, 'package.json'));
+  const hasPomXml = fs.existsSync(path.join(projectPath, 'pom.xml'));
+  const hasPyproject = fs.existsSync(path.join(projectPath, 'pyproject.toml'));
+  const hasRequirements = fs.existsSync(path.join(projectPath, 'requirements.txt'));
+
+  if (!hasPackageJson && !hasPomXml && !hasPyproject && !hasRequirements) {
+    fail('No project detected in this directory.');
+    info('Expected one of: package.json, pom.xml, pyproject.toml, requirements.txt');
+    info('Run orch init from your project root directory.');
+    console.log('');
+    process.exit(1);
+  }
+
   const project = await withSpinner(
     'Detecting project',
     async () => {
@@ -23,6 +53,14 @@ export async function initCommand(options: any): Promise<void> {
     },
     { successText: `Detected ${detectProject(projectPath).type} project` }
   );
+
+  if (project.type === 'unknown') {
+    fail('Could not determine project type.');
+    info('Found project files but no supported framework detected.');
+    info('Supported: Angular (@angular/core), Spring Boot (spring-boot), FastAPI (fastapi)');
+    console.log('');
+    process.exit(1);
+  }
 
   await section('Project');
   kv('Type', project.type);
@@ -67,16 +105,17 @@ export async function initCommand(options: any): Promise<void> {
     async () => {
       await sleep(200);
       return readMarketplace(marketplacePath);
-    },
-    { successText: `Marketplace: ${readMarketplace(marketplacePath).agents.length} agents, ${readMarketplace(marketplacePath).skills.length} skills` }
+    }
   );
+  const mpSummary = `Marketplace: ${marketplace.agents.length} agents, ${marketplace.skills.length} skills`;
+  success(mpSummary);
 
   // Step 4: Create plan
   const plan = await withSpinnerSync(
     'Creating assembly plan',
-    () => createAssemblyPlan(project, marketplace, domains),
-    { successText: `Plan: ${createAssemblyPlan(project, marketplace, domains).agents.length} agents, ${createAssemblyPlan(project, marketplace, domains).skills.length} skills` }
+    () => createAssemblyPlan(project, marketplace, domains, marketplacePath)
   );
+  success(`Plan: ${plan.agents.length} agents, ${plan.skills.length} skills`);
 
   // Step 5: Install
   await section('Installing');
@@ -170,7 +209,20 @@ function findMarketplace(): string {
   ].filter(Boolean);
 
   for (const candidate of candidates) {
-    if (require('fs').existsSync(candidate)) return candidate;
+    if (fs.existsSync(candidate)) return candidate;
   }
   throw new Error('Marketplace not found. Set ORCH_MARKETPLACE env var or run from the ORCH repo.');
+}
+
+function copyDirRecursive(src: string, dest: string): void {
+  fs.mkdirSync(dest, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyDirRecursive(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
 }

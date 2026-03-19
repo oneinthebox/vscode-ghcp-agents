@@ -14,8 +14,7 @@ Same as /generate — detect from active agent, project files, or file context.
 ## Steps
 
 1. Detect domain and current project state.
-2. Check for overrides: `.github/skill-overrides/migrate/overrides.yaml`
-3. Read compatibility matrix: `.github/references/compatibility-matrix-guide.md`
+2. Read compatibility matrix: `.github/references/compatibility-matrix-guide.md`
 4. Read project's `package.json` / `pom.xml` / `pyproject.toml` for current versions.
 5. Determine migration scope:
    - **Version upgrade**: user wants Angular 17→19. Check matrix for all dependent changes.
@@ -183,6 +182,15 @@ Tests: 247/247 pass
 Modules removed: TradeModule, PortfolioModule, ReportingModule, SharedModule
 ```
 
+### Post-phase review (auto=safe and step-by-step only)
+
+After each migration phase, produce a mini-review:
+- Pattern delta (old count decreased by N, new count increased by N)
+- Any warnings from build/test that weren't failures
+- Estimated remaining effort (re-calculate from current pattern counts)
+
+This enables informed go/no-go decisions at each phase boundary.
+
 ### Failure handling
 
 ```
@@ -223,10 +231,19 @@ Option B: Migrate per app (--scope app-name)
   → Best when apps can be independent (no shared lib version conflicts)
   → Each app gets its own PR
 
+Option C: Pilot migration (--pilot)
+  → Select one app as pilot (user chooses or smallest by file count)
+  → Migrate pilot app through all phases on its own branch
+  → After pilot completes, validate: /test + /review --strict + /benchmark --validate
+  → If pilot passes: "Pilot succeeded on {app}. Migrate remaining {N} apps?"
+  → Each remaining app gets its own branch + PR
+  → Workflow state tracks: pilot_app, pilot_status, remaining_apps[]
+
 Detection:
   Read nx.json → count apps
   If 1 app → Option A (no choice needed)
-  If 2+ apps → Ask user: "Migrate all apps together or one at a time?"
+  If 2+ apps → Ask user: "Migrate all apps together, one at a time, or pilot one first?"
+  If --pilot flag → select pilot app (user-specified or smallest by file count)
 ```
 
 ### Final PR creation
@@ -254,20 +271,32 @@ After all phases complete:
   - Any manual fixes that were needed"
 ```
 
-### Auto mode
+### Auto mode behavior
+
+Reads project default from `.github/instructions/auto-mode.instructions.md`. User can override per-invocation.
+
 Phases have confidence levels:
-- **High** (mechanical transforms): standalone, control-flow, inject → can auto-run with `--auto=safe`
-- **Medium** (CLI-driven): version upgrade via ng update → pause for approval by default
-- **Low** (semantic changes): signals, library upgrades → always pause for approval
+- **High** (mechanical transforms): standalone, control-flow, inject
+- **Medium** (CLI-driven): version upgrade via `ng update`
+- **Low** (semantic changes): signals, library upgrades
+
+| Level | Behavior |
+|-------|----------|
+| `step-by-step` | Pause before each phase. Show what will happen, wait for approval. |
+| `auto=safe` (default) | Show full plan, wait for one approval. Then auto-run high-confidence phases. Pause for medium/low confidence phases and any build/test failures. |
+| `auto=all` | Show plan (no approval wait). Auto-run all phases regardless of confidence. Only stop on build/test failures or unresolvable errors. |
 
 Auto mode + worktree is the safest combination for large migrations:
 ```
 @angular /migrate upgrade to Angular 21 --worktree --auto=safe
 → Creates isolated worktree
+→ Shows plan, waits for one approval
 → Auto-runs high-confidence phases
 → Pauses for medium/low confidence
 → Original working copy untouched throughout
 ```
+
+Post-execution: always produce a summary with phases completed, files changed, test results, items skipped, and items needing attention.
 
 ### Persisted plan
 Migration plans are saved to `.orch/plans/` for reuse:
@@ -294,6 +323,27 @@ git:
       phase: 2
       commit: def5678
 ```
+
+## Workflow Integration
+
+### Prerequisites (advisory)
+
+| Prerequisite | Why | Type |
+|-------------|-----|------|
+| `/version-matrix upgrade-path` | Ensures you know ALL version changes needed, not just the primary target | Recommended |
+| `/proof` scan | Gives accurate pattern counts for planning — without it, phase scoping is guesswork | Recommended |
+| `/drift` check | Prevents migrating against stale reference docs that could lead to wrong transforms | Recommended |
+
+Before executing, check `.orch/workflow/` for active workflow state. If a migration workflow exists and this skill is not the current stage, warn the user.
+
+### Post-actions (recommended)
+
+After migration completes:
+1. `/code-comment audit` — check if migration broke doc comments (params changed, types changed)
+2. `/proof compare` — compare pre and post migration snapshots for pattern deltas
+3. `/drift` — verify reference docs still match the migrated code
+
+Update `.orch/workflow/` stage status to `completed` if running within a workflow.
 
 ## Validation
 

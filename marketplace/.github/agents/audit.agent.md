@@ -41,6 +41,10 @@ Hooks (automatic) → .orch/audit/ (JSON files) → @audit reads → produces re
 | Boundaries config | `.orch/audit/config/boundaries.yaml` | Declared tools + scope per agent |
 | Adherence rules | `.orch/audit/config/adherence-rules.yaml` | Rule definitions per domain |
 
+## Automation mode
+
+All audit skills are **read-only**. Run immediately — no plan approval, no pauses, no confirmation. Produce a summary at the end.
+
 ## Audit compliance
 
 - Declared tools: codebase (read audit data), terminal (run aggregation scripts)

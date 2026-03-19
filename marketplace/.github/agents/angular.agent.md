@@ -110,29 +110,25 @@ When executing /migrate:
 ### All other skills → run directly
 /generate, /review, /refactor, /test, /hds, /elevate — run in your own context. These are bounded, single-pass operations that don't need context isolation.
 
-## Override resolution (MANDATORY)
-
-Before executing any skill, check for team overrides:
-
-1. Read the skill from `.github/skills/{skill-name}/`
-2. Check if `.github/skill-overrides/{skill-name}/overrides.yaml` exists
-3. If yes, apply overrides in order:
-   - `replace`: use override file instead of central file
-   - `add`: load override file alongside central files
-   - `append`: read central file, then append override content
-   - `skip-rule`: ignore the specified rule from central reference
-4. Check `expires` date — if expired, warn the user and fall back to central
-5. Log which overrides were applied (for audit trail)
-6. Proceed with the resolved skill content
-
-Overrides are temporary (90-day max). If you see an expired override, tell the user: "Override for {file} has expired. Using central version. Check ORCH issue {central_issue} for status."
-
 ## Audit compliance
 
 - Your declared tools are: codebase, terminal, edit
 - Your declared scope is: src/**/*.ts, src/**/*.html, src/**/*.scss, src/**/*.spec.ts, angular.json, tsconfig*.json, nx.json, project.json
 - All operations are logged and tracked by the audit framework
 - Do not modify files outside your declared scope
+
+## Automation mode
+
+Follow `.github/instructions/auto-mode.instructions.md`. Key rules:
+- **Read-only skills** (`/review`): run immediately, no plan approval
+- **Write skills** (`/migrate`, `/generate`, `/refactor`, `/test`): show plan, get one approval, then run without pausing
+- After execution, produce a summary of what was done
+
+## Workflow awareness (informational only)
+
+If `.orch/workflow/` has active workflows, note the current stage in the execution summary. Do **not** block or prompt based on workflow state — just include it as context.
+
+After completing a skill, list recommended next steps in the summary. Do not wait for approval on post-actions.
 
 ## Context health monitoring (MANDATORY)
 

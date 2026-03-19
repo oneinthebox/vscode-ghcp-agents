@@ -2,7 +2,8 @@
  * orch status — Show installed components
  */
 
-import { banner, section, kv, statusRow, info, divider } from '../utils/ui';
+import { verifyIntegrity, OrchManifest } from '../core/assembler';
+import { banner, section, kv, statusRow, info, warn, divider } from '../utils/ui';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -63,30 +64,45 @@ export async function statusCommand(options: any): Promise<void> {
     }
   }
 
-  // Overrides
-  await section('Overrides');
-  const overridesDir = path.join(projectPath, '.github', 'skill-overrides');
-  if (fs.existsSync(overridesDir)) {
-    const overrides = fs.readdirSync(overridesDir)
-      .filter(f => f !== 'README.md' && fs.statSync(path.join(overridesDir, f)).isDirectory());
-    if (overrides.length > 0) {
-      for (const o of overrides) statusRow(o, 'info');
+  // Integrity
+  await section('Integrity');
+  const manifestPath = path.join(projectPath, '.orch', 'manifest.json');
+  if (fs.existsSync(manifestPath)) {
+    const manifest: OrchManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    if (manifest.checksums && Object.keys(manifest.checksums).length > 0) {
+      const integrity = verifyIntegrity(projectPath, manifest);
+      kv('Tracked files', `${Object.keys(manifest.checksums).length}`);
+      kv('Matching', `${integrity.matched.length}`);
+      if (integrity.modified.length > 0) {
+        kv('Modified locally', `${integrity.modified.length}`);
+        for (const f of integrity.modified) {
+          warn(`  ${f}`);
+        }
+      }
+      if (integrity.missing.length > 0) {
+        kv('Missing', `${integrity.missing.length}`);
+      }
     } else {
-      info('None active');
+      info('No checksums — run orch update to generate');
     }
+  } else {
+    info('No manifest found');
   }
 
-  // Registry
-  await section('Registry');
+  // Registry (core-packs)
+  await section('Registry (Core-Packs)');
   const registryPath = path.join(projectPath, 'docs-registry.yaml');
   if (fs.existsSync(registryPath)) {
     const content = fs.readFileSync(registryPath, 'utf8');
-    const current = (content.match(/status: current/g) || []).length;
-    const stale = (content.match(/status: stale/g) || []).length;
-    const draft = (content.match(/status: draft/g) || []).length;
+    const current = (content.match(/["']?status["']?\s*:\s*["']?current/g) || []).length;
+    const stale = (content.match(/["']?status["']?\s*:\s*["']?stale/g) || []).length;
+    const draft = (content.match(/["']?status["']?\s*:\s*["']?draft/g) || []).length;
     kv('Current', `${current}`);
     kv('Stale', `${stale}`);
     kv('Draft', `${draft}`);
+    if (draft > 0) {
+      info('Draft sources not yet converted by maintainer');
+    }
   } else {
     info('No registry found');
   }
