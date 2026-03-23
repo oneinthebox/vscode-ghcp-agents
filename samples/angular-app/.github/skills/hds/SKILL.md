@@ -25,8 +25,7 @@ HDS (@yourorg/hds) is the organization's design system. It provides:
 
 ## Steps
 
-1. Check for overrides: `.github/skill-overrides/hds/overrides.yaml`
-2. Load references:
+1. Load references:
    - Token catalog: [references/tokens.md](references/tokens.md)
    - Theming guide: [references/theming.md](references/theming.md)
    - Component guide: [references/components.md](references/components.md)
@@ -42,6 +41,54 @@ HDS (@yourorg/hds) is the organization's design system. It provides:
 - **Never hardcode colors, spacing, typography, borders, or shadows**
 - **Use HdsThemeService for theme switching** — never manipulate CSS classes directly
 - **Check token catalog** before inventing new styles — there's probably a token for it
+
+## Audit sub-command (/hds audit)
+
+When invoked as `/hds audit` or `/hds audit {scope}`:
+
+### Steps
+
+1. Scan the target scope (default: `src/`) for SCSS/CSS files.
+2. Detect hardcoded values that should use HDS tokens:
+   - Hex colors (`#xxx`, `#xxxxxx`, `rgb()`, `rgba()`, `hsl()`)
+   - Pixel values for spacing (`margin: 16px`, `padding: 8px`)
+   - Font declarations (`font-family: Arial`, `font-size: 14px`)
+   - Hardcoded shadows and borders
+3. For each violation, suggest the correct HDS token.
+4. Produce a structured report.
+
+### Output
+
+```markdown
+## HDS Audit — {scope}
+
+### Violations
+| File | Line | Current | Suggested Token |
+|------|------|---------|----------------|
+| `trade-card.component.scss` | 12 | `background: #1a1a2e` | `var(--hds-surface-primary)` |
+| `dashboard.component.scss` | 45 | `padding: 16px` | `var(--hds-spacing-md)` |
+| `header.component.scss` | 8 | `font-family: Arial` | `var(--hds-font-family)` |
+
+### Summary
+- Files scanned: {N}
+- Violations found: {N}
+- Estimated fix time: {N} minutes
+
+### Auto-fix
+Run `@angular /refactor --hds-tokens {scope}` to automatically replace hardcoded values with HDS tokens.
+```
+
+## Workflow Integration
+
+### Prerequisites
+
+None. `/hds audit` can run standalone at any time.
+
+### Post-actions (recommended)
+
+After audit finds violations: `/refactor --hds-tokens {scope}` to auto-fix.
+
+Update `.orch/workflow/` stage status to `completed` if running within a workflow.
 
 ## Validation
 

@@ -295,10 +295,19 @@ function findSourceInRegistry(registry: RegistryFile, id: string): DocSource | u
 // ── Subcommands ──
 
 /**
- * orch maintain convert
+ * Normalize a pack argument: strip path prefix and .yaml extension.
+ *   "doc-packs/angular.yaml" → "angular"
+ *   "angular.yaml"           → "angular"
+ *   "angular"                → "angular"
  */
-export async function maintainConvertCommand(options: {
-  pack?: string;
+function normalizePack(input: string): string {
+  return path.basename(input).replace(/\.ya?ml$/i, '');
+}
+
+/**
+ * orch maintain convert [pack] [options]
+ */
+export async function maintainConvertCommand(packArg: string | undefined, options: {
   id?: string;
   all?: boolean;
   dryRun?: boolean;
@@ -312,6 +321,8 @@ export async function maintainConvertCommand(options: {
     fail('No doc packs found in doc-packs/');
     return;
   }
+
+  const packNames = packs.map(p => p.pack).join(', ');
 
   // Determine which sources to convert
   let sourcesToConvert: { source: DocSource; packName: string }[] = [];
@@ -329,10 +340,11 @@ export async function maintainConvertCommand(options: {
       fail(`Source ID "${options.id}" not found in any pack`);
       return;
     }
-  } else if (options.pack) {
-    const pack = packs.find(p => p.pack === options.pack);
+  } else if (packArg) {
+    const name = normalizePack(packArg);
+    const pack = packs.find(p => p.pack === name);
     if (!pack) {
-      fail(`Pack "${options.pack}" not found`);
+      fail(`Pack "${name}" not found. Available: ${packNames}`);
       return;
     }
     sourcesToConvert = pack.sources.map(s => ({ source: s, packName: pack.pack }));
@@ -343,7 +355,11 @@ export async function maintainConvertCommand(options: {
       }
     }
   } else {
-    info('Specify --pack <name>, --id <id>, or --all');
+    info(`Usage: orch maintain convert <pack> [--dry-run]`);
+    info(`       orch maintain convert --all [--dry-run]`);
+    info(`       orch maintain convert --id <source-id> [--dry-run]`);
+    info('');
+    info(`Available packs: ${packNames}`);
     return;
   }
 

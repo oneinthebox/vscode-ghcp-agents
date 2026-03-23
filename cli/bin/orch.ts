@@ -48,14 +48,35 @@ program
         ].join('\n');
       }
 
-      // Subcommand help
+      // Subcommand help — build full path (e.g. "orch maintain")
+      const parentNames: string[] = [];
+      let parent = cmd.parent;
+      while (parent) {
+        parentNames.unshift(parent.name());
+        parent = parent.parent;
+      }
+      const fullName = [...parentNames, cmd.name()].join(' ');
+
       const lines: string[] = [];
-      lines.push(chalk.bold.cyan(`\n  orch ${cmd.name()}`) + chalk.dim(` — ${cmd.description()}\n`));
+      lines.push(chalk.bold.cyan(`\n  ${fullName}`) + chalk.dim(` — ${cmd.description()}\n`));
 
       const usage = helper.commandUsage(cmd);
       lines.push(chalk.bold.white('  Usage:'));
       lines.push(`    ${chalk.cyan(usage)}`);
       lines.push('');
+
+      // Show child commands (e.g. convert, refresh, publish under maintain)
+      if (cmd.commands.length > 0) {
+        lines.push(chalk.bold.white('  Commands:'));
+        for (const sub of cmd.commands) {
+          const name = chalk.cyan(sub.name().padEnd(14));
+          const desc = chalk.white(sub.description());
+          lines.push(`    ${name} ${desc}`);
+        }
+        lines.push('');
+        lines.push(chalk.dim(`  Run `) + chalk.cyan(`${fullName} <command> --help`) + chalk.dim(` for details.`));
+        lines.push('');
+      }
 
       if (cmd.options.length > 0) {
         lines.push(chalk.bold.white('  Options:'));
@@ -136,7 +157,7 @@ const maintain = program
 maintain
   .command('convert')
   .description('Convert doc-pack sources to markdown')
-  .option('--pack <name>', 'Convert sources from a specific pack')
+  .argument('[pack]', 'Pack file or name (e.g. angular, angular.yaml, doc-packs/angular.yaml)')
   .option('--id <id>', 'Convert a single source by ID')
   .option('--all', 'Convert all sources from all packs')
   .option('--dry-run', 'Show what would be converted')

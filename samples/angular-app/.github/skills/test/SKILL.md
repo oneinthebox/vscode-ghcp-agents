@@ -18,12 +18,12 @@ Same as /generate — detect from active agent, project files, or file context.
 | **Generate** | Write tests for existing code that lacks tests |
 | **Improve** | Add edge cases, error scenarios, increase coverage |
 | **Migrate** | Convert Karma → Jest, Cypress → Playwright |
+| **Coverage** | Check coverage against thresholds, compare to baseline |
 
 ## Steps
 
 1. Detect domain and test stack.
-2. Check for overrides: `.github/skill-overrides/test/overrides.yaml`
-3. Load domain-specific references: [references/{domain}/](references/)
+2. Load domain-specific references: [references/{domain}/](references/)
 4. Load templates: [templates/{domain}/](templates/)
 5. Study examples: [examples/{domain}/](examples/)
 6. Determine action (generate, improve, or migrate) from user prompt.
@@ -48,6 +48,55 @@ Same as /generate — detect from active agent, project files, or file context.
 - **One assertion per test** (guideline, not rule)
 - **Playwright for new e2e** — Cypress for existing only
 - **Coverage script**: [scripts/angular/run-coverage.sh](scripts/angular/run-coverage.sh)
+
+## Coverage Thresholds
+
+### --min-coverage flag
+
+When invoked with `--min-coverage {N}` (e.g., `/test --min-coverage 80`):
+1. Run the test suite with coverage enabled: [scripts/angular/run-coverage.sh](scripts/angular/run-coverage.sh)
+2. Parse the coverage summary output (lines, branches, functions, statements).
+3. Compare each metric against the threshold.
+4. Report pass/fail per metric.
+
+### Baseline comparison
+
+If a previous coverage snapshot exists in `.orch/audit/metrics/`:
+1. Read the previous coverage numbers.
+2. Compare against the current run.
+3. Report delta per metric.
+4. Flag any regression (current < previous) as a warning.
+
+### Output
+
+```markdown
+## Coverage Report — {scope}
+| Metric | Current | Threshold | Baseline | Delta | Status |
+|--------|---------|-----------|----------|-------|--------|
+| Lines | 78% | 70% | 75% | +3% | PASS |
+| Branches | 62% | 60% | 64% | -2% | WARN (regression) |
+| Functions | 81% | 70% | 80% | +1% | PASS |
+| Statements | 79% | 70% | 76% | +3% | PASS |
+```
+
+### Default threshold
+
+If no `--min-coverage` specified, default to 70% (org standard).
+If the project has `.orch/workflow/` with a coverage baseline, use that instead.
+
+## Workflow Integration
+
+### Prerequisites
+
+| Prerequisite | Why | Type |
+|-------------|-----|------|
+| Working build | Tests require compilable code | Mandatory |
+
+### Post-actions (recommended)
+
+After test generation: `/review` (recommended — catch anti-patterns in test code).
+
+Update `.orch/workflow/` stage status to `completed` if running within a workflow.
 
 ## Validation
 

@@ -61,10 +61,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "research-fund-management:build:production"
+              "browserTarget": "research-fund-management:build:production"
             },
             "development": {
-              "buildTarget": "research-fund-management:build:development"
+              "browserTarget": "research-fund-management:build:development"
             }
           },
           "defaultConfiguration": "development"
