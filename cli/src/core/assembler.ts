@@ -19,7 +19,7 @@ export interface AssemblyPlan {
   hooks: string[];          // hook filenames to copy
   auditScripts: string[];   // audit script filenames to copy
   semanticAdapters: string[]; // adapter directory names to copy
-  registrySources: any[];   // sources to add to docs-registry.yaml
+  registrySources: any[];   // sources to add to .orch/registry.yaml
   boundaryConfig: any;      // boundaries.yaml content for this project
 }
 
@@ -160,26 +160,24 @@ export function createAssemblyPlan(
   // Audit hooks + scripts + config are always included (via plan.hooks and plan.auditScripts above)
   // But @audit AGENT is opt-in — install via: orch install @audit
 
-  // Always include docs agent — every project needs scan, explain, drift, packs
-  plan.agents.push('docs.agent.md', 'scan-worker.agent.md', 'doc-convert-worker.agent.md');
+  // Always include docs agent — every project needs fetch, status, refresh, drift
+  plan.agents.push('docs.agent.md', 'doc-convert-worker.agent.md');
   plan.skills.push('packs', 'proof', 'drift', 'code-comment', 'version-matrix', 'explain');
   plan.instructions.push(
-    'doc-conversion.instructions.md',
-    'auto-mode.instructions.md',
-    'workflows.instructions.md'
+    'auto-mode.instructions.md'
   );
 
   for (const domain of domains) {
     switch (domain) {
       case 'angular':
-        plan.agents.push('angular.agent.md', 'migrate-worker.agent.md');
+        plan.agents.push(
+          'angular.agent.md', 'angular-planner.agent.md',
+          'angular-engineer.agent.md', 'angular-verifier.agent.md',
+          'migrate-worker.agent.md'
+        );
         plan.skills.push(
           'generate', 'migrate', 'test', 'review', 'refactor',
           'hds', 'elevate'
-        );
-        plan.instructions.push(
-          'angular-typescript.instructions.md',
-          'internal-component-lib.instructions.md'
         );
         plan.semanticAdapters.push('typescript');
 
@@ -242,11 +240,13 @@ export function executeAssembly(
   // Create target directories (no skill-overrides — dropped)
   const dirs = [
     '.github/agents', '.github/skills', '.github/instructions',
-    '.github/hooks', '.github/references',
-    '.orch/audit/config', '.orch/audit/sessions', '.orch/audit/tokens',
-    '.orch/audit/metrics/daily', '.orch/audit/metrics/weekly',
+    '.github/hooks',
+    '.orch/config', '.orch/runs',
+    '.orch/audit/metrics', '.orch/audit/tokens',
     '.orch/plans',
-    'scripts/audit',
+    '.orch/references',
+    '.orch/scripts/audit',
+    '.orch/workflow',
   ];
   for (const dir of dirs) {
     fs.mkdirSync(path.join(target, dir), { recursive: true });
@@ -330,8 +330,8 @@ export function executeAssembly(
 
   // Copy audit scripts
   for (const script of plan.auditScripts) {
-    const src = path.join(mp, 'scripts', 'audit', script);
-    const relativeDest = path.join('scripts', 'audit', script);
+    const src = path.join(mp, '.orch', 'scripts', 'audit', script);
+    const relativeDest = path.join('.orch', 'scripts', 'audit', script);
     const dest = path.join(target, relativeDest);
     const result = safeCopy(src, dest);
     if (result === 'copied') {
@@ -347,11 +347,11 @@ export function executeAssembly(
 
   // Copy semantic adapters
   for (const adapter of plan.semanticAdapters) {
-    const src = path.join(mp, 'scripts', 'semantic', 'adapters', adapter);
-    const relativeDir = path.join('scripts', 'semantic', 'adapters', adapter);
+    const src = path.join(mp, '.orch', 'scripts', 'semantic', 'adapters', adapter);
+    const relativeDir = path.join('.orch', 'scripts', 'semantic', 'adapters', adapter);
     const dest = path.join(target, relativeDir);
     if (fs.existsSync(src)) {
-      fs.mkdirSync(path.join(target, 'scripts', 'semantic', 'adapters'), { recursive: true });
+      fs.mkdirSync(path.join(target, '.orch', 'scripts', 'semantic', 'adapters'), { recursive: true });
       const files = safeCopyDir(src, dest, relativeDir);
       for (const f of files) {
         manifest.files.push(f);
@@ -363,9 +363,9 @@ export function executeAssembly(
   }
 
   // Copy adapter registry
-  const adapterRegSrc = path.join(mp, 'scripts', 'semantic', 'adapters', 'registry.yaml');
+  const adapterRegSrc = path.join(mp, '.orch', 'scripts', 'semantic', 'adapters', 'registry.yaml');
   if (fs.existsSync(adapterRegSrc)) {
-    const relDest = path.join('scripts', 'semantic', 'adapters', 'registry.yaml');
+    const relDest = path.join('.orch', 'scripts', 'semantic', 'adapters', 'registry.yaml');
     const result = safeCopy(adapterRegSrc, path.join(target, relDest));
     if (result === 'copied') {
       manifest.files.push(relDest);
@@ -373,9 +373,9 @@ export function executeAssembly(
     }
   }
 
-  // Copy audit config
-  const configSrc = path.join(mp, '.orch', 'audit', 'config');
-  const configRelDir = path.join('.orch', 'audit', 'config');
+  // Copy audit config (boundaries + adherence rules)
+  const configSrc = path.join(mp, '.orch', 'config');
+  const configRelDir = path.join('.orch', 'config');
   const configDest = path.join(target, configRelDir);
   if (fs.existsSync(configSrc)) {
     const files = safeCopyDir(configSrc, configDest, configRelDir);
@@ -386,12 +386,44 @@ export function executeAssembly(
     copied++;
   }
 
+  // Copy .orch/config.yaml from marketplace
+  const orchConfigSrc = path.join(mp, '.orch', 'config.yaml');
+  if (fs.existsSync(orchConfigSrc)) {
+    const orchConfigRelDest = path.join('.orch', 'config.yaml');
+    const orchConfigDest = path.join(target, orchConfigRelDest);
+    const orchConfigResult = safeCopy(orchConfigSrc, orchConfigDest);
+    if (orchConfigResult === 'copied') {
+      copied++;
+      manifest.files.push(orchConfigRelDest);
+      manifest.checksums[orchConfigRelDest] = computeChecksum(orchConfigDest);
+    } else if (orchConfigResult === 'skipped') {
+      skipped++;
+      manifest.checksums[orchConfigRelDest] = computeChecksum(orchConfigDest);
+    }
+  }
+
+  // Copy .github/copilot-instructions.md from marketplace
+  const copilotInstrSrc = path.join(mp, '.github', 'copilot-instructions.md');
+  if (fs.existsSync(copilotInstrSrc)) {
+    const copilotInstrRelDest = path.join('.github', 'copilot-instructions.md');
+    const copilotInstrDest = path.join(target, copilotInstrRelDest);
+    const copilotInstrResult = safeCopy(copilotInstrSrc, copilotInstrDest);
+    if (copilotInstrResult === 'copied') {
+      copied++;
+      manifest.files.push(copilotInstrRelDest);
+      manifest.checksums[copilotInstrRelDest] = computeChecksum(copilotInstrDest);
+    } else if (copilotInstrResult === 'skipped') {
+      skipped++;
+      manifest.checksums[copilotInstrRelDest] = computeChecksum(copilotInstrDest);
+    }
+  }
+
   // Copy pre-converted reference docs from marketplace
   const refscopied = copyReferenceDocs(mp, target, plan.registrySources, manifest);
   copied += refscopied;
 
-  // Write docs-registry.yaml — set status: current for sources with .md files
-  const registryRelPath = 'docs-registry.yaml';
+  // Write .orch/registry.yaml — set status: current for sources with .md files
+  const registryRelPath = path.join('.orch', 'registry.yaml');
   const registryDest = path.join(target, registryRelPath);
   if (plan.registrySources.length > 0 && !fs.existsSync(registryDest)) {
     const today = new Date().toISOString().split('T')[0];
@@ -439,7 +471,7 @@ function copyReferenceDocs(
   manifest: OrchManifest
 ): number {
   let copied = 0;
-  const refsDir = path.join(mp, '.github', 'references');
+  const refsDir = path.join(mp, '.orch', 'references');
   if (!fs.existsSync(refsDir)) return 0;
 
   // Build a set of expected output paths from registry sources
@@ -459,7 +491,7 @@ function copyReferenceDocs(
       if (entry.isDirectory()) {
         walk(srcPath, relPath);
       } else if (entry.name.endsWith('.md') || entry.name.endsWith('.json')) {
-        const refRelPath = path.join('.github', 'references', relPath);
+        const refRelPath = path.join('.orch', 'references', relPath);
         // Copy if it matches an expected output or is in the references tree
         if (expectedOutputs.has(refRelPath) || expectedOutputs.size === 0) {
           const dest = path.join(target, refRelPath);
@@ -467,7 +499,7 @@ function copyReferenceDocs(
           if (result === 'copied') {
             copied++;
             manifest.files.push(refRelPath);
-      
+
             manifest.checksums[refRelPath] = computeChecksum(dest);
           }
         }

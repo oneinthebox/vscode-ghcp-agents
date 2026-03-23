@@ -4,13 +4,13 @@
     "postToolUse": [
       {
         "type": "command",
-        "bash": "./scripts/audit/check-file-scope.sh",
+        "bash": "./.orch/scripts/audit/check-file-scope.sh",
         "cwd": ".",
         "timeoutSec": 10
       },
       {
         "type": "command",
-        "bash": "./scripts/audit/log-tool-result.sh",
+        "bash": "./.orch/scripts/audit/log-tool-result.sh",
         "cwd": ".",
         "timeoutSec": 5
       }

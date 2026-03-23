@@ -8,6 +8,7 @@ import { banner, section, statusRow, kv, info, warn, summary, withSpinner, sleep
 import { getNodeVersionInfo, getNodeStatusMessage, detectPlatform, detectNodeManager } from '../utils/node-version';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as childProcess from 'child_process';
 
 export async function doctorCommand(): Promise<void> {
   const projectPath = process.cwd();
@@ -55,6 +56,33 @@ export async function doctorCommand(): Promise<void> {
     info(nodeStatus.action);
   }
 
+  // 2b. Required tools (bash, jq, python3)
+  await section('Required Tools');
+  const platform = detectPlatform();
+  const toolChecks: { name: string; cmd: string; macInstall: string; linuxInstall: string; winInstall: string }[] = [
+    { name: 'bash', cmd: 'bash --version', macInstall: 'pre-installed on macOS', linuxInstall: 'pre-installed on Linux', winInstall: 'Install Git Bash or WSL' },
+    { name: 'jq', cmd: 'jq --version', macInstall: 'brew install jq', linuxInstall: 'apt install jq', winInstall: 'choco install jq or scoop install jq' },
+    { name: 'python3', cmd: 'python3 --version', macInstall: 'brew install python3', linuxInstall: 'apt install python3', winInstall: 'choco install python3 or scoop install python' },
+  ];
+
+  for (const tool of toolChecks) {
+    try {
+      childProcess.execSync(tool.cmd, { stdio: 'pipe', encoding: 'utf8' });
+      statusRow(tool.name, 'ok');
+      ok++;
+    } catch {
+      statusRow(tool.name, 'fail', 'NOT FOUND');
+      issues++;
+      if (platform === 'macos') {
+        info(`  Install: ${tool.macInstall}`);
+      } else if (platform === 'linux') {
+        info(`  Install: ${tool.linuxInstall}`);
+      } else {
+        info(`  Install: ${tool.winInstall}`);
+      }
+    }
+  }
+
   // 3. Compatibility
   await section('Compatibility');
   for (const [dep, ver] of Object.entries(project.versions)) {
@@ -82,7 +110,7 @@ export async function doctorCommand(): Promise<void> {
   // 5. Audit config
   await section('Audit Config');
   for (const file of ['boundaries.yaml', 'adherence-rules.yaml']) {
-    const filePath = path.join(projectPath, '.orch', 'audit', 'config', file);
+    const filePath = path.join(projectPath, '.orch', 'config', file);
     if (fs.existsSync(filePath)) {
       statusRow(file, 'ok');
       ok++;
@@ -94,7 +122,7 @@ export async function doctorCommand(): Promise<void> {
 
   // 6. Audit scripts
   await section('Audit Scripts');
-  const scriptsDir = path.join(projectPath, 'scripts', 'audit');
+  const scriptsDir = path.join(projectPath, '.orch', 'scripts', 'audit');
   const requiredScripts = [
     'log-session-start.sh', 'log-session-end.sh', 'log-prompt.sh',
     'check-tool-boundary.sh', 'check-file-scope.sh', 'log-tool-result.sh',
@@ -113,7 +141,7 @@ export async function doctorCommand(): Promise<void> {
   // 7. Semantic adapter
   await section('Semantic Analysis');
   if (project.type === 'angular') {
-    const adapterPath = path.join(projectPath, 'scripts', 'semantic', 'adapters', 'typescript');
+    const adapterPath = path.join(projectPath, '.orch', 'scripts', 'semantic', 'adapters', 'typescript');
     if (fs.existsSync(adapterPath)) {
       statusRow('TypeScript adapter (ts-morph)', 'ok');
       ok++;
@@ -186,9 +214,29 @@ export async function doctorCommand(): Promise<void> {
     issues++;
   }
 
-  // 10. Reference Docs (core-packs)
+  // 10. ORCH Config + Global Instructions
+  await section('ORCH Config');
+  const orchConfigPath = path.join(projectPath, '.orch', 'config.yaml');
+  if (fs.existsSync(orchConfigPath)) {
+    statusRow('.orch/config.yaml', 'ok');
+    ok++;
+  } else {
+    statusRow('.orch/config.yaml', 'fail', 'MISSING');
+    issues++;
+  }
+
+  const copilotInstrPath = path.join(projectPath, '.github', 'copilot-instructions.md');
+  if (fs.existsSync(copilotInstrPath)) {
+    statusRow('.github/copilot-instructions.md', 'ok');
+    ok++;
+  } else {
+    statusRow('.github/copilot-instructions.md', 'fail', 'MISSING');
+    issues++;
+  }
+
+  // 11. Reference Docs (core-packs)
   await section('Reference Docs');
-  const registryPath = path.join(projectPath, 'docs-registry.yaml');
+  const registryPath = path.join(projectPath, '.orch', 'registry.yaml');
   if (fs.existsSync(registryPath)) {
     const content = fs.readFileSync(registryPath, 'utf8');
     const currentCount = (content.match(/["']?status["']?\s*:\s*["']?current/g) || []).length;
@@ -202,7 +250,7 @@ export async function doctorCommand(): Promise<void> {
       statusRow('Registry empty', 'info', 'No sources registered yet');
     }
   } else {
-    statusRow('docs-registry.yaml', 'warn', 'Not found');
+    statusRow('.orch/registry.yaml', 'warn', 'Not found');
     warnings++;
   }
 

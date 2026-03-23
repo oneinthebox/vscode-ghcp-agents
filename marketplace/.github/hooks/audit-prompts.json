@@ -4,7 +4,7 @@
     "userPromptSubmitted": [
       {
         "type": "command",
-        "bash": "./scripts/audit/log-prompt.sh",
+        "bash": "./.orch/scripts/audit/log-prompt.sh",
         "cwd": ".",
         "timeoutSec": 5
       }

@@ -91,7 +91,7 @@ export async function statusCommand(options: any): Promise<void> {
 
   // Registry (core-packs)
   await section('Registry (Core-Packs)');
-  const registryPath = path.join(projectPath, 'docs-registry.yaml');
+  const registryPath = path.join(projectPath, '.orch/registry.yaml');
   if (fs.existsSync(registryPath)) {
     const content = fs.readFileSync(registryPath, 'utf8');
     const current = (content.match(/["']?status["']?\s*:\s*["']?current/g) || []).length;
@@ -107,18 +107,22 @@ export async function statusCommand(options: any): Promise<void> {
     info('No registry found');
   }
 
-  // Audit sessions
-  await section('Audit');
-  const sessionsDir = path.join(projectPath, '.orch', 'audit', 'sessions');
-  if (fs.existsSync(sessionsDir)) {
-    const dateDirs = fs.readdirSync(sessionsDir);
+  // Run history
+  await section('Run History');
+  const runsDir = path.join(projectPath, '.orch', 'runs');
+  if (fs.existsSync(runsDir)) {
+    const dateDirs = fs.readdirSync(runsDir).filter(d =>
+      fs.statSync(path.join(runsDir, d)).isDirectory()
+    );
     let total = 0;
     for (const d of dateDirs) {
-      total += fs.readdirSync(path.join(sessionsDir, d)).filter(f => f.endsWith('.json')).length;
+      total += fs.readdirSync(path.join(runsDir, d)).filter(f =>
+        fs.statSync(path.join(runsDir, d, f)).isDirectory()
+      ).length;
     }
-    kv('Sessions', `${total} across ${dateDirs.length} days`);
+    kv('Runs', `${total} across ${dateDirs.length} days`);
   } else {
-    info('No sessions recorded yet');
+    info('No runs recorded yet');
   }
 
   console.log('');

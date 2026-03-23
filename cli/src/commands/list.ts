@@ -10,24 +10,31 @@ import * as fs from 'fs';
 // Same map as install.ts — defines what each agent provides
 const AGENT_PACKAGES: Record<string, { skills: string[]; description: string }> = {
   angular: {
-    skills: ['generate', 'migrate', 'test', 'review', 'refactor', 'hds', 'elevate'],
-    description: 'Angular, TypeScript, RxJS expert (v17-v19)',
+    skills: [
+      'angular-scan-deps', 'angular-scan-arch', 'angular-scan-quality',
+      'angular-scan-tests', 'angular-scan-deploy', 'angular-scan-git',
+      'angular-scan-docs', 'angular-scan-features', 'angular-explain',
+      'angular-compatibility',
+      'angular-generate-component', 'angular-generate-service', 'angular-generate-route',
+      'angular-migrate-standalone', 'angular-migrate-signals', 'angular-migrate-control-flow',
+      'angular-migrate-jest', 'angular-migrate-playwright', 'angular-migrate-version',
+      'angular-refactor', 'angular-docs-generate', 'angular-docs-repair',
+      'angular-test-unit', 'angular-test-e2e', 'angular-test-lint',
+      'angular-review', 'angular-docs-audit',
+    ],
+    description: 'Angular, TypeScript, RxJS expert (v17-v19) — planner, engineer, verifier',
   },
   docs: {
-    skills: ['packs', 'proof', 'drift', 'code-comment', 'version-matrix', 'explain'],
-    description: 'Documentation pipeline — scan, convert, drift, explain',
+    skills: ['docs-fetch', 'docs-status', 'docs-refresh', 'docs-drift'],
+    description: 'Reference material supply chain — fetch, convert, drift',
   },
   audit: {
-    skills: ['report', 'benchmark', 'context'],
-    description: 'Observability — usage, tokens, compliance, session health',
-  },
-  showcase: {
-    skills: ['present', 'dashboard'],
-    description: 'Presentations — slide decks and dashboards from ORCH data',
+    skills: ['audit-usage', 'audit-tokens', 'audit-compliance', 'audit-drift', 'audit-benchmark', 'audit-context'],
+    description: 'Observability — usage, tokens, compliance, drift, benchmarks',
   },
   orch: {
-    skills: [],
-    description: 'Master orchestrator — workflow coordination, cross-agent hand-offs',
+    skills: ['present-deck', 'present-dashboard'],
+    description: 'Master orchestrator — workflow coordination, cross-agent hand-offs, presentations',
   },
 };
 
@@ -123,7 +130,7 @@ async function listPacks(projectPath: string): Promise<void> {
   }
 
   // Check which packs are active in this project
-  const registryPath = path.join(projectPath, 'docs-registry.yaml');
+  const registryPath = path.join(projectPath, '.orch/registry.yaml');
   const activePacks = new Set<string>();
   if (fs.existsSync(registryPath)) {
     const raw = fs.readFileSync(registryPath, 'utf8');

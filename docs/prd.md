@@ -384,7 +384,7 @@ snapshots:
   - tag: "pre-migration-2026-03"
     date: 2026-03-18
     commit: abc1234
-    output: .github/references/scans/trade-app/2026-03-18-pre-migration/
+    output: .orch/references/scans/trade-app/2026-03-18-pre-migration/
     summary: "156 NgModule components, 67 manual subscribes, Angular 16.2"
 ```
 
@@ -661,7 +661,7 @@ sequenceDiagram
     actor Dev as Developer
     participant DOC as @docs Agent
     participant REG as docs-registry.yaml
-    participant REF as .github/references/
+    participant REF as .orch/references/
     participant GIT as Git History
 
     Note over Dev,GIT: Step 1: Fetch and convert reference docs

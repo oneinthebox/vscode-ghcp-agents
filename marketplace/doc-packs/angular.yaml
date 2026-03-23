@@ -1,5 +1,5 @@
 # Doc Pack: Angular Ecosystem
-# Copied to docs-registry.yaml during orch init for Angular projects.
+# Copied to .orch/registry.yaml during orch init for Angular projects.
 # Source of truth for all Angular-domain documentation sources.
 #
 # Version templating: {version} is replaced with the detected Angular major version at init time.
@@ -21,7 +21,7 @@ sources:
     type: url
     origin: https://v16.angular.io/docs
     format: html
-    output: .github/references/angular/v16/overview-guide.md
+    output: .orch/references/angular/v16/overview-guide.md
     scope: frontend-ts-angular
     version: "16.x"
     last_refreshed: null
@@ -33,7 +33,7 @@ sources:
     type: url
     origin: https://v17.angular.io/docs
     format: html
-    output: .github/references/angular/v17/overview-guide.md
+    output: .orch/references/angular/v17/overview-guide.md
     scope: frontend-ts-angular
     version: "17.x"
     last_refreshed: null
@@ -45,7 +45,7 @@ sources:
     type: url
     origin: https://v20.angular.dev/overview
     format: html
-    output: .github/references/angular/v20/overview-guide.md
+    output: .orch/references/angular/v20/overview-guide.md
     scope: frontend-ts-angular
     version: "20.x"
     last_refreshed: null
@@ -56,7 +56,7 @@ sources:
     type: url
     origin: https://v20.angular.dev/essentials
     format: html
-    output: .github/references/angular/v20/essentials-guide.md
+    output: .orch/references/angular/v20/essentials-guide.md
     scope: frontend-ts-angular
     version: "20.x"
     last_refreshed: null
@@ -67,7 +67,7 @@ sources:
     type: url
     origin: https://v20.angular.dev/api
     format: html
-    output: .github/references/angular/v20/api-guide.md
+    output: .orch/references/angular/v20/api-guide.md
     scope: frontend-ts-angular
     version: "20.x"
     last_refreshed: null
@@ -79,7 +79,7 @@ sources:
     type: url
     origin: https://angular.dev/overview
     format: html
-    output: .github/references/angular/v21/overview-guide.md
+    output: .orch/references/angular/v21/overview-guide.md
     scope: frontend-ts-angular
     version: "21.x"
     last_refreshed: null
@@ -90,7 +90,7 @@ sources:
     type: url
     origin: https://angular.dev/essentials
     format: html
-    output: .github/references/angular/v21/essentials-guide.md
+    output: .orch/references/angular/v21/essentials-guide.md
     scope: frontend-ts-angular
     version: "21.x"
     last_refreshed: null
@@ -101,7 +101,7 @@ sources:
     type: url
     origin: https://angular.dev/api
     format: html
-    output: .github/references/angular/v21/api-guide.md
+    output: .orch/references/angular/v21/api-guide.md
     scope: frontend-ts-angular
     version: "21.x"
     last_refreshed: null
@@ -115,7 +115,7 @@ sources:
     type: url
     origin: https://angular.dev/overview
     format: html
-    output: .github/references/angular/v{version}/overview-guide.md
+    output: .orch/references/angular/v{version}/overview-guide.md
     scope: frontend-ts-angular
     version: "{version}.x"
     last_refreshed: null
@@ -126,7 +126,7 @@ sources:
     type: url
     origin: https://angular.dev/essentials
     format: html
-    output: .github/references/angular/v{version}/essentials-guide.md
+    output: .orch/references/angular/v{version}/essentials-guide.md
     scope: frontend-ts-angular
     version: "{version}.x"
     last_refreshed: null
@@ -137,7 +137,7 @@ sources:
     type: url
     origin: https://angular.dev/api
     format: html
-    output: .github/references/angular/v{version}/api-guide.md
+    output: .orch/references/angular/v{version}/api-guide.md
     scope: frontend-ts-angular
     version: "{version}.x"
     last_refreshed: null
@@ -151,7 +151,7 @@ sources:
     type: url
     origin: https://angular.dev/update-guide
     format: html
-    output: .github/references/angular/migrations/update-guide.md
+    output: .orch/references/angular/migrations/update-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -162,7 +162,7 @@ sources:
     type: url
     origin: https://angular.dev/update-guide?v=16.0-17.0&l=3
     format: html
-    output: .github/references/angular/migrations/update-v16-to-v17-guide.md
+    output: .orch/references/angular/migrations/update-v16-to-v17-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -172,7 +172,7 @@ sources:
     type: url
     origin: https://angular.dev/update-guide?v=17.0-18.0&l=3
     format: html
-    output: .github/references/angular/migrations/update-v17-to-v18-guide.md
+    output: .orch/references/angular/migrations/update-v17-to-v18-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -182,7 +182,7 @@ sources:
     type: url
     origin: https://angular.dev/update-guide?v=18.0-19.0&l=3
     format: html
-    output: .github/references/angular/migrations/update-v18-to-v19-guide.md
+    output: .orch/references/angular/migrations/update-v18-to-v19-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -192,7 +192,7 @@ sources:
     type: url
     origin: https://angular.dev/update-guide?v=19.0-20.0&l=3
     format: html
-    output: .github/references/angular/migrations/update-v19-to-v20-guide.md
+    output: .orch/references/angular/migrations/update-v19-to-v20-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -202,7 +202,7 @@ sources:
     type: url
     origin: https://angular.dev/update-guide?v=20.0-21.0&l=3
     format: html
-    output: .github/references/angular/migrations/update-v20-to-v21-guide.md
+    output: .orch/references/angular/migrations/update-v20-to-v21-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -212,7 +212,7 @@ sources:
     type: url
     origin: https://angular.dev/reference/migrations
     format: html
-    output: .github/references/angular/migrations/overview-guide.md
+    output: .orch/references/angular/migrations/overview-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -222,7 +222,7 @@ sources:
     type: url
     origin: https://angular.dev/reference/migrations/standalone
     format: html
-    output: .github/references/angular/migrations/standalone-guide.md
+    output: .orch/references/angular/migrations/standalone-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -232,7 +232,7 @@ sources:
     type: url
     origin: https://angular.dev/reference/migrations/control-flow
     format: html
-    output: .github/references/angular/migrations/control-flow-guide.md
+    output: .orch/references/angular/migrations/control-flow-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -242,7 +242,7 @@ sources:
     type: url
     origin: https://angular.dev/reference/migrations/signal-inputs
     format: html
-    output: .github/references/angular/migrations/signal-inputs-guide.md
+    output: .orch/references/angular/migrations/signal-inputs-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -252,7 +252,7 @@ sources:
     type: url
     origin: https://angular.dev/reference/migrations/signal-queries
     format: html
-    output: .github/references/angular/migrations/signal-queries-guide.md
+    output: .orch/references/angular/migrations/signal-queries-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -262,7 +262,7 @@ sources:
     type: url
     origin: https://angular.dev/reference/migrations/inject-function
     format: html
-    output: .github/references/angular/migrations/inject-function-guide.md
+    output: .orch/references/angular/migrations/inject-function-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -272,7 +272,7 @@ sources:
     type: url
     origin: https://angular.dev/reference/migrations/outputs
     format: html
-    output: .github/references/angular/migrations/outputs-guide.md
+    output: .orch/references/angular/migrations/outputs-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -282,7 +282,7 @@ sources:
     type: url
     origin: https://angular.dev/reference/migrations/route-lazy-loading
     format: html
-    output: .github/references/angular/migrations/lazy-routes-guide.md
+    output: .orch/references/angular/migrations/lazy-routes-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -292,7 +292,7 @@ sources:
     type: url
     origin: https://angular.dev/tools/cli/build-system-migration
     format: html
-    output: .github/references/angular/migrations/esbuild-guide.md
+    output: .orch/references/angular/migrations/esbuild-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -303,7 +303,7 @@ sources:
     type: url
     origin: https://angular.dev/reference/releases
     format: html
-    output: .github/references/angular/releases-guide.md
+    output: .orch/references/angular/releases-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -313,7 +313,7 @@ sources:
     type: url
     origin: https://angular.dev/reference/versions
     format: html
-    output: .github/references/angular/versions-guide.md
+    output: .orch/references/angular/versions-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -327,7 +327,7 @@ sources:
     type: url
     origin: https://v{version}.material.angular.dev/guide/getting-started
     format: html
-    output: .github/references/angular-material/v{version}/getting-started-guide.md
+    output: .orch/references/angular-material/v{version}/getting-started-guide.md
     scope: frontend-ts-angular
     version: "{version}.x"
     last_refreshed: null
@@ -338,7 +338,7 @@ sources:
     type: url
     origin: https://v{version}.material.angular.dev/guide/theming
     format: html
-    output: .github/references/angular-material/v{version}/theming-guide.md
+    output: .orch/references/angular-material/v{version}/theming-guide.md
     scope: frontend-ts-angular
     version: "{version}.x"
     last_refreshed: null
@@ -349,7 +349,7 @@ sources:
     type: url
     origin: https://v{version}.material.angular.dev/components
     format: html
-    output: .github/references/angular-material/v{version}/components-guide.md
+    output: .orch/references/angular-material/v{version}/components-guide.md
     scope: frontend-ts-angular
     version: "{version}.x"
     last_refreshed: null
@@ -360,7 +360,7 @@ sources:
     type: url
     origin: https://v{version}.material.angular.dev/cdk
     format: html
-    output: .github/references/angular-material/v{version}/cdk-guide.md
+    output: .orch/references/angular-material/v{version}/cdk-guide.md
     scope: frontend-ts-angular
     version: "{version}.x"
     last_refreshed: null
@@ -371,7 +371,7 @@ sources:
     type: url
     origin: https://v16.material.angular.dev/guide/getting-started
     format: html
-    output: .github/references/angular-material/v16/getting-started-guide.md
+    output: .orch/references/angular-material/v16/getting-started-guide.md
     scope: frontend-ts-angular
     version: "16.x"
     last_refreshed: null
@@ -382,7 +382,7 @@ sources:
     type: url
     origin: https://v17.material.angular.dev/guide/getting-started
     format: html
-    output: .github/references/angular-material/v17/getting-started-guide.md
+    output: .orch/references/angular-material/v17/getting-started-guide.md
     scope: frontend-ts-angular
     version: "17.x"
     last_refreshed: null
@@ -393,7 +393,7 @@ sources:
     type: url
     origin: https://v20.material.angular.dev/guide/getting-started
     format: html
-    output: .github/references/angular-material/v20/getting-started-guide.md
+    output: .orch/references/angular-material/v20/getting-started-guide.md
     scope: frontend-ts-angular
     version: "20.x"
     last_refreshed: null
@@ -404,7 +404,7 @@ sources:
     type: url
     origin: https://v20.material.angular.dev/guide/theming
     format: html
-    output: .github/references/angular-material/v20/theming-guide.md
+    output: .orch/references/angular-material/v20/theming-guide.md
     scope: frontend-ts-angular
     version: "20.x"
     last_refreshed: null
@@ -415,7 +415,7 @@ sources:
     type: url
     origin: https://v17.material.angular.dev/guide/mdc-migration
     format: html
-    output: .github/references/angular-material/v17/mdc-migration-guide.md
+    output: .orch/references/angular-material/v17/mdc-migration-guide.md
     scope: frontend-ts-angular
     version: "17.x"
     last_refreshed: null
@@ -426,7 +426,7 @@ sources:
     type: url
     origin: https://material.angular.dev/guide/material-2-theming
     format: html
-    output: .github/references/angular-material/m2-theming-guide.md
+    output: .orch/references/angular-material/m2-theming-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -440,7 +440,7 @@ sources:
     type: url
     origin: https://v18.primeng.org/installation
     format: html
-    output: .github/references/primeng/v18/installation-guide.md
+    output: .orch/references/primeng/v18/installation-guide.md
     scope: frontend-ts-angular
     version: "18.x"
     last_refreshed: null
@@ -451,7 +451,7 @@ sources:
     type: url
     origin: https://v18.primeng.org/guides/migration
     format: html
-    output: .github/references/primeng/v18/migration-guide.md
+    output: .orch/references/primeng/v18/migration-guide.md
     scope: frontend-ts-angular
     version: "18.x"
     last_refreshed: null
@@ -462,7 +462,7 @@ sources:
     type: url
     origin: https://v17.primeng.org/installation
     format: html
-    output: .github/references/primeng/v17/installation-guide.md
+    output: .orch/references/primeng/v17/installation-guide.md
     scope: frontend-ts-angular
     version: "17.x"
     last_refreshed: null
@@ -473,7 +473,7 @@ sources:
     type: url
     origin: https://v17.primeng.org/table
     format: html
-    output: .github/references/primeng/v17/table-guide.md
+    output: .orch/references/primeng/v17/table-guide.md
     scope: frontend-ts-angular
     version: "17.x"
     last_refreshed: null
@@ -484,7 +484,7 @@ sources:
     type: url
     origin: https://primeng-v16.pages.dev/
     format: html
-    output: .github/references/primeng/v16/overview-guide.md
+    output: .orch/references/primeng/v16/overview-guide.md
     scope: frontend-ts-angular
     version: "16.x"
     last_refreshed: null
@@ -495,7 +495,7 @@ sources:
     type: url
     origin: https://v19.primeng.org/installation
     format: html
-    output: .github/references/primeng/v19/installation-guide.md
+    output: .orch/references/primeng/v19/installation-guide.md
     scope: frontend-ts-angular
     version: "19.x"
     last_refreshed: null
@@ -506,7 +506,7 @@ sources:
     type: url
     origin: https://primeng.org/migration/v19
     format: html
-    output: .github/references/primeng/v19/migration-guide.md
+    output: .orch/references/primeng/v19/migration-guide.md
     scope: frontend-ts-angular
     version: "19.x"
     last_refreshed: null
@@ -517,7 +517,7 @@ sources:
     type: url
     origin: https://v20.primeng.org/installation
     format: html
-    output: .github/references/primeng/v20/installation-guide.md
+    output: .orch/references/primeng/v20/installation-guide.md
     scope: frontend-ts-angular
     version: "20.x"
     last_refreshed: null
@@ -528,7 +528,7 @@ sources:
     type: url
     origin: https://primeng.org/migration/v20
     format: html
-    output: .github/references/primeng/v20/migration-guide.md
+    output: .orch/references/primeng/v20/migration-guide.md
     scope: frontend-ts-angular
     version: "20.x"
     last_refreshed: null
@@ -539,7 +539,7 @@ sources:
     type: url
     origin: https://primeng.org/installation
     format: html
-    output: .github/references/primeng/latest/installation-guide.md
+    output: .orch/references/primeng/latest/installation-guide.md
     scope: frontend-ts-angular
     version: "21.x"
     last_refreshed: null
@@ -554,7 +554,7 @@ sources:
     type: url
     origin: https://www.ag-grid.com/angular-data-grid/getting-started/
     format: html
-    output: .github/references/ag-grid/quickstart-guide.md
+    output: .orch/references/ag-grid/quickstart-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -564,7 +564,7 @@ sources:
     type: url
     origin: https://www.ag-grid.com/angular-data-grid/reference/
     format: html
-    output: .github/references/ag-grid/api-guide.md
+    output: .orch/references/ag-grid/api-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -574,7 +574,7 @@ sources:
     type: url
     origin: https://www.ag-grid.com/angular-data-grid/migration/
     format: html
-    output: .github/references/ag-grid/migration-overview-guide.md
+    output: .orch/references/ag-grid/migration-overview-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -584,7 +584,7 @@ sources:
     type: url
     origin: https://www.ag-grid.com/angular-data-grid/compatibility/
     format: html
-    output: .github/references/ag-grid/compatibility-guide.md
+    output: .orch/references/ag-grid/compatibility-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -594,7 +594,7 @@ sources:
     type: url
     origin: https://www.ag-grid.com/angular-data-grid/upgrading-to-ag-grid-35/
     format: html
-    output: .github/references/ag-grid/v35/upgrade-guide.md
+    output: .orch/references/ag-grid/v35/upgrade-guide.md
     scope: frontend-ts-angular
     version: "35.x"
     last_refreshed: null
@@ -605,7 +605,7 @@ sources:
     type: url
     origin: https://www.ag-grid.com/angular-data-grid/upgrading-to-ag-grid-34/
     format: html
-    output: .github/references/ag-grid/v34/upgrade-guide.md
+    output: .orch/references/ag-grid/v34/upgrade-guide.md
     scope: frontend-ts-angular
     version: "34.x"
     last_refreshed: null
@@ -616,7 +616,7 @@ sources:
     type: url
     origin: https://www.ag-grid.com/angular-data-grid/upgrading-to-ag-grid-33/
     format: html
-    output: .github/references/ag-grid/v33/upgrade-guide.md
+    output: .orch/references/ag-grid/v33/upgrade-guide.md
     scope: frontend-ts-angular
     version: "33.x"
     last_refreshed: null
@@ -627,7 +627,7 @@ sources:
     type: url
     origin: https://www.ag-grid.com/angular-data-grid/upgrading-to-ag-grid-32/
     format: html
-    output: .github/references/ag-grid/v32/upgrade-guide.md
+    output: .orch/references/ag-grid/v32/upgrade-guide.md
     scope: frontend-ts-angular
     version: "32.x"
     last_refreshed: null
@@ -638,7 +638,7 @@ sources:
     type: url
     origin: https://www.ag-grid.com/angular-data-grid/upgrading-to-ag-grid-31/
     format: html
-    output: .github/references/ag-grid/v31/upgrade-guide.md
+    output: .orch/references/ag-grid/v31/upgrade-guide.md
     scope: frontend-ts-angular
     version: "31.x"
     last_refreshed: null
@@ -653,7 +653,7 @@ sources:
     type: url
     origin: https://github.com/plotly/angular-plotly.js/blob/master/README.md
     format: html
-    output: .github/references/plotly/angular-integration-guide.md
+    output: .orch/references/plotly/angular-integration-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -663,7 +663,7 @@ sources:
     type: url
     origin: https://plotly.com/javascript/reference/
     format: html
-    output: .github/references/plotly/api-guide.md
+    output: .orch/references/plotly/api-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -673,7 +673,7 @@ sources:
     type: url
     origin: https://plotly.com/javascript/
     format: html
-    output: .github/references/plotly/chart-types-guide.md
+    output: .orch/references/plotly/chart-types-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -683,7 +683,7 @@ sources:
     type: url
     origin: https://plotly.com/javascript/financial-charts/
     format: html
-    output: .github/references/plotly/financial-charts-guide.md
+    output: .orch/references/plotly/financial-charts-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -698,7 +698,7 @@ sources:
     type: url
     origin: https://docs.interop.io/browser/developers/browser-client/angular/index.html
     format: html
-    output: .github/references/interop/browser/angular-guide.md
+    output: .orch/references/interop/browser/angular-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -708,7 +708,7 @@ sources:
     type: url
     origin: https://docs.interop.io/browser/reference/javascript/io.connect%20browser/index.html
     format: html
-    output: .github/references/interop/browser/api-guide.md
+    output: .orch/references/interop/browser/api-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -718,7 +718,7 @@ sources:
     type: url
     origin: https://docs.interop.io/browser/getting-started/migrating-to-io-connect/index.html
     format: html
-    output: .github/references/interop/browser/migration-guide.md
+    output: .orch/references/interop/browser/migration-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -729,7 +729,7 @@ sources:
     type: url
     origin: https://docs.interop.io/desktop/getting-started/how-to/interop-enable-your-apps/angular/index.html
     format: html
-    output: .github/references/interop/desktop/angular-guide.md
+    output: .orch/references/interop/desktop/angular-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -739,7 +739,7 @@ sources:
     type: url
     origin: https://docs.interop.io/desktop/reference/javascript/io.connect%20desktop/index.html
     format: html
-    output: .github/references/interop/desktop/api-guide.md
+    output: .orch/references/interop/desktop/api-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -749,7 +749,7 @@ sources:
     type: url
     origin: https://docs.interop.io/desktop/getting-started/how-to/migrate-to-io-connect/index.html
     format: html
-    output: .github/references/interop/desktop/migration-guide.md
+    output: .orch/references/interop/desktop/migration-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -759,7 +759,7 @@ sources:
     type: url
     origin: https://docs.interop.io/desktop/getting-started/changelog/10-0/index.html
     format: html
-    output: .github/references/interop/desktop/changelog-v10-guide.md
+    output: .orch/references/interop/desktop/changelog-v10-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -769,7 +769,7 @@ sources:
     type: url
     origin: https://docs.interop.io/desktop/getting-started/changelog/9-0/index.html
     format: html
-    output: .github/references/interop/desktop/changelog-v9-guide.md
+    output: .orch/references/interop/desktop/changelog-v9-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -780,7 +780,7 @@ sources:
     type: url
     origin: https://docs.glue42.com/getting-started/how-to/glue42-enable-your-app/angular/index.html
     format: html
-    output: .github/references/interop/glue42/angular-guide.md
+    output: .orch/references/interop/glue42/angular-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -794,7 +794,7 @@ sources:
     type: url
     origin: https://nx.dev/nx-api/angular
     format: html
-    output: .github/references/tooling/nx-angular-guide.md
+    output: .orch/references/tooling/nx-angular-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -804,7 +804,7 @@ sources:
     type: url
     origin: https://angular.dev/reference/configs/workspace-config
     format: html
-    output: .github/references/tooling/typescript-angular-config-guide.md
+    output: .orch/references/tooling/typescript-angular-config-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -814,7 +814,7 @@ sources:
     type: url
     origin: https://thymikee.github.io/jest-preset-angular/
     format: html
-    output: .github/references/tooling/jest-angular-guide.md
+    output: .orch/references/tooling/jest-angular-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -824,7 +824,7 @@ sources:
     type: url
     origin: https://playwright.dev/docs/test-components
     format: html
-    output: .github/references/tooling/playwright-angular-guide.md
+    output: .orch/references/tooling/playwright-angular-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft
@@ -834,7 +834,7 @@ sources:
     type: url
     origin: https://docs.cypress.io/app/component-testing/angular/overview
     format: html
-    output: .github/references/tooling/cypress-angular-guide.md
+    output: .orch/references/tooling/cypress-angular-guide.md
     scope: frontend-ts-angular
     last_refreshed: null
     status: draft

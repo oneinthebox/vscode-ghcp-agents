@@ -28,7 +28,7 @@ You are an internal sub-agent invoked by @docs to convert individual documentati
 
 1. Fetch/read source based on type:
    - URL → fetch tool
-   - Local file → read from docs/staging/
+   - Local file → read from .orch/references/staging/
    - Source-embedded → run generator tool first
 
 2. For source-embedded formats, run the extraction tool:

@@ -4,7 +4,7 @@
     "sessionStart": [
       {
         "type": "command",
-        "bash": "./scripts/audit/log-session-start.sh",
+        "bash": "./.orch/scripts/audit/log-session-start.sh",
         "cwd": ".",
         "timeoutSec": 5
       }
@@ -12,7 +12,7 @@
     "sessionEnd": [
       {
         "type": "command",
-        "bash": "./scripts/audit/log-session-end.sh",
+        "bash": "./.orch/scripts/audit/log-session-end.sh",
         "cwd": ".",
         "timeoutSec": 30
       }
@@ -20,7 +20,7 @@
     "errorOccurred": [
       {
         "type": "command",
-        "bash": "./scripts/audit/log-error.sh",
+        "bash": "./.orch/scripts/audit/log-error.sh",
         "cwd": ".",
         "timeoutSec": 5
       }

@@ -3,49 +3,68 @@
 # The audit framework enforces these at runtime via hooks.
 
 agents:
-  showcase:
+  orch:
+    # Master orchestrator — routes to domain agents, runs pre-flight
     allowed_tools:
       - codebase
-      - terminal
-      - edit
     allowed_scope:
-      - ".github/references/**"
-      - ".github/skills/present/**"
-      - ".github/skills/dashboard/**"
-      - ".orch/audit/**"
-      - ".orch/plans/**"
-      - "docs-registry.yaml"
-      - "PROJECT.md"
-      - "README.md"
-      - "*.html"
+      - ".orch/**"
+      - ".github/agents/**"
+      - ".github/skills/**"
+      - "package.json"
+      - "angular.json"
+      - "nx.json"
     blocked_commands:
       - "rm -rf"
-      - "git push"
-
-  docs:
-    allowed_tools:
-      - codebase
-      - terminal
-      - fetch
-      - edit
-    allowed_scope:
-      - ".github/references/**"
-      - "docs/staging/**"
-      - "docs-registry.yaml"
-      # Read access for source-embedded doc extraction (JSDoc, TSDoc, Compodoc, PyDoc, Javadoc)
-      - "src/**"
-      - "app/**"
-      - "lib/**"
-      - "packages/**"
-      - "*.json"          # package.json, tsconfig.json for compodoc
-      - "*.toml"          # pyproject.toml for sphinx
-      - "*.xml"           # pom.xml for javadoc
-    blocked_commands:
-      - "rm -rf"
-      - "git push"
-      - "git reset"
+      - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
 
   angular:
+    # Coordinator only — routes to sub-agents, no direct edit or terminal
+    allowed_tools:
+      - codebase
+    allowed_scope:
+      - "src/**"
+      - "libs/**"
+      - "apps/**"
+      - "angular.json"
+      - "tsconfig*.json"
+      - "nx.json"
+      - "project.json"
+      - "package.json"
+      - ".orch/references/**"
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+
+  angular-planner:
+    allowed_tools:
+      - codebase
+      - terminal
+    allowed_scope:
+      # Read-only, all source files
+      - "src/**"
+      - "libs/**"
+      - "apps/**"
+      - "angular.json"
+      - "tsconfig*.json"
+      - "nx.json"
+      - "project.json"
+      - "package.json"
+      - "jest.config.*"
+      - "playwright.config.*"
+      - "cypress.config.*"
+      - ".orch/references/**"
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+
+  angular-engineer:
     allowed_tools:
       - codebase
       - terminal
@@ -55,28 +74,59 @@ agents:
       - "src/**/*.html"
       - "src/**/*.scss"
       - "src/**/*.spec.ts"
-      - "libs/**/*.ts"
-      - "libs/**/*.html"
-      - "libs/**/*.scss"
-      - "libs/**/*.spec.ts"
-      - "apps/**/*.ts"
-      - "apps/**/*.html"
-      - "apps/**/*.scss"
-      - "angular.json"
-      - "tsconfig*.json"
-      - "nx.json"
-      - "project.json"
-      - "package.json"
-      - "jest.config.*"
-      - "playwright.config.*"
-      - "cypress.config.*"
-      - ".github/references/**"  # read reference guides
     blocked_commands:
       - "rm -rf"
       - "git push --force"
       - "git reset --hard"
       - "npm publish"
-      - "nx reset"
+
+  angular-verifier:
+    allowed_tools:
+      - codebase
+      - terminal
+    allowed_scope:
+      # Read-only source, write test files only
+      - "src/**"
+      - "libs/**"
+      - "apps/**"
+      - "angular.json"
+      - "tsconfig*.json"
+      - "package.json"
+      - "src/**/*.spec.ts"
+      - "libs/**/*.spec.ts"
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+
+  orch-preflight:
+    allowed_tools:
+      - codebase
+      - terminal
+    allowed_scope:
+      # Read-only: .orch/**, package.json, angular.json
+      - ".orch/**"
+      - "package.json"
+      - "angular.json"
+    blocked_commands:
+      - "rm -rf"
+      - "git push"
+      - "git reset"
+
+  docs:
+    allowed_tools:
+      - codebase
+      - terminal
+      - fetch
+      - edit
+    allowed_scope:
+      - ".orch/references/**"
+      - ".orch/registry.yaml"
+    blocked_commands:
+      - "rm -rf"
+      - "git push"
+      - "git reset"
 
   audit:
     allowed_tools:
@@ -91,23 +141,6 @@ agents:
       - "git reset"
 
   # ── Sub-Agent Workers (internal, not user-invocable) ──
-
-  scan-worker:
-    allowed_tools:
-      - codebase
-      - terminal
-    allowed_scope:
-      - "src/**"
-      - "app/**"
-      - "libs/**"
-      - ".github/references/scans/**"
-      - "*.json"
-      - "*.toml"
-      - "*.xml"
-    blocked_commands:
-      - "rm -rf"
-      - "git push"
-      - "git reset"
 
   migrate-worker:
     allowed_tools:
@@ -137,8 +170,8 @@ agents:
       - fetch
       - edit
     allowed_scope:
-      - ".github/references/**"
-      - "docs/staging/**"
+      - ".orch/references/**"
+      - ".orch/references/staging/**"
       - "src/**"
       - "app/**"
       - "lib/**"

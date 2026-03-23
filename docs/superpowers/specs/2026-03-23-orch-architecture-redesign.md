@@ -67,7 +67,11 @@ Skills:
 - `/audit-tokens` — cost tracking
 - `/audit-compliance` — boundary violations, adherence scores
 - `/audit-drift` — behavioral quality trends over time
-- `/audit-benchmark` — model comparison across skills (periodic, not per-run)
+- `/audit-benchmark` — comparison engine with two modes:
+  - **Model comparison** (`--compare models`): run same task across Claude Sonnet 4, GPT-4.1, o4-mini — compare quality, speed, adherence, token cost per model per skill
+  - **Approach comparison** (`--compare approaches`): run same task with ORCH agents vs raw prompts — compare total tokens, turns to completion, standards adherence, build/test pass rate, time to completion
+  - Supports cross-product: approaches x models (e.g., "ORCH + Claude vs raw + GPT-4.1")
+  - Output: side-by-side report with metrics table, winner per dimension, recommendation
 - `/audit-context` — in-session health check + handoff generation
 
 ### 2.5 Removed

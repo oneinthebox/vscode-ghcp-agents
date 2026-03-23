@@ -17,32 +17,47 @@ const AGENT_PACKAGES: Record<string, {
   semanticAdapters: string[];
 }> = {
   angular: {
-    agents: ['angular.agent.md', 'migrate-worker.agent.md'],
-    skills: ['generate', 'migrate', 'test', 'review', 'refactor', 'hds', 'elevate'],
-    instructions: ['angular-typescript.instructions.md', 'internal-component-lib.instructions.md'],
+    agents: [
+      'angular.agent.md', 'angular-planner.agent.md',
+      'angular-engineer.agent.md', 'angular-verifier.agent.md',
+      'migrate-worker.agent.md',
+    ],
+    skills: [
+      'angular-scan-deps', 'angular-scan-arch', 'angular-scan-quality',
+      'angular-scan-tests', 'angular-scan-deploy', 'angular-scan-git',
+      'angular-scan-docs', 'angular-scan-features', 'angular-explain',
+      'angular-compatibility',
+      'angular-generate-component', 'angular-generate-service', 'angular-generate-route',
+      'angular-migrate-standalone', 'angular-migrate-signals', 'angular-migrate-control-flow',
+      'angular-migrate-jest', 'angular-migrate-playwright', 'angular-migrate-version',
+      'angular-refactor', 'angular-docs-generate', 'angular-docs-repair',
+      'angular-test-unit', 'angular-test-e2e', 'angular-test-lint',
+      'angular-review', 'angular-docs-audit',
+      'hds', 'elevate',
+    ],
+    instructions: [],
     semanticAdapters: ['typescript'],
   },
   docs: {
-    agents: ['docs.agent.md', 'scan-worker.agent.md', 'doc-convert-worker.agent.md'],
-    skills: ['packs', 'proof', 'drift', 'code-comment', 'version-matrix', 'explain'],
-    instructions: ['doc-conversion.instructions.md'],
+    agents: ['docs.agent.md', 'doc-convert-worker.agent.md'],
+    skills: [
+      'docs-fetch', 'docs-status', 'docs-refresh', 'docs-drift',
+    ],
+    instructions: [],
     semanticAdapters: [],
   },
   audit: {
     agents: ['audit.agent.md'],
-    skills: ['report', 'benchmark', 'context'],
-    instructions: [],
-    semanticAdapters: [],
-  },
-  showcase: {
-    agents: ['showcase.agent.md'],
-    skills: ['present', 'dashboard'],
+    skills: [
+      'audit-usage', 'audit-tokens', 'audit-compliance', 'audit-drift',
+      'audit-benchmark', 'audit-context',
+    ],
     instructions: [],
     semanticAdapters: [],
   },
   orch: {
-    agents: ['orch.agent.md'],
-    skills: [],
+    agents: ['orch.agent.md', 'orch-preflight.agent.md'],
+    skills: ['present-deck', 'present-dashboard'],
     instructions: [],
     semanticAdapters: [],
   },

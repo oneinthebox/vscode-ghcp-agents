@@ -270,7 +270,7 @@ function loadAllPacks(marketplacePath: string): DocPackManifest[] {
 }
 
 function loadRegistry(marketplacePath: string): RegistryFile {
-  const registryPath = path.join(marketplacePath, 'docs-registry.yaml');
+  const registryPath = path.join(marketplacePath, '.orch/registry.yaml');
   if (!fs.existsSync(registryPath)) {
     return { version: 1, sources: [] };
   }
@@ -279,7 +279,7 @@ function loadRegistry(marketplacePath: string): RegistryFile {
 }
 
 function saveRegistry(marketplacePath: string, registry: RegistryFile): void {
-  const registryPath = path.join(marketplacePath, 'docs-registry.yaml');
+  const registryPath = path.join(marketplacePath, '.orch/registry.yaml');
   const content =
     `# ORCH Documentation Registry\n` +
     `# Central source of truth for all documentation sources.\n` +
@@ -550,19 +550,19 @@ export async function maintainPublishCommand(options: {
   const refsDir = path.join(mp, '.github', 'references');
 
   if (!fs.existsSync(refsDir)) {
-    info('No .github/references/ directory found. Run "orch maintain convert" first.');
+    info('No .orch/references/ directory found. Run "orch maintain convert" first.');
     return;
   }
 
   // Use git to find changes since last commit
   try {
     const diffOutput = childProcess.execSync(
-      'git diff --name-status HEAD -- .github/references/',
+      'git diff --name-status HEAD -- .orch/references/',
       { cwd: mp, encoding: 'utf8' }
     ).trim();
 
     const untrackedOutput = childProcess.execSync(
-      'git ls-files --others --exclude-standard .github/references/',
+      'git ls-files --others --exclude-standard .orch/references/',
       { cwd: mp, encoding: 'utf8' }
     ).trim();
 
@@ -619,7 +619,7 @@ export async function maintainPublishCommand(options: {
 
     divider();
     info(`Total: ${newFiles.length} new, ${modifiedFiles.length} updated, ${deletedFiles.length} deleted`);
-    info('Commit and push when ready: git add .github/references/ && git commit');
+    info('Commit and push when ready: git add .orch/references/ && git commit');
     console.log('');
   } catch (err: any) {
     fail(`Git error: ${err.message}`);

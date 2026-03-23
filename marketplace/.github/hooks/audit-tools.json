@@ -4,7 +4,7 @@
     "preToolUse": [
       {
         "type": "command",
-        "bash": "./scripts/audit/check-tool-boundary.sh",
+        "bash": "./.orch/scripts/audit/check-tool-boundary.sh",
         "cwd": ".",
         "timeoutSec": 10
       }

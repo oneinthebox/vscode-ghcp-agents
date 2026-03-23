@@ -76,10 +76,7 @@ export async function resetCommand(options: any): Promise<void> {
     '.github/skills',
     '.github/hooks',
     '.github/instructions',
-    '.github/references',
     '.orch',
-    'scripts/audit',
-    'scripts/semantic',
   ];
 
   let dirsRemoved = 0;
@@ -102,8 +99,8 @@ export async function resetCommand(options: any): Promise<void> {
     fs.unlinkSync(manifestPath);
   } catch { }
 
-  // Remove docs-registry.yaml
-  const registryPath = path.join(projectPath, 'docs-registry.yaml');
+  // Remove .orch/registry.yaml
+  const registryPath = path.join(projectPath, '.orch', 'registry.yaml');
   if (fs.existsSync(registryPath)) {
     try {
       makeWritable(registryPath);
@@ -112,11 +109,31 @@ export async function resetCommand(options: any): Promise<void> {
     } catch { }
   }
 
+  // Remove .orch/config.yaml
+  const orchConfigPath = path.join(projectPath, '.orch', 'config.yaml');
+  if (fs.existsSync(orchConfigPath)) {
+    try {
+      makeWritable(orchConfigPath);
+      fs.unlinkSync(orchConfigPath);
+      removed++;
+    } catch { }
+  }
+
+  // Remove .github/copilot-instructions.md
+  const copilotInstrPath = path.join(projectPath, '.github', 'copilot-instructions.md');
+  if (fs.existsSync(copilotInstrPath)) {
+    try {
+      makeWritable(copilotInstrPath);
+      fs.unlinkSync(copilotInstrPath);
+      removed++;
+    } catch { }
+  }
+
   // Remove .orch-backup files
   cleanupBackupFiles(projectPath);
 
   // Remove runtime data not tracked in manifest
-  const runtimeDirs = ['.orch', 'scripts'];
+  const runtimeDirs = ['.orch'];
   for (const dir of runtimeDirs) {
     removeEmptyDirTree(path.join(projectPath, dir));
   }
@@ -136,18 +153,15 @@ async function forceReset(projectPath: string, dryRun: boolean): Promise<void> {
   // Known ORCH directories — remove recursively
   const orchDirs = [
     '.orch',
-    'scripts/audit',
-    'scripts/semantic',
     '.github/agents',
     '.github/skills',
     '.github/hooks',
     '.github/instructions',
-    '.github/references',
   ];
 
   // Known ORCH root files
   const orchFiles = [
-    'docs-registry.yaml',
+    '.github/copilot-instructions.md',
   ];
 
   // Collect everything that exists
@@ -198,7 +212,7 @@ async function forceReset(projectPath: string, dryRun: boolean): Promise<void> {
   cleanupBackupFiles(projectPath);
 
   // Clean up empty parent dirs
-  for (const dir of ['.github', 'scripts']) {
+  for (const dir of ['.github']) {
     removeEmptyDirTree(path.join(projectPath, dir));
   }
 
@@ -282,13 +296,13 @@ function restoreMissing(backupDir: string, targetDir: string): void {
 function cleanupBackupFiles(projectPath: string): void {
   const searchDirs = [
     path.join(projectPath, '.github'),
-    path.join(projectPath, 'scripts'),
+    path.join(projectPath, '.orch'),
   ];
   for (const dir of searchDirs) {
     if (!fs.existsSync(dir)) continue;
     removeBackupsRecursive(dir);
   }
-  const registryBackup = path.join(projectPath, 'docs-registry.yaml.orch-backup');
+  const registryBackup = path.join(projectPath, '.orch', 'registry.yaml.orch-backup');
   if (fs.existsSync(registryBackup)) {
     try { fs.unlinkSync(registryBackup); } catch { }
   }

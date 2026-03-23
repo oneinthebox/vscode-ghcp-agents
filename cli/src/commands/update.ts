@@ -70,9 +70,9 @@ export async function updateCommand(options: any): Promise<void> {
 }
 
 async function updateDocPacks(projectPath: string, marketplacePath: string, dryRun: boolean): Promise<void> {
-  const registryPath = path.join(projectPath, 'docs-registry.yaml');
+  const registryPath = path.join(projectPath, '.orch/registry.yaml');
   if (!fs.existsSync(registryPath)) {
-    info('No docs-registry.yaml found — skipping pack update');
+    info('No .orch/registry.yaml found — skipping pack update');
     return;
   }
 
@@ -84,13 +84,13 @@ async function updateDocPacks(projectPath: string, marketplacePath: string, dryR
     try {
       registry = JSON.parse(registryRaw);
     } catch {
-      warn('Could not parse docs-registry.yaml — skipping pack update');
+      warn('Could not parse .orch/registry.yaml — skipping pack update');
       return;
     }
   }
 
   if (!registry || !Array.isArray(registry.sources)) {
-    warn('docs-registry.yaml has no sources array — skipping');
+    warn('.orch/registry.yaml has no sources array — skipping');
     return;
   }
 
@@ -212,7 +212,7 @@ async function updateDocPacks(projectPath: string, marketplacePath: string, dryR
         { lineWidth: 0 }
       ));
       console.log('');
-      success('docs-registry.yaml updated');
+      success('.orch/registry.yaml updated');
     }
   }
 }

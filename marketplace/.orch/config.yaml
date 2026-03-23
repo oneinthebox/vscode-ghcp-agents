@@ -1,0 +1,27 @@
+# ORCH Configuration
+# Runtime settings for agent behavior, workflow control, and pre-flight checks.
+# Edit this file to customize ORCH behavior for your project.
+
+workflow:
+  max_retries: 3
+  auto_mode: false
+  permission_level: allow    # allow | allow-with-permissions | auto
+
+preflight:
+  check_references: true
+  max_stale_days: 30
+  check_build_baseline: true
+  check_git_clean: true
+  auto_refresh_docs: true
+
+models:
+  coordinator: claude-sonnet-4
+  planner: claude-sonnet-4
+  engineer: claude-sonnet-4
+  verifier: claude-sonnet-4
+
+presentation:
+  logo_path: ./assets/placeholder-logo.svg
+  cover_background: "#0a0e17"
+  hds_theme: null
+  default_format: html

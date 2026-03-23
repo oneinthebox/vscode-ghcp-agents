@@ -145,11 +145,6 @@ vscode-ghcp-agents/
 │   ├── .orch/            # default config (boundaries, adherence rules), scripts
 │   ├── doc-packs/        # Doc pack templates (angular.yaml, etc.)
 │   └── orch-status-extension/  # VS Code status bar extension
-├── samples/              # Test apps for validation
-│   ├── angular-app/      # Sample Angular 16 project
-│   ├── nx-angular-app/   # Sample Angular 18 Nx monorepo
-│   ├── springboot-app/   # Future
-│   └── fastapi-app/      # Future
 ├── cli/                  # ORCH CLI for installing and managing agents
 ├── docs/                 # PRD, technical design, delivery plan
 └── README.md

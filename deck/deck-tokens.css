@@ -1,0 +1,112 @@
+/* ═══════════════════════════════════════════════════════
+   ORCH Presentation Design Tokens
+   ═══════════════════════════════════════════════════════
+
+   Override this file to change the entire deck's look.
+   All values flow through CSS custom properties —
+   change a token here, it updates everywhere.
+
+   HOW TO APPLY A DIFFERENT THEME:
+   1. Copy this file to `deck-tokens-mytheme.css`
+   2. Edit the values below
+   3. In orch-overview-deck.html, change the <link> to point to your file:
+      <link rel="stylesheet" href="deck-tokens-mytheme.css">
+
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Color Primitives (oklch) ──
+     Neutrals tinted toward hue 240 (deep blue).
+     Change the hue number to shift the entire palette.
+     e.g., hue 25 = warm terracotta, hue 150 = sage green */
+
+  --neutral-50:  oklch(0.98 0.005 240);
+  --neutral-100: oklch(0.96 0.006 240);
+  --neutral-200: oklch(0.91 0.008 240);
+  --neutral-300: oklch(0.85 0.008 240);
+  --neutral-400: oklch(0.68 0.01  240);
+  --neutral-500: oklch(0.55 0.01  240);
+  --neutral-600: oklch(0.45 0.012 240);
+  --neutral-700: oklch(0.35 0.012 240);
+  --neutral-800: oklch(0.25 0.01  240);
+  --neutral-900: oklch(0.15 0.008 240);
+  --neutral-950: oklch(0.10 0.006 240);
+
+  --brand-100: oklch(0.94 0.03 240);
+  --brand-500: oklch(0.48 0.14 240);    /* primary accent — deep blue */
+  --brand-600: oklch(0.40 0.12 240);
+
+  --teal-100: oklch(0.94 0.04 175);
+  --teal-500: oklch(0.55 0.12 175);    /* success / progress */
+
+  /* ── Semantic Foreground ── */
+  --fg-primary:   var(--neutral-900);
+  --fg-secondary: var(--neutral-600);
+  --fg-muted:     var(--neutral-400);
+  --fg-faint:     var(--neutral-300);
+  --fg-accent:    var(--brand-500);
+  --fg-teal:      var(--teal-500);
+  --fg-inverse:   var(--neutral-50);
+
+  /* ── Semantic Background ── */
+  --bg-page:    var(--neutral-50);
+  --bg-surface: var(--neutral-100);
+  --bg-warm:    var(--neutral-200);
+  --bg-inset:   var(--neutral-950);
+  --bg-teal:    var(--teal-100);
+  --bg-accent:  var(--brand-100);
+
+  /* ── Borders (opacity-based, blend with any bg) ── */
+  --border-default: oklch(0 0 0 / 0.08);
+  --border-subtle:  oklch(0 0 0 / 0.05);
+  --border-strong:  oklch(0 0 0 / 0.14);
+  --border-rule:    var(--neutral-900);
+
+  /* ── Typography ──
+     Display: editorial serif (headings)
+     Body: geometric sans (content)
+     Mono: monospace (code, data) */
+  --f-display: 'Newsreader', Georgia, serif;
+  --f-body:    'Outfit', -apple-system, sans-serif;
+  --f-mono:    'IBM Plex Mono', 'Menlo', monospace;
+
+  /* ── Type Scale (slide context, relative to reveal base) ── */
+  --fs-display:  1.65em;  /* title slide heading */
+  --fs-h1:       1.45em;  /* slide heading */
+  --fs-h2:       1.15em;  /* slide heading (content slides) */
+  --fs-section:  1.35em;  /* section divider heading */
+  --fs-h3:       0.48em;  /* label / section subheading */
+  --fs-body:     0.52em;  /* body text */
+  --fs-small:    0.46em;  /* lists, table cells */
+  --fs-caption:  0.40em;  /* footnotes, muted text */
+  --fs-tiny:     0.36em;  /* tags, badges */
+  --fs-code:     0.68em;  /* code blocks */
+  --fs-stat:     1.45em;  /* large metric numbers */
+
+  /* ── Spacing (4px base) ── */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* ── Slide padding ── */
+  --slide-pad-y: 52px;
+  --slide-pad-x: 64px;
+
+  /* ── Border radius ── */
+  --radius-sm: 3px;
+  --radius-md: 5px;
+
+  /* ── Flow / diagram component colors ── */
+  --flow-bg:      var(--bg-surface);
+  --flow-border:  var(--border-default);
+  --flow-accent:  var(--brand-500);
+  --flow-success: var(--teal-500);
+  --flow-arrow:   var(--fg-faint);
+}
