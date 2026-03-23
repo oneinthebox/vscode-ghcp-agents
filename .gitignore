@@ -125,6 +125,15 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
+# Angular cache
+.angular/
+
+# macOS
+.DS_Store
+
+# Lock files for sample apps
+samples/**/package-lock.json
+
 # yarn v3
 .pnp.*
 .yarn/*
@@ -137,3 +146,15 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# CLI compiled output
+cli/bin/*.js
+cli/bin/*.d.ts
+cli/dist/
+
+# ORCH runtime data (per-developer, not committed)
+.orch/runs/
+.orch/audit/sessions/
+.orch/audit/tokens/
+.orch/audit/metrics/
+.orch/audit/violations.jsonl

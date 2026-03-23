@@ -31,37 +31,34 @@ ORCH is built on a layered architecture where **audit is the foundation**, not a
 
 ```
 ┌─────────────────────────────────────────────────────────┐
+│                   Shared Skills                          │
+│  /present-deck  /present-dashboard                      │
+├─────────────────────────────────────────────────────────┤
 │                   Reporting Layer                        │
-│  /orch-audit-usage  /orch-audit-tokens                  │
-│  /orch-audit-compliance  /orch-audit-drift              │
-│  /orch-benchmark-models                                 │
+│  /audit-usage  /audit-tokens  /audit-compliance         │
+│  /audit-drift  /audit-benchmark  /audit-context         │
 ├─────────────────────────────────────────────────────────┤
-│                   Validation Layer                       │
-│  Deterministic checks (build, test, lint)               │
-│  Heuristic checks (adherence, hallucination, coverage)  │
-│  Model benchmarking (quality, speed, per-skill scores)  │
+│              Domain Agents (role-based)                  │
+│  @angular: planner → engineer → verifier                │
+│  @springboot: planner → engineer → verifier (future)    │
+│  @fastapi: planner → engineer → verifier (future)       │
 ├─────────────────────────────────────────────────────────┤
-│              Action Skills (all domains)                 │
-│  /generate  /migrate  /test  /review  /refactor         │
+│              Domain Skills (granular)                    │
+│  /angular-scan-*  /angular-generate-*  /angular-test-*  │
+│  /angular-migrate-*  /angular-review  /angular-refactor │
 ├─────────────────────────────────────────────────────────┤
-│  Domain Skills          │  Overrides (temporary)        │
-│  /hds  /elevate         │  .github/skill-overrides/     │
-│  /version-matrix        │  90-day expiry + ORCH issue   │
+│                   Agents                                 │
+│  @orch (orchestrator)  @docs (reference supply chain)   │
+│  @audit (observability)  + @orch-preflight              │
 ├─────────────────────────────────────────────────────────┤
-│                   Agents                                │
-│  @docs  @angular  @springboot  @fastapi  @ci  @cd  @audit│
-│  + workers: @scan-worker @migrate-worker                │
-│             @doc-convert-worker                         │
-├─────────────────────────────────────────────────────────┤
-│                   Core Layer                            │
-│  Doc Pipeline (/packs /proof /drift)                    │
-│  Code documentation (/code-comment)                     │
-│  Registry (docs-registry.yaml)                          │
+│                   Core Layer                             │
+│  Reference Pipeline (/docs-fetch /docs-refresh)         │
+│  Registry (.orch/registry.yaml)                         │
 ├─────────────────────────────────────────────────────────┤
 │              ██ AUDIT FRAMEWORK (FOUNDATION) ██         │
 │  Session tracking │ Token estimation │ Tool boundaries   │
 │  File scope checks │ Prompt capture │ Adherence checks  │
-│  Violation logging │ Behavioral drift │ Governance       │
+│  Pre-flight │ Per-run telemetry (.orch/runs/)           │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -86,13 +83,13 @@ ORCH is built on a layered architecture where **audit is the foundation**, not a
 
 ## Domains
 
-| Domain | Stack | Purpose |
-|--------|-------|---------|
-| `frontend-ts-angular` | TypeScript, Angular | Component architecture, RxJS patterns, state management, testing standards |
-| `backend-java-springboot` | Java, Spring Boot | REST API design, dependency injection, JPA patterns, security configuration |
-| `backend-python-fastapi` | Python, FastAPI | Async patterns, Pydantic models, dependency injection, API documentation |
-| `operations-ci-glue` | CI/CD, GitHub Actions | Pipeline authoring, build optimization, artifact management, quality gates |
-| `operations-cd-dps` | Deployment, Infrastructure | Deployment strategies, environment promotion, rollback procedures, observability |
+| Domain | Stack | Status | Purpose |
+|--------|-------|--------|---------|
+| `frontend-ts-angular` | TypeScript, Angular | **Implemented** | Component architecture, RxJS patterns, state management, testing standards |
+| `backend-java-springboot` | Java, Spring Boot | Future | REST API design, dependency injection, JPA patterns, security configuration |
+| `backend-python-fastapi` | Python, FastAPI | Future | Async patterns, Pydantic models, dependency injection, API documentation |
+| `operations-ci-glue` | CI/CD, GitHub Actions | Future | Pipeline authoring, build optimization, artifact management, quality gates |
+| `operations-cd-dps` | Deployment, Infrastructure | Future | Deployment strategies, environment promotion, rollback procedures, observability |
 
 ---
 
@@ -100,9 +97,9 @@ ORCH is built on a layered architecture where **audit is the foundation**, not a
 
 ### Phase 0 — Foundation (Current)
 - **Build audit framework first** — session tracking, token estimation, tool boundaries, adherence checks
-- Build doc pipeline (convert, scan, drift detection)
-- Build `frontend-ts-angular` domain customizations
-- Deploy to 2-3 pilot teams, measure with full audit data
+- Build doc pipeline (reference supply chain — fetch, refresh, drift detection)
+- Build Angular domain with role-based agents (planner, engineer, verifier)
+- Deploy to pilot teams, measure with full audit data
 - Build VS Code status bar extension for glanceable progress + interrupt-only notifications
 
 ### Phase 1 — Expand
@@ -134,7 +131,8 @@ ORCH is built on a layered architecture where **audit is the foundation**, not a
 9. **Enterprise-grade governance** — every agent's tool access is explicitly declared, enforced, and audited
 10. **Notifications respect attention** — status bar for glanceable state, toasts only when user action is required. Never interrupt for something the user can see in chat
 11. **Overrides are temporary** — 90-day expiry, must have a tracking issue to absorb into central. Escape hatch, not a feature
-12. **Skills are actions, agents are expertise** — same /generate skill works across all domains. The agent brings the domain knowledge.
+12. **Skills are domain-specific and granular** — /angular-test-unit, not /test. Each skill does one thing for one domain.
+13. **Agents are role-based** — planner (why/what), engineer (how/where), verifier (checks). Coordinators own the loop.
 
 ---
 
@@ -142,17 +140,17 @@ ORCH is built on a layered architecture where **audit is the foundation**, not a
 
 ```
 vscode-ghcp-agents/
-├── marketplace/          # The ORCH setup — agents, skills, instructions, hooks, scripts
-│   ├── .github/          # agents/, skills/, instructions/, hooks/, skill-overrides/
-│   ├── .orch/            # audit config (boundaries, adherence rules)
-│   ├── scripts/          # audit hooks + semantic analysis adapters (ts-morph)
-│   ├── docs-registry.yaml
-│   └── orch-status-extension/
+├── marketplace/          # The ORCH marketplace — agents, skills, instructions, hooks
+│   ├── .github/          # agents/, skills/, instructions/, hooks/
+│   ├── .orch/            # default config (boundaries, adherence rules), scripts
+│   ├── doc-packs/        # Doc pack templates (angular.yaml, etc.)
+│   └── orch-status-extension/  # VS Code status bar extension
 ├── samples/              # Test apps for validation
-│   ├── angular-app/      # Sample Angular project (v17/18/19)
+│   ├── angular-app/      # Sample Angular 16 project
+│   ├── nx-angular-app/   # Sample Angular 18 Nx monorepo
 │   ├── springboot-app/   # Future
 │   └── fastapi-app/      # Future
-├── cli/                  # ORCH CLI for distributing agents to developers
+├── cli/                  # ORCH CLI for installing and managing agents
 ├── docs/                 # PRD, technical design, delivery plan
 └── README.md
 ```
@@ -160,25 +158,20 @@ vscode-ghcp-agents/
 ## Getting Started
 
 ```bash
-# Clone the repo
-git clone <repo-url>
+# Install the ORCH CLI
+npm install -g @orch/cli
 
-# Copy ORCH marketplace into your project
-cp -r marketplace/.github/agents/angular.agent.md   <your-repo>/.github/agents/
-cp -r marketplace/.github/skills/generate/           <your-repo>/.github/skills/
-cp -r marketplace/.github/skills/migrate/            <your-repo>/.github/skills/
-cp -r marketplace/.github/instructions/              <your-repo>/.github/instructions/
+# Initialize ORCH in your project
+cd your-project
+orch init
 
-# IMPORTANT: Always include audit hooks + scripts
-cp -r marketplace/.github/hooks/                     <your-repo>/.github/hooks/
-cp -r marketplace/scripts/audit/                     <your-repo>/scripts/audit/
-cp -r marketplace/.orch/                             <your-repo>/.orch/
-
-# Future: use the CLI instead
-# orch install @angular --repo <your-repo>
+# Verify installation
+orch doctor
 ```
 
 Once files are in your repo's `.github/` directory, Copilot picks them up automatically. Audit hooks begin capturing from the first session.
+
+For development setup, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
@@ -189,11 +182,12 @@ Once files are in your repo's `.github/` directory, Copilot picks them up automa
 | [Product Requirements (PRD)](docs/prd.md) | Vision, scope, capabilities, audit framework, domains, versioning, drift detection, success metrics |
 | [Technical Design](docs/tech.md) | C4 architecture, audit schema, file structure, data flows, agent/skill/instruction/hook specs |
 | [Delivery Plan](docs/delivery.md) | Phased rollout — audit first, then doc pipeline, then domains. Stages, tasks, estimates, exit criteria |
+| [Architecture Redesign](docs/superpowers/specs/2026-03-23-orch-architecture-redesign.md) | New agent architecture, skill granularity, directory structure |
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting new domains, skills, or instructions.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting new domains, skills, or instructions. It covers both internal team development and external marketplace contributions.
 
 All contributions require review by the ORCH team before merging. All new agents and skills must integrate with the audit framework.

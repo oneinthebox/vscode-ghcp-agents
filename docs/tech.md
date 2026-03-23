@@ -1,7 +1,7 @@
 # ORCH (Orchestra) — Technical Design Document
 
-**Version:** 1.0
-**Date:** 2026-03-18
+**Version:** 2.0
+**Date:** 2026-03-23
 **Status:** Draft
 
 ---
@@ -48,20 +48,26 @@ graph TB
         subgraph AuditFW["██ AUDIT FRAMEWORK (FOUNDATION) ██"]
             AuditHooks["Audit Hooks<br/>session, prompt, tool, scope"]
             AuditStore["Audit Storage<br/>.orch/audit/"]
-            AuditReports["Audit Skills<br/>usage, tokens, compliance, drift"]
-            Benchmark["Model Benchmarking<br/>quality/speed per skill"]
+            AuditAgent["@audit Agent<br/>6 skills: /audit-usage, /audit-tokens,<br/>/audit-compliance, /audit-drift,<br/>/audit-benchmark, /audit-context"]
             Validation["Validation<br/>deterministic + heuristic checks"]
         end
 
-        subgraph DocPipeline["Documentation Pipeline"]
-            DocAgent["Docs Agent<br/>docs.agent.md"]
-            DocSkills["Doc Skills<br/>packs, proof, drift,<br/>code-comment, version-matrix, explain"]
-            DocInstructions["Conversion Instructions<br/>.instructions.md"]
+        subgraph DocAgent["@docs — Reference Supply Chain"]
+            Docs["@docs Agent<br/>docs.agent.md"]
+            DocSkills["Doc Skills<br/>/docs-fetch, /docs-status,<br/>/docs-refresh, /docs-drift"]
         end
 
-        subgraph DomainSets["Domain Customization Sets"]
-            FE["angular<br/>agent + skills + instructions"]
-            Showcase["showcase<br/>agent + skills (present, dashboard)"]
+        subgraph AngularDomain["@angular — Coordinator + Sub-Agents"]
+            AngCoord["@angular Coordinator<br/>Triage → delegate"]
+            AngPlanner["@angular-planner<br/>analysis & planning skills"]
+            AngEngineer["@angular-engineer<br/>generation & transformation skills"]
+            AngVerifier["@angular-verifier<br/>review & validation skills"]
+        end
+
+        subgraph Orchestration["@orch — Orchestrator"]
+            MasterAgent["@orch Agent<br/>Triage + handoff"]
+            Preflight["@orch-preflight<br/>Pre-flight checks"]
+            SharedSkills["Shared Skills<br/>/present-deck, /present-dashboard"]
         end
 
         subgraph Governance["Governance Layer"]
@@ -69,24 +75,28 @@ graph TB
         end
 
         subgraph Storage["Reference Storage"]
-            Registry["docs-registry.yaml<br/>Source of truth"]
-            Refs["references/<br/>Versioned markdown + code"]
-            Staging["docs/staging/<br/>Raw source files"]
-        end
-
-        subgraph Orchestration["Orchestration"]
-            MasterAgent["Orch Agent<br/>Triage + handoff agent"]
+            Registry[".orch/registry.yaml<br/>Source of truth"]
+            SharedRefs[".orch/references/<br/>Shared versioned markdown + code"]
+            SkillRefs["skills/*/references/<br/>Skill-local refs"]
         end
     end
 
-    AuditFW -->|wraps all operations| DocPipeline
-    AuditFW -->|wraps all operations| DomainSets
+    AuditFW -->|wraps all operations| DocAgent
+    AuditFW -->|wraps all operations| AngularDomain
     AuditFW -->|wraps all operations| Governance
-    DocAgent --> DocSkills
+    Docs --> DocSkills
     DocSkills --> Registry
-    DocSkills --> Refs
-    DomainSets --> Refs
-    MasterAgent -.->|handoffs to| DomainSets
+    DocSkills --> SharedRefs
+    AngCoord -->|delegates to| AngPlanner
+    AngCoord -->|delegates to| AngEngineer
+    AngCoord -->|delegates to| AngVerifier
+    AngPlanner --> SharedRefs
+    AngEngineer --> SharedRefs
+    AngEngineer --> SkillRefs
+    MasterAgent -->|pre-flight| Preflight
+    MasterAgent -.->|handoffs to| DocAgent
+    MasterAgent -.->|handoffs to| AngularDomain
+    MasterAgent -.->|handoffs to| AuditAgent
 ```
 
 ---
@@ -98,63 +108,52 @@ graph TB
 ```mermaid
 graph LR
     subgraph Skills
-        Packs["/packs<br/>Register, convert, refresh, status"]
-        Proof["/proof<br/>Codebase → Arch docs + compare"]
-        Drift["/drift<br/>Docs vs code analysis"]
-        CodeComment["/code-comment<br/>Audit, generate, repair code docs"]
-        VersionMatrix["/version-matrix<br/>Compatibility matrix"]
-        Explain["/explain<br/>Project walkthrough"]
+        DocsFetch["/docs-fetch<br/>Register + convert sources"]
+        DocsStatus["/docs-status<br/>Registry health dashboard"]
+        DocsRefresh["/docs-refresh<br/>Re-convert stale sources"]
+        DocsDrift["/docs-drift<br/>Docs vs code analysis"]
     end
 
     subgraph Agent
-        Docs["@docs<br/>Orchestrates doc pipeline"]
+        Docs["@docs<br/>Reference supply chain"]
     end
 
     subgraph Data
-        RegistryFile["docs-registry.yaml"]
-        RefsDir["references/"]
+        RegistryFile[".orch/registry.yaml"]
+        RefsDir[".orch/references/"]
     end
 
     Docs --> Skills
-    Packs --> RegistryFile
-    Packs --> RefsDir
-    Proof --> RefsDir
-    Drift --> RefsDir
-    Drift --> RegistryFile
+    DocsFetch --> RegistryFile
+    DocsFetch --> RefsDir
+    DocsRefresh --> RegistryFile
+    DocsRefresh --> RefsDir
+    DocsDrift --> RefsDir
+    DocsDrift --> RegistryFile
+    DocsStatus --> RegistryFile
 ```
 
-### 3.2 Domain Customization Set — Components (angular example)
+### 3.2 Domain Agent — Components (@angular)
 
 ```mermaid
 graph TB
-    subgraph Agent["@angular Agent"]
-        Persona["Persona: Angular + TS + RxJS expert"]
-        Tools["Tools: codebase, terminal, edit"]
-        Model["Model: pinned for consistency"]
+    subgraph Coordinator["@angular Coordinator"]
+        Triage["Triage Logic<br/>Classify request → delegate"]
     end
 
-    subgraph Instructions["Instructions (always-on)"]
-        CompPatterns["Component patterns"]
-        RxJS["RxJS conventions"]
-        State["State management"]
-        TSStrict["TypeScript strictness"]
-        Testing["Testing standards"]
-        A11y["Accessibility"]
-        InternalLib["Internal lib patterns"]
+    subgraph Planner["@angular-planner Sub-Agent"]
+        PlanSkills["/angular-analyze<br/>/angular-plan-migrate<br/>/angular-plan-refactor"]
     end
 
-    subgraph Skills["Skills (on-demand)"]
-        Generate["Scaffolding<br/>/generate"]
-        Test["Testing<br/>/test"]
-        Review["Review<br/>/review"]
-        Migrate["Migration<br/>/migrate"]
-        Refactor["Modernize<br/>/refactor"]
-        HDS["Design System<br/>/hds"]
-        Elevate["Platform<br/>/elevate"]
-        Explain["Walkthrough<br/>/explain"]
+    subgraph Engineer["@angular-engineer Sub-Agent"]
+        EngSkills["/angular-generate<br/>/angular-migrate<br/>/angular-refactor<br/>/angular-hds<br/>/angular-elevate"]
     end
 
-    subgraph Refs["Reference Docs"]
+    subgraph Verifier["@angular-verifier Sub-Agent"]
+        VerSkills["/angular-test<br/>/angular-review<br/>/angular-lint-check"]
+    end
+
+    subgraph Refs["Reference Docs (orch://references/...)"]
         AngDocs["angular/v17/ v18/ v19/"]
         PrimeDocs["primeng/v16/ v17/"]
         AGDocs["ag-grid/v31/ v32/"]
@@ -162,10 +161,12 @@ graph TB
         InternalDocs["internal/ui-components.md"]
     end
 
-    Agent --> Instructions
-    Agent --> Skills
-    Skills --> Refs
-    Migrate --> Refs
+    Coordinator -->|analysis requests| Planner
+    Coordinator -->|build requests| Engineer
+    Coordinator -->|verify requests| Verifier
+    PlanSkills --> Refs
+    EngSkills --> Refs
+    VerSkills --> Refs
 ```
 
 ### 3.3 Audit Framework — Components
@@ -179,6 +180,10 @@ graph TB
         PTU["preToolUse"]
         PostTU["postToolUse"]
         Err["errorOccurred"]
+    end
+
+    subgraph PreFlight["@orch-preflight"]
+        PFC["Pre-flight Checks<br/>config validation, registry health,<br/>reference freshness"]
     end
 
     subgraph AuditHooks["Audit Hooks (always on)"]
@@ -202,13 +207,17 @@ graph TB
         Metrics["metrics/ — daily/weekly rollups"]
     end
 
-    subgraph Reports["Audit Report Skills"]
-        Report["/report<br/>Usage + tokens + compliance + drift"]
-        BenchReport["/benchmark<br/>Validation + model comparison"]
-        Context["/context<br/>Session health + handoff"]
+    subgraph Reports["@audit Skills"]
+        AuditUsage["/audit-usage<br/>Usage summary"]
+        AuditTokens["/audit-tokens<br/>Token cost breakdown"]
+        AuditCompliance["/audit-compliance<br/>Compliance report"]
+        AuditDrift["/audit-drift<br/>Behavioral drift"]
+        AuditBenchmark["/audit-benchmark<br/>Model comparison"]
+        AuditContext["/audit-context<br/>Session health + handoff"]
     end
 
-    SS --> Lifecycle
+    SS --> PFC
+    PFC --> Lifecycle
     SE --> Lifecycle
     UPS --> PromptLog
     PTU --> ToolBound
@@ -268,119 +277,136 @@ graph LR
 vscode-ghcp-agents/
 ├── marketplace/
 │   ├── .github/
-│   │   ├── agents/
-│   │   │   ├── angular.agent.md            # Angular domain agent
-│   │   │   ├── audit.agent.md              # Audit & observability agent
-│   │   │   ├── doc-convert-worker.agent.md # Internal doc conversion worker (sub-agent)
-│   │   │   ├── docs.agent.md               # Documentation pipeline agent
-│   │   │   ├── migrate-worker.agent.md     # Internal migration worker (sub-agent)
-│   │   │   ├── orch.agent.md               # Master orchestrator
-│   │   │   ├── scan-worker.agent.md        # Internal scanning worker (sub-agent)
-│   │   │   └── showcase.agent.md           # Presentations & dashboards agent
+│   │   ├── agents/                              (all agent .md files)
+│   │   │   ├── angular.agent.md                 # Angular coordinator
+│   │   │   ├── angular-planner.agent.md         # Angular planner sub-agent
+│   │   │   ├── angular-engineer.agent.md        # Angular engineer sub-agent
+│   │   │   ├── angular-verifier.agent.md        # Angular verifier sub-agent
+│   │   │   ├── audit.agent.md                   # Audit & observability agent
+│   │   │   ├── doc-convert-worker.agent.md      # Internal doc conversion worker (sub-agent)
+│   │   │   ├── docs.agent.md                    # Reference supply chain agent
+│   │   │   ├── migrate-worker.agent.md          # Internal migration worker (sub-agent under @angular-engineer)
+│   │   │   ├── orch.agent.md                    # Master orchestrator
+│   │   │   └── orch-preflight.agent.md          # Pre-flight checks sub-agent
 │   │   │
-│   │   ├── hooks/
-│   │   │   ├── audit-lifecycle.json        # sessionStart, sessionEnd, errorOccurred
-│   │   │   ├── audit-prompts.json          # userPromptSubmitted
-│   │   │   ├── audit-tools.json            # preToolUse — tool boundary enforcement
-│   │   │   └── audit-scope.json            # postToolUse — file scope + token estimation
+│   │   ├── skills/                              (all skill directories with SKILL.md + local refs)
+│   │   │   ├── angular-analyze/                 # @angular-planner: codebase analysis
+│   │   │   │   └── SKILL.md
+│   │   │   ├── angular-elevate/                 # @angular-engineer: platform services
+│   │   │   │   └── SKILL.md
+│   │   │   ├── angular-generate/                # @angular-engineer: scaffold components
+│   │   │   │   └── SKILL.md
+│   │   │   ├── angular-hds/                     # @angular-engineer: design system
+│   │   │   │   └── SKILL.md
+│   │   │   ├── angular-lint-check/              # @angular-verifier: lint validation
+│   │   │   │   └── SKILL.md
+│   │   │   ├── angular-migrate/                 # @angular-engineer: upgrade migrations
+│   │   │   │   ├── SKILL.md
+│   │   │   │   └── references/
+│   │   │   ├── angular-plan-migrate/            # @angular-planner: migration planning
+│   │   │   │   └── SKILL.md
+│   │   │   ├── angular-plan-refactor/           # @angular-planner: refactor planning
+│   │   │   │   └── SKILL.md
+│   │   │   ├── angular-refactor/                # @angular-engineer: modernize code
+│   │   │   │   └── SKILL.md
+│   │   │   ├── angular-review/                  # @angular-verifier: PR review
+│   │   │   │   ├── SKILL.md
+│   │   │   │   └── references/
+│   │   │   ├── angular-test/                    # @angular-verifier: Jest/Playwright tests
+│   │   │   │   └── SKILL.md
+│   │   │   ├── audit-benchmark/                 # @audit: model comparison
+│   │   │   │   └── SKILL.md
+│   │   │   ├── audit-compliance/                # @audit: compliance report
+│   │   │   │   └── SKILL.md
+│   │   │   ├── audit-context/                   # @audit: session health + handoff
+│   │   │   │   └── SKILL.md
+│   │   │   ├── audit-drift/                     # @audit: behavioral drift
+│   │   │   │   └── SKILL.md
+│   │   │   ├── audit-tokens/                    # @audit: token cost breakdown
+│   │   │   │   └── SKILL.md
+│   │   │   ├── audit-usage/                     # @audit: usage summary
+│   │   │   │   └── SKILL.md
+│   │   │   ├── docs-drift/                      # @docs: doc-code mismatch
+│   │   │   │   └── SKILL.md
+│   │   │   ├── docs-fetch/                      # @docs: register + convert sources
+│   │   │   │   └── SKILL.md
+│   │   │   ├── docs-refresh/                    # @docs: re-convert stale sources
+│   │   │   │   └── SKILL.md
+│   │   │   ├── docs-status/                     # @docs: registry health dashboard
+│   │   │   │   └── SKILL.md
+│   │   │   ├── present-dashboard/               # @orch shared: metrics dashboard
+│   │   │   │   └── SKILL.md
+│   │   │   └── present-deck/                    # @orch shared: slide decks
+│   │   │       ├── SKILL.md
+│   │   │       ├── assets/
+│   │   │       └── templates/
 │   │   │
-│   │   ├── instructions/
-│   │   │   ├── angular-typescript.instructions.md
-│   │   │   ├── doc-conversion.instructions.md
-│   │   │   └── internal-component-lib.instructions.md
+│   │   ├── instructions/                        (auto-mode.instructions.md only)
+│   │   │   └── auto-mode.instructions.md        # Bridges config.yaml → agent behavior
 │   │   │
-│   │   ├── skill-overrides/
-│   │   │   └── README.md
+│   │   ├── hooks/                               (audit hook JSON configs)
+│   │   │   ├── audit-lifecycle.json             # sessionStart, sessionEnd, errorOccurred
+│   │   │   ├── audit-prompts.json               # userPromptSubmitted
+│   │   │   ├── audit-tools.json                 # preToolUse — tool boundary enforcement
+│   │   │   └── audit-scope.json                 # postToolUse — file scope + token estimation
 │   │   │
-│   │   └── skills/
-│   │       ├── benchmark/                  # @audit: model comparison
-│   │       │   └── SKILL.md
-│   │       ├── code-comment/               # @docs: audit, generate, repair code docs
-│   │       │   └── SKILL.md
-│   │       ├── context/                    # @audit: session health + handoff
-│   │       │   └── SKILL.md
-│   │       ├── dashboard/                  # @showcase: metrics dashboard
-│   │       │   └── SKILL.md
-│   │       ├── drift/                      # @docs: doc-code mismatch
-│   │       │   └── SKILL.md
-│   │       ├── elevate/                    # @angular: platform services
-│   │       │   └── SKILL.md
-│   │       ├── explain/                    # @docs + @angular: project walkthrough
-│   │       │   ├── SKILL.md
-│   │       │   └── references/
-│   │       ├── generate/                   # @angular: scaffold components/services
-│   │       │   └── SKILL.md
-│   │       ├── hds/                        # @angular: design system
-│   │       │   └── SKILL.md
-│   │       ├── migrate/                    # @angular: upgrade migrations
-│   │       │   ├── SKILL.md
-│   │       │   └── scripts/angular/
-│   │       ├── packs/                      # @docs: register, convert, refresh, status
-│   │       │   └── SKILL.md
-│   │       ├── present/                    # @showcase: slide decks
-│   │       │   ├── SKILL.md
-│   │       │   ├── assets/
-│   │       │   └── templates/
-│   │       ├── proof/                      # @docs: codebase scan + compare
-│   │       │   └── SKILL.md
-│   │       ├── refactor/                   # @angular: modernize code
-│   │       │   └── SKILL.md
-│   │       ├── report/                     # @audit: usage + tokens + compliance + drift
-│   │       │   └── SKILL.md
-│   │       ├── review/                     # @angular: PR review
-│   │       │   ├── SKILL.md
-│   │       │   └── schemas/
-│   │       ├── test/                       # @angular: Jest/Playwright tests
-│   │       │   └── SKILL.md
-│   │       └── version-matrix/             # @docs: compatibility matrix
-│   │           └── SKILL.md
+│   │   └── copilot-instructions.md              # Global rules: safety, audit, confirmation, models, limits
 │   │
 │   ├── .orch/
-│   │   └── audit/
-│   │       └── config/
-│   │           ├── boundaries.yaml         # Declared tool + scope rules per agent
-│   │           └── adherence-rules.yaml    # Instruction rules for programmatic checks
+│   │   ├── config/                              (governance config)
+│   │   │   ├── boundaries.yaml                  # Declared tool + scope rules per agent
+│   │   │   └── adherence-rules.yaml             # Instruction rules for programmatic checks
+│   │   ├── references/                          (shared reference docs)
+│   │   │   ├── angular/
+│   │   │   ├── primeng/
+│   │   │   ├── ag-grid/
+│   │   │   ├── interop/
+│   │   │   └── internal/
+│   │   ├── scripts/                             (audit + semantic scripts)
+│   │   │   ├── audit/
+│   │   │   │   ├── log-session-start.sh
+│   │   │   │   ├── log-session-end.sh
+│   │   │   │   ├── log-prompt.sh
+│   │   │   │   ├── check-tool-boundary.sh
+│   │   │   │   ├── check-file-scope.sh
+│   │   │   │   ├── check-adherence.sh
+│   │   │   │   ├── check-context-health.sh
+│   │   │   │   ├── log-tool-result.sh
+│   │   │   │   ├── log-error.sh
+│   │   │   │   ├── estimate-tokens.py
+│   │   │   │   ├── aggregate-metrics.sh
+│   │   │   │   ├── update-session-status.sh
+│   │   │   │   └── notify.sh
+│   │   │   └── semantic/
+│   │   │       ├── README.md
+│   │   │       └── adapters/
+│   │   │           ├── registry.yaml
+│   │   │           └── typescript/
+│   │   │               ├── generate-summary.ts
+│   │   │               ├── analyze-migrations.ts
+│   │   │               └── transform.ts
+│   │   ├── runs/                                (audit run output)
+│   │   ├── audit/                               (audit record storage)
+│   │   ├── config.yaml                          # ORCH runtime config
+│   │   └── registry.yaml                        # Central registry for all doc sources
 │   │
-│   ├── scripts/
-│   │   ├── audit/
-│   │   │   ├── log-session-start.sh        # sessionStart hook script
-│   │   │   ├── log-session-end.sh          # sessionEnd hook script
-│   │   │   ├── log-prompt.sh               # userPromptSubmitted hook script
-│   │   │   ├── check-tool-boundary.sh      # preToolUse hook script
-│   │   │   ├── check-file-scope.sh         # postToolUse hook script
-│   │   │   ├── check-adherence.sh          # Post-session instruction adherence check
-│   │   │   ├── check-context-health.sh     # Context health monitoring
-│   │   │   ├── log-tool-result.sh          # postToolUse logging script
-│   │   │   ├── log-error.sh                # errorOccurred hook script
-│   │   │   ├── estimate-tokens.py          # Token estimation utility
-│   │   │   ├── aggregate-metrics.sh        # Daily/weekly rollup script
-│   │   │   ├── update-session-status.sh    # Session state updates
-│   │   │   └── notify.sh                   # Notification utility
-│   │   └── semantic/
-│   │       ├── README.md
-│   │       └── adapters/
-│   │           ├── registry.yaml
-│   │           └── typescript/
-│   │               ├── generate-summary.ts
-│   │               ├── analyze-migrations.ts
-│   │               └── transform.ts
+│   ├── doc-packs/                               (angular.yaml template)
+│   │   └── angular.yaml
 │   │
-│   ├── docs-registry.yaml                  # Central registry for all doc sources
-│   │
-│   └── orch-status-extension/              # VS Code status bar extension
+│   └── orch-status-extension/                   # VS Code status bar extension
 │       ├── package.json
 │       └── extension.js
 │
 ├── samples/
-│   ├── angular-app/                        # Sample Angular app for testing
-│   └── nx-angular-app/                     # Sample Nx Angular workspace for testing
+│   ├── angular-app/                             # Sample Angular app for testing
+│   └── nx-angular-app/                          # Sample Nx Angular workspace for testing
 │
-├── cli/                                    # CLI tooling
+├── cli/                                         # CLI tooling
 │
 ├── docs/
-│   ├── prd.md                              # Product requirements
-│   ├── tech.md                             # This document
-│   └── delivery.md                         # Delivery plan
+│   ├── prd.md                                   # Product requirements
+│   ├── tech.md                                  # This document
+│   └── delivery.md                              # Delivery plan
 │
 └── README.md
 ```
@@ -388,20 +414,20 @@ vscode-ghcp-agents/
 ### 4.2 Registry Schema
 
 ```yaml
-# docs-registry.yaml
+# .orch/registry.yaml
 version: 1
 sources:
   - id: string                    # unique identifier (kebab-case)
     name: string                  # human-readable name
-    type: url | local | scan      # source type
+    type: url | openapi | pdf | confluence | storybook | codebase | source-embedded
     origin: string                # URL or local file path or repo URL
-    format: html | openapi | pdf | confluence | storybook | codebase | jsdoc | tsdoc | compodoc | pydoc | javadoc
     output: string                # path to generated markdown
     scope: string                 # which domain consumes this
     version: string               # library version (for external docs)
+    managed_by: pack:<name> | user  # who manages this entry
     last_refreshed: date | null   # when last converted
     status: current | stale | draft | error
-    # For scan type only:
+    # For codebase type only:
     snapshots:
       - tag: string               # human-readable label
         date: date
@@ -510,7 +536,7 @@ Each session produces a complete audit record:
 ### 4.4 Boundaries Configuration
 
 ```yaml
-# .orch/audit/config/boundaries.yaml
+# .orch/config/boundaries.yaml
 agents:
   angular:
     allowed_tools:
@@ -533,16 +559,15 @@ agents:
       - fetch
       - edit
     allowed_scope:
-      - ".github/references/**"
-      - "docs/staging/**"
-      - "docs-registry.yaml"
+      - ".orch/references/**"
+      - ".orch/registry.yaml"
     blocked_commands: []
 ```
 
 ### 4.5 Adherence Rules
 
 ```yaml
-# .orch/audit/config/adherence-rules.yaml
+# .orch/config/adherence-rules.yaml
 angular:
   - id: onpush_change_detection
     description: "All components must use OnPush change detection"
@@ -575,14 +600,14 @@ angular:
 
 **Rationale:** In an enterprise environment, unobserved AI agents are an unacceptable risk. Audit provides: compliance evidence, behavioral drift detection, token cost visibility, boundary enforcement, and data-driven model optimization. Building audit first means every subsequent component is automatically observable.
 
-**Implementation:** Lifecycle hooks capture events → scripts process and log → `.orch/audit/` stores records → report skills surface insights.
+**Implementation:** Lifecycle hooks capture events -> scripts process and log -> `.orch/audit/` stores records -> audit skills surface insights.
 
 ```mermaid
 flowchart LR
     A[Any Agent Operation] --> B[Audit Hooks]
     B --> C[Log + Validate + Enforce]
     C --> D[.orch/audit/]
-    D --> E[Report Skills]
+    D --> E[Audit Skills]
     E --> F[Actionable Insights]
 ```
 
@@ -601,17 +626,17 @@ flowchart LR
 | Flows with 3+ interactions | Mermaid in markdown | Fewer tokens than prose, unambiguous |
 | Config examples (small) | Native (.yaml, .json) | Fidelity matters |
 | Config examples (large) | Markdown table | Token savings |
-| Source-embedded docs (JSDoc, TSDoc, Compodoc, PyDoc, Javadoc) | Run generator tool → Markdown tables | Two-step: extract then convert |
+| Source-embedded docs (JSDoc, TSDoc, Compodoc, PyDoc, Javadoc) | Run generator tool -> Markdown tables | Two-step: extract then convert |
 
 ### 5.2 YAML Registry over Database
 
-**Decision:** Use a single `docs-registry.yaml` file as the source of truth.
+**Decision:** Use a single `.orch/registry.yaml` file as the source of truth.
 
 **Rationale:** No infrastructure needed. Version-controlled alongside the artifacts. Human-readable and editable. Supports comments. Sufficient for the expected scale (dozens to low hundreds of sources).
 
 ### 5.3 Git History as Architecture Data Source
 
-**Decision:** `/proof` enriches code analysis with git log data (commit frequency, authors, churn, pattern adoption timelines).
+**Decision:** `/docs-drift` and analysis skills enrich code analysis with git log data (commit frequency, authors, churn, pattern adoption timelines).
 
 **Rationale:** Git history reveals intent (commit messages), ownership (authors), risk (churn), and momentum (adoption timelines) that static code analysis cannot. This data is critical for migration planning and drift explanation.
 
@@ -637,7 +662,7 @@ flowchart LR
 flowchart LR
     A[Source code<br/>with doc comments] -->|Step 1: Extract| B[Generator tool<br/>typedoc/compodoc/sphinx/javadoc]
     B -->|Intermediate output<br/>JSON/HTML/RST| C[Step 2: Convert<br/>docs agent]
-    C -->|Token-efficient<br/>markdown tables| D[.github/references/]
+    C -->|Token-efficient<br/>markdown tables| D[.orch/references/]
 ```
 
 **Tool mapping:**
@@ -650,7 +675,7 @@ flowchart LR
 | PyDoc | `sphinx-apidoc` | `pip install sphinx` | RST |
 | Javadoc | `javadoc -d` | JDK (pre-installed) | HTML |
 
-**Boundary implications:** The docs agent requires read access to source files (`src/**`, `app/**`, `lib/**`) for extraction. This is read-only — the agent never modifies source code. Write access remains restricted to `.github/references/`, `docs/staging/`, and `docs-registry.yaml`.
+**Boundary implications:** The docs agent requires read access to source files (`src/**`, `app/**`, `lib/**`) for extraction. This is read-only — the agent never modifies source code. Write access remains restricted to `.orch/references/` and `.orch/registry.yaml`.
 
 ### 5.5 No MCP Servers
 
@@ -661,7 +686,7 @@ flowchart LR
 
 ### 5.6 Controlled Refresh over Auto-Refresh
 
-**Decision:** External docs are only refreshed when a human runs `/packs refresh`. No automated background refresh.
+**Decision:** External docs are only refreshed when a human runs `/docs-refresh`. No automated background refresh.
 
 **Rationale:** External doc sites can change structure or content unexpectedly. Controlled refresh ensures a human reviews the updated reference material before it influences Copilot's suggestions. Especially important in enterprise/regulated environments.
 
@@ -712,7 +737,65 @@ flowchart TD
 
 **Rationale:** LLMs cannot hold a full LST (millions of nodes) in context. But an LST-derived semantic summary (~2-4K tokens) gives the agent precise type-aware knowledge for planning. And LST-aware transform scripts execute migrations with full type resolution and formatting preservation — dramatically reducing errors compared to agent-based file editing.
 
-**Adapter pattern:** All language adapters implement 4 operations: generate-summary, analyze-imports, analyze-migrations, transform. New languages are added by creating a new adapter directory with these scripts. The /proof and /migrate skills auto-detect the language and use the right adapter via adapters/registry.yaml.
+**Adapter pattern:** All language adapters implement 4 operations: generate-summary, analyze-imports, analyze-migrations, transform. New languages are added by creating a new adapter directory with these scripts. The /angular-analyze and /angular-migrate skills auto-detect the language and use the right adapter via adapters/registry.yaml.
+
+### 5.10 Role-Based Sub-Agents for Domain Agents
+
+**Decision:** Domain agents (e.g., @angular) use a coordinator pattern with role-based sub-agents: planner, engineer, verifier.
+
+**Rationale:** Each role has a distinct persona, toolset, and context window budget. A planner needs broad codebase read access but no edit tools. An engineer needs edit + terminal but only for scoped files. A verifier needs read + terminal (test/lint) but no edit. Splitting roles prevents context pollution (migration plan tokens don't crowd out code generation tokens) and enables precise boundary enforcement per role.
+
+```mermaid
+flowchart LR
+    R[User Request] --> C[@angular Coordinator]
+    C -->|"What needs doing?"| P[@angular-planner]
+    C -->|"Build it"| E[@angular-engineer]
+    C -->|"Verify it"| V[@angular-verifier]
+```
+
+### 5.11 Domain-Specific Granular Skills
+
+**Decision:** Skills are prefixed with their domain name and are granular (e.g., `/angular-generate`, `/angular-migrate`, `/audit-usage`), not generic (e.g., `/generate`, `/report`).
+
+**Rationale:** Domain-prefixed skills eliminate ambiguity when multiple agents could handle a request. They make triage trivial: the skill name itself declares which agent owns it. They also enable fine-grained audit tracking — token costs and compliance scores are attributable to a specific domain + action combination.
+
+### 5.12 Hybrid Reference Model
+
+**Decision:** Reference docs live in two locations: shared `.orch/references/` for cross-agent consumption, and `skills/*/references/` for skill-local context.
+
+**Rationale:** Some references (e.g., Angular v19 migration guide) are consumed by multiple skills across planner, engineer, and verifier. These live in `.orch/references/` and are addressed via `orch://references/angular/v19/...`. Other references (e.g., review checklist schemas) are only relevant to a single skill. These live alongside the SKILL.md to keep the skill self-contained. Skills declare their dependencies via a `references:` field in SKILL.md.
+
+### 5.13 Pre-Flight Checks via @orch-preflight
+
+**Decision:** Before routing a request to any domain agent, @orch invokes @orch-preflight to validate system readiness.
+
+**Rationale:** Pre-flight catches configuration errors, stale references, missing registry entries, and boundary misconfigurations before they cause mid-session failures. This is cheaper (in tokens and developer time) than failing halfway through a migration. Pre-flight runs as a sub-agent so its checks are themselves audited.
+
+```mermaid
+flowchart LR
+    U[User Request] --> O[@orch]
+    O --> PF[@orch-preflight]
+    PF -->|pass| D[Route to domain agent]
+    PF -->|fail| E[Report issues to user]
+```
+
+### 5.14 Three-Level Rule Cascade
+
+**Decision:** Rules apply in a 3-level cascade: global -> domain -> skill. More specific rules override less specific ones.
+
+**Rationale:** Global rules (safety, audit, confirmation prompts) apply everywhere. Domain rules (Angular patterns, TypeScript strictness) apply to all skills within that domain. Skill rules (migration-specific constraints) apply only during that skill's execution. This avoids duplication while allowing targeted overrides.
+
+| Level | Source | Example |
+|-------|--------|---------|
+| Global | `.github/copilot-instructions.md` | "Always confirm before deleting files" |
+| Domain | Agent `.md` persona section | "Use OnPush change detection" |
+| Skill | SKILL.md steps section | "For signal migration, preserve existing tests" |
+
+### 5.15 Presentation as Shared Skills, Not Dedicated Agent
+
+**Decision:** Presentation capabilities (/present-deck, /present-dashboard) are shared skills owned by @orch, not a dedicated @showcase agent.
+
+**Rationale:** A dedicated agent for 2 skills is over-engineered. Presentation skills need cross-domain data access (audit metrics, migration progress, doc coverage) which @orch already has via its handoff relationships. Shared skills avoid the overhead of another agent persona, tool declaration, and boundary configuration. If presentation grows to 5+ skills, re-evaluate.
 
 ---
 
@@ -723,13 +806,18 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     actor Dev as Developer
+    participant Orch as @orch
+    participant PF as @orch-preflight
     participant Agent as Any Agent/Skill
     participant AH as Audit Hooks
     participant AB as Boundary Check
     participant AS as .orch/audit/
     participant AC as Adherence Check
 
-    Dev->>Agent: Invoke agent or skill
+    Dev->>Orch: Invoke agent or skill
+    Orch->>PF: Pre-flight checks
+    PF-->>Orch: Pass/fail
+    Orch->>Agent: Route to domain agent
     AH->>AS: Log sessionStart (identity, agent, config)
 
     loop Every prompt
@@ -768,14 +856,13 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor Dev as Developer
-    participant Reg as docs-registry.yaml
+    participant Reg as .orch/registry.yaml
     participant Agent as @docs
     participant Source as Source (URL/File)
-    participant Refs as references/
+    participant Refs as .orch/references/
 
-    Dev->>Agent: /packs register angular-signals
+    Dev->>Agent: /docs-fetch angular-signals
     Agent->>Reg: Add new entry (status: draft)
-    Dev->>Agent: /packs convert angular-signals
     Agent->>Source: Fetch URL or read local file
     Source-->>Agent: Raw content (HTML/YAML/PDF)
     Agent->>Agent: Convert to token-efficient markdown
@@ -784,34 +871,34 @@ sequenceDiagram
     Agent->>Reg: Update status: current, set last_refreshed
 
     Note over Dev,Refs: Source-embedded docs (JSDoc/TSDoc/Compodoc/PyDoc/Javadoc)
-    Dev->>Agent: /packs convert trade-service-tsdoc
+    Dev->>Agent: /docs-fetch trade-service-tsdoc
     Agent->>Source: Read source files (src/app/trade/)
     Agent->>Agent: Run generator tool (typedoc --json)
     Agent->>Agent: Parse intermediate JSON output
-    Agent->>Agent: Extract public API → markdown tables
+    Agent->>Agent: Extract public API -> markdown tables
     Agent->>Refs: Write output markdown
     Agent->>Reg: Update status: current, set last_refreshed
 ```
 
-### 6.2 Codebase Scan Flow
+### 6.2 Codebase Analysis Flow
 
 ```mermaid
 sequenceDiagram
     actor Dev as Developer
-    participant Agent as @docs
+    participant Coord as @angular
+    participant Planner as @angular-planner
     participant Repo as Target Repository
     participant Git as Git History
-    participant Refs as references/scans/
-    participant Reg as docs-registry.yaml
+    participant Refs as .orch/references/
 
-    Dev->>Agent: /proof trade-app
-    Agent->>Repo: Static analysis (AST, patterns, dependencies)
-    Agent->>Git: History analysis (churn, authors, timelines)
-    Git-->>Agent: Ownership, hotspots, adoption data
-    Agent->>Agent: Combine into architecture docs
-    Agent->>Agent: Generate pattern inventory + mermaid diagrams
-    Agent->>Refs: Write snapshot to scans/trade-app/{date}/
-    Agent->>Reg: Add snapshot entry with summary
+    Dev->>Coord: /angular-analyze trade-app
+    Coord->>Planner: Delegate analysis
+    Planner->>Repo: Static analysis (AST, patterns, dependencies)
+    Planner->>Git: History analysis (churn, authors, timelines)
+    Git-->>Planner: Ownership, hotspots, adoption data
+    Planner->>Planner: Combine into architecture docs
+    Planner->>Planner: Generate pattern inventory + mermaid diagrams
+    Planner-->>Dev: Analysis report with recommendations
 ```
 
 ### 6.3 Drift Detection Flow
@@ -820,14 +907,14 @@ sequenceDiagram
 sequenceDiagram
     actor Dev as Developer
     participant Agent as @docs
-    participant Refs as Reference Docs
-    participant Scan as Scan Results
+    participant Refs as .orch/references/
+    participant Reg as .orch/registry.yaml
     participant Git as Git History
     participant Report as Drift Report
 
-    Dev->>Agent: /drift trade-app
+    Dev->>Agent: /docs-drift trade-app
     Agent->>Refs: Read reference docs for scope
-    Agent->>Scan: Read latest scan snapshot
+    Agent->>Reg: Read registry entries for scope
     Agent->>Agent: Compare: what docs say vs what code does
     Agent->>Git: For each drift, find when/who/why
     Git-->>Agent: Commit context for deviations
@@ -842,32 +929,39 @@ sequenceDiagram
 sequenceDiagram
     actor Dev as Migration Lead
     participant Doc as @docs
-    participant FE as @angular
-    participant Refs as references/
-    participant Reg as docs-registry.yaml
+    participant Coord as @angular
+    participant Planner as @angular-planner
+    participant Engineer as @angular-engineer
+    participant Verifier as @angular-verifier
+    participant Refs as .orch/references/
 
-    Note over Dev,Reg: Phase 1: Understand
-    Dev->>Doc: /proof trade-app
-    Doc->>Refs: Architecture docs + pattern inventory
-    Dev->>Doc: /packs convert angular-v19-migration-guide
+    Note over Dev,Refs: Phase 1: Understand
+    Dev->>Coord: /angular-analyze trade-app
+    Coord->>Planner: Delegate analysis
+    Planner-->>Dev: Architecture docs + pattern inventory
+    Dev->>Doc: /docs-fetch angular-v19-migration-guide
     Doc->>Refs: Converted migration guide
-    Dev->>Doc: /drift trade-app
+    Dev->>Doc: /docs-drift trade-app
     Doc-->>Dev: Drift report (2 critical, 3 moderate)
 
-    Note over Dev,Reg: Phase 2: Decide
-    Dev->>Dev: Review drift report, confirm scope
-    Dev->>Dev: Resolve critical drift (auth, error handling)
+    Note over Dev,Refs: Phase 2: Plan
+    Dev->>Coord: /angular-plan-migrate control-flow
+    Coord->>Planner: Delegate planning
+    Planner-->>Dev: Migration plan with file list + order
 
-    Note over Dev,Reg: Phase 3: Migrate
-    Dev->>FE: /migrate control-flow
-    FE->>Refs: Reads v17 → v19 migration patterns
-    FE-->>Dev: Migrated files
-    Dev->>FE: /migrate standalone
-    FE-->>Dev: Migrated files
+    Note over Dev,Refs: Phase 3: Migrate
+    Dev->>Coord: /angular-migrate control-flow
+    Coord->>Engineer: Delegate migration
+    Engineer->>Refs: Reads v17 -> v19 migration patterns
+    Engineer-->>Dev: Migrated files
+    Dev->>Coord: /angular-migrate standalone
+    Coord->>Engineer: Delegate migration
+    Engineer-->>Dev: Migrated files
 
-    Note over Dev,Reg: Phase 4: Verify
-    Dev->>Doc: /proof trade-app (re-scan)
-    Doc-->>Dev: Progress report (67% complete, est. 3 weeks remaining)
+    Note over Dev,Refs: Phase 4: Verify
+    Dev->>Coord: /angular-review trade-app
+    Coord->>Verifier: Delegate review
+    Verifier-->>Dev: Review report (67% complete, est. 3 weeks remaining)
 ```
 
 ---
@@ -879,8 +973,8 @@ sequenceDiagram
 ```yaml
 # .github/agents/docs.agent.md frontmatter
 name: "docs"
-description: "Manages all ORCH reference documentation. Handles URLs, local files,
-  and source-embedded docs (JSDoc, TSDoc, Compodoc, PyDoc, Javadoc).
+description: "ORCH reference supply chain agent. Fetches, converts, and maintains
+  reference documentation. Narrowed scope: doc lifecycle only.
   All operations tracked by the ORCH audit framework."
 model: claude-sonnet-4
 tools:
@@ -889,87 +983,133 @@ tools:
   - fetch                # fetch external URLs
   - edit                 # write converted docs
 agents:
-  - scan-worker          # delegates /proof scanning to isolated sub-agent
   - doc-convert-worker   # delegates heavy doc conversion to isolated sub-agent
 ```
 
-Skills: /packs, /proof, /drift, /code-comment, /version-matrix, /explain
+Skills: /docs-fetch, /docs-status, /docs-refresh, /docs-drift
 
-### 7.2 Angular Agent
+### 7.2 Angular Agent (Coordinator + 3 Sub-Agents)
+
+**Coordinator:**
 
 ```yaml
 # .github/agents/angular.agent.md frontmatter
 name: "angular"
-description: "Angular, TypeScript, and RxJS expert for enterprise applications.
-  Supports Angular v17-v19. Knows @yourorg internal libraries (elevate, elevate-common, hds).
-  All operations tracked by the ORCH audit framework."
+description: "Angular domain coordinator. Triages requests and delegates to the
+  appropriate sub-agent: planner (analysis), engineer (generation/transformation),
+  or verifier (review/validation). All operations tracked by the ORCH audit framework."
+model: claude-sonnet-4
+tools:
+  - codebase             # read for triage decisions
+agents:
+  - angular-planner
+  - angular-engineer
+  - angular-verifier
+```
+
+**Sub-Agent: @angular-planner**
+
+```yaml
+# .github/agents/angular-planner.agent.md frontmatter
+name: "angular-planner"
+description: "Analysis and planning sub-agent. Reads codebases, git history,
+  and reference docs to produce analysis reports and migration plans."
+model: claude-sonnet-4
+tools:
+  - codebase             # broad read access
+  - terminal             # git log, static analysis
+```
+
+Skills: /angular-analyze, /angular-plan-migrate, /angular-plan-refactor
+
+**Sub-Agent: @angular-engineer**
+
+```yaml
+# .github/agents/angular-engineer.agent.md frontmatter
+name: "angular-engineer"
+description: "Generation and transformation sub-agent. Scaffolds components,
+  executes migrations, and applies refactors using semantic adapters."
 model: claude-sonnet-4
 tools:
   - codebase
   - terminal             # ng CLI, npm, lint, test
   - edit
 agents:
-  - migrate-worker       # delegates /migrate heavy lifting to isolated sub-agent
+  - migrate-worker       # delegates heavy migration transforms
 ```
 
-Skills: /generate, /migrate, /test, /review, /refactor, /hds, /elevate, /explain
+Skills: /angular-generate, /angular-migrate, /angular-refactor, /angular-hds, /angular-elevate
+
+**Sub-Agent: @angular-verifier**
+
+```yaml
+# .github/agents/angular-verifier.agent.md frontmatter
+name: "angular-verifier"
+description: "Review and validation sub-agent. Runs tests, lints, and performs
+  structured code reviews against org standards."
+model: claude-sonnet-4
+tools:
+  - codebase             # read for review
+  - terminal             # run tests, lint, build
+```
+
+Skills: /angular-test, /angular-review, /angular-lint-check
 
 ### 7.3 Audit Agent
 
 ```yaml
 # .github/agents/audit.agent.md frontmatter
 name: "audit"
-description: "ORCH audit and observability agent. Generates usage, token, compliance,
-  drift, and benchmark reports. Monitors context health and manages session handoffs."
+description: "ORCH audit and observability agent. Provides 6 granular audit skills
+  covering usage, tokens, compliance, drift, benchmarking, and context health."
 model: claude-sonnet-4
 tools:
   - codebase             # read audit logs and config
   - terminal             # run aggregation and benchmark scripts
 ```
 
-Skills: /report, /benchmark, /context
+Skills: /audit-usage, /audit-tokens, /audit-compliance, /audit-drift, /audit-benchmark, /audit-context
 
-### 7.4 Showcase Agent
-
-```yaml
-# .github/agents/showcase.agent.md frontmatter
-name: "showcase"
-description: "Creates polished, org-branded presentations and dashboards from ORCH data.
-  Produces HTML slide decks (reveal.js), PPTX, or live dashboards — all styled with
-  HDS design tokens."
-model: claude-sonnet-4
-tools:
-  - codebase
-  - terminal
-  - edit
-```
-
-Skills: /present, /dashboard
-
-### 7.5 Orchestrator Agent
+### 7.4 Orchestrator Agent
 
 ```yaml
 # .github/agents/orch.agent.md frontmatter
 name: "orch"
-description: "ORCH master orchestrator. Routes requests to the right domain agent,
-  coordinates cross-domain workflows, and synthesizes results."
+description: "ORCH master orchestrator. Runs pre-flight checks via @orch-preflight,
+  routes requests to the right domain agent, coordinates cross-domain workflows,
+  synthesizes results, and owns shared presentation skills."
 model: claude-sonnet-4
 tools:
   - codebase
 agents:
+  - orch-preflight
   - angular
   - docs
+  - audit
 ```
 
-### 7.6 Worker Sub-Agents
+Shared skills: /present-deck, /present-dashboard
+
+**Sub-Agent: @orch-preflight**
+
+```yaml
+# .github/agents/orch-preflight.agent.md frontmatter
+name: "orch-preflight"
+description: "Pre-flight validation sub-agent. Checks config integrity, registry health,
+  reference freshness, and boundary configuration before routing to domain agents."
+model: claude-sonnet-4
+tools:
+  - codebase             # read config and registry files
+```
+
+### 7.5 Workers
 
 Worker sub-agents are internal agents that handle isolated, resource-intensive subtasks. They are not invoked directly by users — parent agents delegate to them.
 
 | Worker | Parent | Purpose |
 |--------|--------|---------|
-| `scan-worker` | @docs | Isolated codebase scanning for /proof |
-| `migrate-worker` | @angular | Isolated migration transforms for /migrate |
-| `doc-convert-worker` | @docs | Isolated heavy doc conversion for /packs |
+| `doc-convert-worker` | @docs | Isolated heavy doc conversion for /docs-fetch |
+| `migrate-worker` | @angular-engineer | Isolated migration transforms for /angular-migrate |
 
 ---
 
@@ -984,6 +1124,9 @@ All skills follow this structure:
 ---
 name: skill-name-kebab-case
 description: "10-1024 chars. Clear trigger keywords for agent discovery."
+references:
+  - orch://references/angular/v19/migration-guide.md
+  - orch://references/internal/ui-components.md
 ---
 
 ## Context
@@ -1008,40 +1151,56 @@ How to verify the output is correct.
 
 | Skill | Inputs | Outputs | Validates |
 |-------|--------|---------|-----------|
-| `/packs` | Subcommands: register, convert, refresh, status. Source id, --scope, --stale | Registry entries, converted markdown in references/, status dashboard. For source-embedded formats (jsdoc, tsdoc, compodoc, pydoc, javadoc): runs generator tool, extracts public API, converts to markdown tables | Entry doesn't duplicate; output under token budget; generator tool exits 0; registry is parseable |
-| `/proof` | repo path or URL | Architecture docs + pattern inventory + inline doc coverage inventory in references/scans/. Supports snapshot comparison | Git data is accessible; doc coverage counts match file counts |
-| `/drift` | app scan id | Drift report with classifications (doc stale / code wrong / ambiguous) | Reference docs exist for scope |
-| `/code-comment` | path, optional --format, --severity, --dry-run | Code doc coverage audit, generated doc comments, repaired doc comments | File counts match filesystem; project compiles; linter passes |
-| `/version-matrix` | library or framework name | Compatibility matrix across versions | Versions are valid and current |
-| `/explain` | project path or component | Project walkthrough documentation | Output covers structure, patterns, dependencies |
+| `/docs-fetch` | Source id or URL, --scope, --type | Registry entry + converted markdown in .orch/references/. For source-embedded formats: runs generator tool, extracts public API, converts to markdown tables | Entry doesn't duplicate; output under token budget; generator tool exits 0; registry is parseable |
+| `/docs-status` | Optional --scope, --stale filter | Registry health dashboard: source count, staleness, coverage gaps | Registry is parseable; dates are valid |
+| `/docs-refresh` | Source id or --stale flag | Re-converted markdown from original source | Source is reachable; output under token budget; diff from previous version |
+| `/docs-drift` | App or scope identifier | Drift report with classifications (doc stale / code wrong / ambiguous) | Reference docs exist for scope; git data is accessible |
 
-### 8.3 @angular Skills
+### 8.3 @angular Skills (by sub-agent)
+
+**@angular-planner skills:**
 
 | Skill | Inputs | Outputs | Validates |
 |-------|--------|---------|-----------|
-| `/generate` | component/service name, type | Scaffolded .ts, .html, .scss, .spec.ts files | Follows OnPush, standalone patterns; Injectable with proper error handling |
-| `/migrate` | file or folder scope, migration type (standalone, signals, control-flow, jest, rxjs) | Migrated files using semantic adapters | Build passes after migration |
-| `/test` | file to test | .spec.ts file | TestBed setup, org mocking patterns |
-| `/review` | PR diff or file | Structured review comments | Checks anti-patterns list |
-| `/refactor` | file or folder | Modernized code | Build passes, tests pass |
-| `/hds` | component or pattern query | Design system guidance and code using HDS tokens | Matches current HDS version |
-| `/elevate` | service or integration query | Platform service integration patterns | Uses @yourorg/elevate APIs correctly |
-| `/explain` | project path or component | Project walkthrough documentation | Output covers structure, patterns, dependencies |
+| `/angular-analyze` | Project path or component | Architecture docs, pattern inventory, dependency graph, inline doc coverage | Git data accessible; file counts match filesystem |
+| `/angular-plan-migrate` | Migration type (standalone, signals, control-flow, jest, rxjs), scope | Migration plan: file list, order, risk assessment, estimated effort | References exist for migration type; scope resolves to files |
+| `/angular-plan-refactor` | File or folder scope, refactor goal | Refactor plan: changes needed, impact analysis, risk areas | Scope resolves to files; goal is actionable |
+
+**@angular-engineer skills:**
+
+| Skill | Inputs | Outputs | Validates |
+|-------|--------|---------|-----------|
+| `/angular-generate` | Component/service name, type | Scaffolded .ts, .html, .scss, .spec.ts files | Follows OnPush, standalone patterns; Injectable with proper error handling |
+| `/angular-migrate` | File or folder scope, migration type | Migrated files using semantic adapters | Build passes after migration |
+| `/angular-refactor` | File or folder | Modernized code | Build passes, tests pass |
+| `/angular-hds` | Component or pattern query | Design system guidance and code using HDS tokens | Matches current HDS version |
+| `/angular-elevate` | Service or integration query | Platform service integration patterns | Uses @yourorg/elevate APIs correctly |
+
+**@angular-verifier skills:**
+
+| Skill | Inputs | Outputs | Validates |
+|-------|--------|---------|-----------|
+| `/angular-test` | File to test | .spec.ts file | TestBed setup, org mocking patterns |
+| `/angular-review` | PR diff or file | Structured review comments | Checks anti-patterns list |
+| `/angular-lint-check` | File or folder scope | Lint validation report | ng lint passes; custom rules checked |
 
 ### 8.4 @audit Skills
 
 | Skill | Inputs | Outputs | Purpose |
 |-------|--------|---------|---------|
-| `/report` | date range, --agent filter | Usage + tokens + compliance + drift combined report | Full audit picture |
-| `/benchmark` | session ID or skill name + models | Validation report or model comparison matrix | Quality gate + model optimization |
-| `/context` | none | Session health check or compact handoff prompt | Context monitoring + session management |
+| `/audit-usage` | Date range, --agent filter | Usage summary: sessions, prompts, tools invoked per agent | Track adoption and usage patterns |
+| `/audit-tokens` | Date range, --agent filter, --model filter | Token cost breakdown by agent, model, skill | Cost visibility and optimization |
+| `/audit-compliance` | Date range, --agent filter | Compliance report: boundary violations, scope violations, adherence scores | Compliance evidence for auditors |
+| `/audit-drift` | Date range, --agent filter | Behavioral drift analysis: changing patterns, emerging violations | Detect gradual model/config degradation |
+| `/audit-benchmark` | Session ID or skill name + models | Validation report or model comparison matrix | Quality gate + model optimization |
+| `/audit-context` | None | Session health check or compact handoff prompt | Context monitoring + session management |
 
-### 8.5 @showcase Skills
+### 8.5 @orch Shared Skills
 
 | Skill | Inputs | Outputs | Purpose |
 |-------|--------|---------|---------|
-| `/present` | topic, --template (intro, architecture, migration, status, custom) | HTML slide deck (reveal.js) or PPTX styled with HDS design tokens | Sprint reviews, architecture reviews, management updates |
-| `/dashboard` | metric type or data source | Live metrics dashboard | Ongoing monitoring and reporting |
+| `/present-deck` | Topic, --template (intro, architecture, migration, status, custom) | HTML slide deck (reveal.js) or PPTX styled with HDS design tokens | Sprint reviews, architecture reviews, management updates |
+| `/present-dashboard` | Metric type or data source | Live metrics dashboard | Ongoing monitoring and reporting |
 
 ---
 
@@ -1070,11 +1229,20 @@ Concrete, specific guidance with examples.
 
 ### 9.2 Key Instructions
 
-| File | applyTo | Purpose |
-|------|---------|---------|
-| `doc-conversion.instructions.md` | `**/*.md` (in references/) | Token efficiency rules, format selection, mermaid conversion triggers |
-| `angular-typescript.instructions.md` | `**/*.ts, **/*.html, **/*.scss` | Angular component patterns, RxJS, state management, TypeScript strictness |
-| `internal-component-lib.instructions.md` | `**/*.ts, **/*.html` | Internal UI library usage patterns |
+Only 2 instruction files remain. Domain-specific coding standards are absorbed into skill SKILL.md files. Internal library patterns become reference docs in `.orch/references/`.
+
+| File | Scope | Purpose |
+|------|-------|---------|
+| `.github/copilot-instructions.md` | Global (all agents) | Safety rules, audit requirements, confirmation prompts, model pinning, token limits |
+| `.github/instructions/auto-mode.instructions.md` | Bridges config.yaml | Translates `.orch/config.yaml` settings into agent behavioral constraints (auto-approve thresholds, batch sizes, retry policies) |
+
+**What was absorbed:**
+
+| Former file | Absorbed into |
+|-------------|---------------|
+| `angular-typescript.instructions.md` | @angular sub-agent SKILL.md files (patterns live alongside the skills that enforce them) |
+| `internal-component-lib.instructions.md` | `.orch/references/internal/ui-components.md` (becomes a reference doc) |
+| `doc-conversion.instructions.md` | @docs SKILL.md files (/docs-fetch, /docs-refresh contain conversion rules) |
 
 ---
 
@@ -1089,7 +1257,7 @@ Concrete, specific guidance with examples.
     "eventName": [
       {
         "type": "command",
-        "bash": "./scripts/hook-script.sh",
+        "bash": "./.orch/scripts/hook-script.sh",
         "cwd": ".",
         "timeoutSec": 30,
         "env": {}
@@ -1103,10 +1271,10 @@ Concrete, specific guidance with examples.
 
 | Hook | Events | Script | Action | Exit behavior |
 |------|--------|--------|--------|--------------|
-| Audit Lifecycle | sessionStart, sessionEnd, errorOccurred | `scripts/audit/log-session-start.sh`, `log-session-end.sh`, `log-error.sh` | Log session identity, timing, file changes, run post-session adherence checks | Always passes (logging only) |
-| Audit Prompts | userPromptSubmitted | `scripts/audit/log-prompt.sh` | Log full prompt text, estimate input tokens | Always passes (logging only) |
-| Audit Tools | preToolUse | `scripts/audit/check-tool-boundary.sh` | Compare tool against agent's declared tools in boundaries.yaml | **Non-zero blocks unauthorized tools** |
-| Audit Scope | postToolUse | `scripts/audit/check-file-scope.sh`, `log-tool-result.sh` | Check file paths against agent's declared scope, log result, estimate tokens | Configurable: warn or block |
+| Audit Lifecycle | sessionStart, sessionEnd, errorOccurred | `.orch/scripts/audit/log-session-start.sh`, `log-session-end.sh`, `log-error.sh` | Log session identity, timing, file changes, run post-session adherence checks | Always passes (logging only) |
+| Audit Prompts | userPromptSubmitted | `.orch/scripts/audit/log-prompt.sh` | Log full prompt text, estimate input tokens | Always passes (logging only) |
+| Audit Tools | preToolUse | `.orch/scripts/audit/check-tool-boundary.sh` | Compare tool against agent's declared tools in boundaries.yaml | **Non-zero blocks unauthorized tools** |
+| Audit Scope | postToolUse | `.orch/scripts/audit/check-file-scope.sh`, `log-tool-result.sh` | Check file paths against agent's declared scope, log result, estimate tokens | Configurable: warn or block |
 
 ### 10.3 Governance Hooks
 
@@ -1126,23 +1294,27 @@ Note: The current implementation uses the 4 audit hooks listed above. Secrets sc
 - Reference docs are reviewed before use (controlled refresh)
 - Audit records are immutable (append-only violation log)
 - `.orch/audit/` can be shipped to enterprise observability stack (Splunk, ELK, Datadog)
+- Pre-flight checks validate system integrity before each session
 
 ### 11.2 Maintainability
 
 - Registry tracks staleness — nothing silently goes out of date
-- One domain per customization set — clear ownership
-- Skills are self-contained — no hidden dependencies between skills
+- Role-based sub-agents have clear, non-overlapping responsibilities
+- Skills are self-contained with declared reference dependencies
+- 3-level rule cascade (global -> domain -> skill) eliminates duplication
 
 ### 11.3 Scalability
 
 - File-based architecture scales with git
-- New domains added by creating new agent + skills + instructions
+- New domains added by creating coordinator + sub-agents + skills
 - Registry supports unlimited sources
+- Hybrid reference model (shared + skill-local) keeps context windows lean
 - Plugin packaging enables cross-org distribution in Phase 3
 
 ### 11.4 Testing
 
 - Migration skills: always run build + tests after transformation
-- Instructions: spot-check Copilot suggestions against expected patterns
+- Verifier sub-agent: structured review against anti-patterns list
 - Hooks: test scripts locally before deployment
 - Drift detection: compare against known-good baseline
+- Pre-flight: validates config before any agent runs

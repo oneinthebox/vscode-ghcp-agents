@@ -135,6 +135,6 @@
     ".orch/audit/config/boundaries.yaml": "sha256:d7daf69c65e16302ee676355c18269b487a2015e56e4b06fe8a74328b59a480c",
     "docs-registry.yaml": "sha256:94ed21a13627addf6d51c1a62af3318df4927a8f177495a54cca399652ece1db"
   },
-  "installedAt": "2026-03-19T19:01:04.114Z",
+  "installedAt": "2026-03-23T07:40:12.440Z",
   "marketplace": "/Users/sagarsaurabh/code/repo/vscode-ghcp-agents/marketplace"
 }

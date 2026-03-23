@@ -1,7 +1,7 @@
 # ORCH (Orchestra) — Delivery Plan
 
-**Version:** 1.0
-**Date:** 2026-03-18
+**Version:** 2.0
+**Date:** 2026-03-23
 **Status:** Draft
 
 ---
@@ -15,15 +15,14 @@ gantt
     axisFormat %b %d
 
     section Phase 0: Foundation
-    Audit Framework (FIRST)        :p0z, 2026-03-18, 16d
-    Doc Agent (@docs) & Pipeline    :p0a, after p0z, 18d
+    Audit Framework (FIRST)        :p0z, 2026-03-18, 18d
+    Doc Agent (@docs) & Pipeline    :p0a, after p0z, 12d
     Reference Doc Population       :p0r, after p0a, 8d
-    Angular Domain (@angular)      :p0b, after p0r, 14d
+    Angular Domain (@angular)      :p0b, after p0r, 22d
     Pilot deployment (2-3 teams)   :p0c, after p0b, 14d
-    Showcase Agent & Explain Skill :p0d, after p0b, 5d
 
     section Phase 1: Expand
-    Remaining 4 domains            :p1a, after p0c, 21d
+    Remaining 4 domains            :p1a, after p0c, 28d
     Governance hooks               :p1b, after p0c, 10d
     Model benchmarking             :p1d, after p0c, 7d
     Iterate from pilot feedback    :p1c, after p0c, 21d
@@ -41,7 +40,7 @@ gantt
 
 ## Phase 0 — Foundation
 
-**Goal:** Build audit framework, doc pipeline, and first domain customization set. Prove value with pilot teams.
+**Goal:** Build audit framework, doc pipeline, and first domain customization set (Angular with role-based sub-agents). Prove value with pilot teams.
 
 ### Stage 0.0 — Audit Framework (FIRST)
 
@@ -59,11 +58,11 @@ The audit framework is built before anything else. Every subsequent stage is aut
 | 0.0.8 | Build token estimation utility | `scripts/audit/estimate-tokens.py` — tokenize captured text for input/output estimates | None | 1d |
 | 0.0.9 | Build adherence check script | `scripts/audit/check-adherence.sh` — post-session grep of generated code against rules | 0.0.3 | 1d |
 | 0.0.10 | Build metrics aggregation script | `scripts/audit/aggregate-metrics.sh` — daily/weekly rollups | 0.0.1 | 0.5d |
-| 0.0.11 | Build `/orch-audit-usage` skill | `.github/skills/orch-audit-usage/SKILL.md` — usage report generation | 0.0.4 | 0.5d |
-| 0.0.12 | Build `/orch-audit-tokens` skill | `.github/skills/orch-audit-tokens/SKILL.md` — token consumption report | 0.0.8 | 0.5d |
-| 0.0.13 | Build `/orch-audit-compliance` skill | `.github/skills/orch-audit-compliance/SKILL.md` — violations + adherence report | 0.0.6, 0.0.9 | 0.5d |
-| 0.0.14 | Build `/orch-audit-drift` skill | `.github/skills/orch-audit-drift/SKILL.md` — behavioral drift over time | 0.0.9, 0.0.10 | 0.5d |
-| 0.0.15 | Build `/orch-validate` skill | `.github/skills/orch-validate/SKILL.md` — post-operation validation | 0.0.9 | 0.5d |
+| 0.0.11 | Build `/audit-usage` skill | `.github/skills/audit-usage/SKILL.md` — usage report generation | 0.0.4 | 0.5d |
+| 0.0.12 | Build `/audit-tokens` skill | `.github/skills/audit-tokens/SKILL.md` — token consumption report | 0.0.8 | 0.5d |
+| 0.0.13 | Build `/audit-compliance` skill | `.github/skills/audit-compliance/SKILL.md` — violations + adherence report | 0.0.6, 0.0.9 | 0.5d |
+| 0.0.14 | Build `/audit-drift` skill | `.github/skills/audit-drift/SKILL.md` — behavioral drift over time | 0.0.9, 0.0.10 | 0.5d |
+| 0.0.15 | Build `/audit-benchmark` skill | `.github/skills/audit-benchmark/SKILL.md` — model benchmarking across domains | 0.0.8 | 0.5d |
 | 0.0.16 | Build context health check script | `scripts/audit/check-context-health.sh` — token tracking + adherence monitoring within session | 0.0.8, 0.0.9 | 1d |
 | 0.0.17 | Build session status tracking | `scripts/audit/update-session-status.sh` — work progress tracking, bounded task detection | 0.0.16 | 1d |
 | 0.0.18 | Build OS notification script | `scripts/audit/notify.sh` — macOS/Linux native notifications for critical alerts only | 0.0.17 | 0.5d |
@@ -71,40 +70,43 @@ The audit framework is built before anything else. Every subsequent stage is aut
 | 0.0.20 | Update all agent instructions with self-warn rules | Add context health monitoring section to every agent .md | 0.0.16 | 0.5d |
 | 0.0.21 | Test notification system end-to-end | Verify: status bar updates, toast fires only on 3 triggers, OS notification on critical only | 0.0.16–0.0.20 | 1d |
 | 0.0.22 | Test audit framework end-to-end | Run a dummy agent session, verify full audit trail captured | 0.0.4–0.0.21 | 1d |
-| 0.0.23 | Create @audit agent | `.github/agents/audit.agent.md` + skills: /report, /benchmark, /context | Stage 0.0 audit framework | 1d |
+| 0.0.23 | Create @audit agent | `.github/agents/audit.agent.md` + skills: /audit-usage, /audit-tokens, /audit-compliance, /audit-drift, /audit-benchmark | Stage 0.0 audit framework | 1d |
+| 0.0.24 | Build `@orch-preflight` sub-agent | `.github/agents/orch-preflight.agent.md` — pre-flight checks: validate config, verify boundaries, confirm references exist, check tool availability before any agent session starts | 0.0.2, 0.0.6, 0.0.7 | 1.5d |
+| 0.0.25 | Design and implement `.orch/config.yaml` | `.orch/config.yaml` — global workflow config: default model, token budgets, audit level, agent routing rules, pre-flight toggles, telemetry settings | 0.0.1, 0.0.2 | 1d |
+| 0.0.26 | Create `.github/copilot-instructions.md` | `.github/copilot-instructions.md` — global rules file: naming conventions, forbidden patterns, security rules, code style enforcement across all agents | None | 0.5d |
 
-**Stage total: ~16 days**
+**Stage total: ~18 days** (13 scripts + 5 skills + preflight sub-agent + config + global rules)
 
 ### Stage 0.1 — Documentation Pipeline (Doc Agent)
+
+> **Scope note:** `@docs` is the **reference supply chain** only. It fetches, converts, tracks, and refreshes external/internal documentation into `.github/references/`. Skills like `/explain`, `/code-comment`, and `/version-matrix` have moved to domain planners/agents. `/context` has moved to `@audit`.
 
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
 | 0.1.0 | Register docs in boundaries.yaml | Add docs agent to audit boundaries config with declared tools (codebase, terminal, fetch, edit) and scope (.github/references/**, docs/staging/**, docs-registry.yaml) | Stage 0.0 | 0.25d |
-| 0.1.1 | Create docs agent | `.github/agents/docs.agent.md` | 0.1.0 | 0.5d |
-| 0.1.2 | Create doc-conversion instructions | `.github/instructions/doc-conversion.instructions.md` with token budget rules, format selection matrix, mermaid conversion triggers | None | 1d |
+| 0.1.1 | Create docs agent | `.github/agents/docs.agent.md` — reference supply chain coordinator | 0.1.0 | 0.5d |
+| 0.1.2 | Create doc-conversion instructions | `.github/instructions/doc-conversion.instructions.md` with token budget rules, format selection matrix, mermaid conversion triggers (note: absorbed into @docs agent internals post-build) | None | 1d |
 | 0.1.3 | Create docs-registry.yaml schema | `docs-registry.yaml` with schema documentation and starter entries | None | 0.5d |
-| 0.1.4 | Build /packs skill | `.github/skills/packs/SKILL.md` — unified registry lifecycle (register + convert + refresh + status) | 0.1.2, 0.1.3 | 2d |
-| 0.1.5 | Build /proof skill | `.github/skills/proof/SKILL.md` — codebase scan + compare snapshots + inline doc coverage | 0.1.2 | 2d |
-| 0.1.6 | Build /drift skill | `.github/skills/drift/SKILL.md` — docs vs code comparison with git enrichment | 0.1.4, 0.1.5 | 1d |
-| 0.1.7 | Build /code-comment skill | `.github/skills/code-comment/SKILL.md` — audit + generate + repair code docs (TSDoc, Javadoc, PyDoc) | 0.1.2 | 2d |
-| 0.1.8 | Build /version-matrix skill | `.github/skills/version-matrix/SKILL.md` + known-compatibility.yaml — version matrix | 0.1.3 | 1d |
-| 0.1.9 | Create staging + references folder structure | `docs/staging/`, `.github/references/` with versioned subdirectories | None | 0.5d |
-| 0.1.10 | Test doc pipeline end-to-end | packs → proof → drift cycle verified, including source-embedded extraction | 0.1.4–0.1.9 | 1.5d |
-| 0.1.11 | Verify audit trail for doc pipeline | All doc sessions produce complete audit records | 0.1.10, Stage 0.0 | 0.5d |
-| 0.1.12 | Create scan-worker sub-agent | `.github/agents/scan-worker.agent.md` — internal codebase scanning worker | 0.1.5 | 0.5d |
-| 0.1.13 | Create doc-convert-worker sub-agent | `.github/agents/doc-convert-worker.agent.md` — internal doc conversion worker | 0.1.4 | 0.5d |
-| 0.1.14 | Add sub-agent delegation to @docs agent | Update docs.agent.md with agents field + delegation routing for /proof and /packs convert | 0.1.13 | 0.5d |
+| 0.1.4 | Build `/docs-fetch` skill | `.github/skills/docs-fetch/SKILL.md` — fetch external URL or local file, convert to token-efficient markdown, register in docs-registry | 0.1.2, 0.1.3 | 1.5d |
+| 0.1.5 | Build `/docs-status` skill | `.github/skills/docs-status/SKILL.md` — show registry status: staleness, coverage, token budgets per reference | 0.1.3 | 1d |
+| 0.1.6 | Build `/docs-refresh` skill | `.github/skills/docs-refresh/SKILL.md` — re-fetch stale sources, reconvert, update registry timestamps | 0.1.4 | 1d |
+| 0.1.7 | Build `/docs-drift` skill | `.github/skills/docs-drift/SKILL.md` — compare reference docs against live sources, flag outdated content | 0.1.4, 0.1.5 | 1.5d |
+| 0.1.8 | Create staging + references folder structure | `docs/staging/`, `.github/references/` with versioned subdirectories | None | 0.5d |
+| 0.1.9 | Test doc pipeline end-to-end | fetch → status → refresh → drift cycle verified | 0.1.4–0.1.8 | 1.5d |
+| 0.1.10 | Verify audit trail for doc pipeline | All doc sessions produce complete audit records | 0.1.9, Stage 0.0 | 0.5d |
+| 0.1.11 | Create @doc-convert-worker sub-agent | `.github/agents/doc-convert-worker.agent.md` — internal doc conversion worker | 0.1.4 | 0.5d |
+| 0.1.12 | Add sub-agent delegation to @docs agent | Update docs.agent.md with agents field + delegation routing for /docs-fetch conversion | 0.1.11 | 0.5d |
 
-**Stage total: ~14 days**
+**Stage total: ~10.75 days**
 
 ### Stage 0.2 — Reference Doc Population
 
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
 | 0.2.1 | Register Angular core docs (v17, v18, v19) | 3 registry entries | 0.1.4 | 0.25d |
-| 0.2.2 | Convert Angular core docs | `.github/references/angular/v17/core.md`, v18, v19 | 0.2.1, 0.1.5 | 1d |
+| 0.2.2 | Convert Angular core docs | `.github/references/angular/v17/core.md`, v18, v19 | 0.2.1 | 1d |
 | 0.2.3 | Register Angular migration guides | Registry entries for standalone, signals, control flow guides | 0.1.4 | 0.25d |
-| 0.2.4 | Convert Angular migration guides | `.github/references/angular/v*/migration-*.md` | 0.2.3, 0.1.5 | 1d |
+| 0.2.4 | Convert Angular migration guides | `.github/references/angular/v*/migration-*.md` | 0.2.3 | 1d |
 | 0.2.5 | Register PrimeNG docs (v16, v17) | 2 registry entries | 0.1.4 | 0.25d |
 | 0.2.6 | Convert PrimeNG docs | `.github/references/primeng/v16/*.md`, v17 | 0.2.5 | 1d |
 | 0.2.7 | Register AG Grid docs | Registry entry | 0.1.4 | 0.25d |
@@ -112,78 +114,93 @@ The audit framework is built before anything else. Every subsequent stage is aut
 | 0.2.9 | Register Interop.io docs | Registry entry | 0.1.4 | 0.25d |
 | 0.2.10 | Convert Interop.io Angular guide | `.github/references/interop/angular-integration.md` | 0.2.9 | 0.5d |
 | 0.2.11 | Collect internal UI lib docs | Export from Storybook/source, place in docs/staging/ | Manual | 0.5d |
-| 0.2.12 | Convert internal UI lib docs | `.github/references/internal/ui-components.md` | 0.2.11 | 0.5d |
+| 0.2.12 | Convert internal UI lib docs | `.github/references/internal/ui-components.md` (note: internal-component-lib.instructions.md becomes this reference doc) | 0.2.11 | 0.5d |
 | 0.2.13 | Review all converted docs for quality | Ensure token budgets met, no hallucinated content | 0.2.2–0.2.12 | 1d |
 
 **Stage total: ~7.25 days**
 
 ### Stage 0.3 — Frontend Angular Domain
 
+> **Architecture:** Angular follows the role-based sub-agent pattern. `@angular` is a lightweight coordinator with triage logic that delegates to three role-based sub-agents: `@angular-planner` (analysis & planning), `@angular-engineer` (code generation & migration), and `@angular-verifier` (testing & review). Each sub-agent owns granular, domain-specific skills.
+
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
-| 0.3.0 | Register angular in boundaries.yaml | Add angular agent to audit boundaries config with declared tools (codebase, terminal, edit) and scope (src/**/*.ts, src/**/*.html, src/**/*.scss) | Stage 0.0 | 0.25d |
-| 0.3.1 | Create angular agent | `.github/agents/angular.agent.md` with persona, tools, model, guardrails | 0.3.0 | 0.5d |
-| 0.3.2 | Create angular-typescript instructions | `.github/instructions/angular-typescript.instructions.md` — component patterns, RxJS, state management, TS strictness, testing, a11y | Stage 0.2 | 2d |
-| 0.3.2a | Run /code-comment-audit on pilot Angular project | Documentation coverage report — identify gaps before building skills that depend on doc extraction | 0.1.14, 0.3.2 | 0.5d |
-| 0.3.2b | Run /code-comment-generate on critical undocumented services | Add TSDoc to top-priority undocumented files identified by audit | 0.3.2a | 1d |
-| 0.3.2c | Run /code-comment-repair to fix JSDoc → TSDoc in pilot project | Migrate any JSDoc {type} syntax to proper TSDoc format | 0.3.2b | 0.5d |
-| 0.3.3 | Build /generate skill (Angular domain) | `.github/skills/generate/SKILL.md` + `templates/angular/` + `examples/angular/` + `references/angular.md` | 0.3.2 | 2d |
-| 0.3.4 | Build /migrate skill (Angular domain) | `.github/skills/migrate/SKILL.md` + `references/angular/` (8 migration guides) + `examples/angular/` (before/after) + `scripts/angular/` | 0.3.2 | 3d |
-| 0.3.4a | Build ts-morph semantic adapter | `scripts/semantic/adapters/typescript/` — generate-summary.ts, analyze-migrations.ts, transform.ts | 0.3.4 | 2d |
-| 0.3.4b | Integrate semantic analysis into /proof skill | Add --semantic flag that runs ts-morph generate-summary.ts | 0.3.4a | 0.5d |
-| 0.3.4c | Integrate ts-morph transforms into /migrate skill | Wire migrate-worker to use transform.ts for standalone, inject, signals | 0.3.4a | 1d |
-| 0.3.5 | Build /test skill (Angular domain) | `.github/skills/test/SKILL.md` + `templates/angular/` + `references/angular/` (jest, playwright, cypress, ng-mocks) + `examples/angular/` | 0.3.2 | 2d |
-| 0.3.6 | Build /review skill (Angular domain) | `.github/skills/review/SKILL.md` + `references/angular/anti-patterns.md` + `schemas/review-format.yaml` | 0.3.2 | 1d |
-| 0.3.7 | Build /refactor skill | `.github/skills/refactor/SKILL.md` + `references/angular.md` + `examples/angular/` (before/after) | 0.3.2 | 1d |
-| 0.3.8 | Build /hds skill | `.github/skills/hds/SKILL.md` + `references/` (tokens, theming, components) + `examples/` + `assets/token-map.json` | 0.3.3 | 1.5d |
-| 0.3.9 | Build /elevate skill | `.github/skills/elevate/SKILL.md` + `references/` (auth, logging, config, prefs, components) + `examples/` + `schemas/config-schema.json` | 0.3.3 | 1.5d |
-| 0.3.10 | Build override system | `.github/skill-overrides/` structure, overrides.yaml schema, override resolution in agent instructions | 0.3.3 | 1d |
-| 0.3.11 | Test all skills against sample Angular project | Verify each skill produces correct output with @angular agent | 0.3.3–0.3.10 | 2d |
-| 0.3.12 | Create migrate-worker sub-agent | `.github/agents/migrate-worker.agent.md` — internal migration phase worker | 0.3.4 | 0.5d |
-| 0.3.13 | Add sub-agent delegation to @angular agent | Update angular.agent.md with agents field + delegation routing for /migrate | 0.3.12 | 0.5d |
+| **Coordinator** | | | | |
+| 0.3.0 | Register angular in boundaries.yaml | Add angular coordinator + sub-agents to audit boundaries config with declared tools and scope (src/**/*.ts, src/**/*.html, src/**/*.scss) | Stage 0.0 | 0.5d |
+| 0.3.1 | Create `@angular` coordinator agent | `.github/agents/angular.agent.md` — triage logic, routes to planner/engineer/verifier based on intent | 0.3.0 | 1d |
+| **Planner sub-agent** | | | | |
+| 0.3.2 | Create `@angular-planner` sub-agent | `.github/agents/angular-planner.agent.md` — analysis, scanning, planning, compatibility checks | 0.3.1 | 1d |
+| 0.3.3 | Build `/angular-scan-deps` skill | Dependency analysis: outdated packages, version conflicts, security advisories | 0.3.2, Stage 0.2 | 0.5d |
+| 0.3.4 | Build `/angular-scan-arch` skill | Architecture analysis: module structure, lazy loading, dependency graph | 0.3.2 | 0.5d |
+| 0.3.5 | Build `/angular-scan-quality` skill | Code quality scan: complexity, duplication, anti-patterns | 0.3.2 | 0.5d |
+| 0.3.6 | Build `/angular-scan-tests` skill | Test coverage analysis: missing tests, weak assertions, flaky test detection | 0.3.2 | 0.5d |
+| 0.3.7 | Build `/angular-scan-deploy` skill | Deployment readiness: build config, bundle size, environment configs | 0.3.2 | 0.5d |
+| 0.3.8 | Build `/angular-scan-git` skill | Git history analysis: churn hotspots, contributor patterns, recent changes | 0.3.2 | 0.5d |
+| 0.3.9 | Build `/angular-scan-docs` skill | Documentation coverage: TSDoc completeness, README freshness, inline comments | 0.3.2 | 0.5d |
+| 0.3.10 | Build `/angular-scan-features` skill | Feature inventory: routes, components, services, guards, interceptors | 0.3.2 | 0.5d |
+| 0.3.11 | Build `/angular-explain` skill | Explain codebase patterns, architecture decisions, Angular concepts in context | 0.3.2 | 0.5d |
+| 0.3.12 | Build `/angular-compatibility` skill | Version matrix + compatibility checks (Angular/PrimeNG/AG Grid/RxJS/TS) | 0.3.2, Stage 0.2 | 1d |
+| **Engineer sub-agent** | | | | |
+| 0.3.13 | Create `@angular-engineer` sub-agent | `.github/agents/angular-engineer.agent.md` — code generation, migration, refactoring, doc generation | 0.3.1 | 1d |
+| 0.3.14 | Build `/angular-generate-component` skill | Scaffold Angular component with template, styles, tests, story | 0.3.13 | 1d |
+| 0.3.15 | Build `/angular-generate-service` skill | Scaffold Angular service with injection, tests | 0.3.13 | 0.5d |
+| 0.3.16 | Build `/angular-generate-route` skill | Scaffold route with guard, resolver, lazy loading | 0.3.13 | 0.5d |
+| 0.3.17 | Build `/angular-migrate-standalone` skill | Migrate NgModule-based components to standalone | 0.3.13, Stage 0.2 | 1d |
+| 0.3.18 | Build `/angular-migrate-signals` skill | Migrate Observable/BehaviorSubject patterns to Angular signals | 0.3.13, Stage 0.2 | 1d |
+| 0.3.19 | Build `/angular-migrate-control-flow` skill | Migrate *ngIf/*ngFor to @if/@for control flow syntax | 0.3.13, Stage 0.2 | 0.5d |
+| 0.3.20 | Build `/angular-migrate-jest` skill | Migrate Karma/Jasmine tests to Jest | 0.3.13 | 1d |
+| 0.3.21 | Build `/angular-migrate-playwright` skill | Migrate Protractor/Cypress e2e tests to Playwright | 0.3.13 | 1d |
+| 0.3.22 | Build `/angular-migrate-version` skill | Major version upgrade: Angular N → N+1 with breaking change resolution | 0.3.13, Stage 0.2 | 1.5d |
+| 0.3.23 | Build `/angular-refactor` skill | Pattern-based refactoring: extract component, extract service, simplify RxJS chains | 0.3.13 | 1d |
+| 0.3.24 | Build `/angular-docs-generate` skill | Generate TSDoc for undocumented code (replaces /code-comment-generate for Angular) | 0.3.13 | 0.5d |
+| 0.3.25 | Build `/angular-docs-repair` skill | Fix JSDoc → TSDoc, repair broken doc references | 0.3.13 | 0.5d |
+| 0.3.26 | Build ts-morph semantic adapter | `scripts/semantic/adapters/typescript/` — generate-summary.ts, analyze-migrations.ts, transform.ts | 0.3.17 | 2d |
+| 0.3.27 | Integrate ts-morph into engineer skills | Wire migrate skills to use transform.ts for standalone, signals, control flow | 0.3.26 | 1d |
+| **Verifier sub-agent** | | | | |
+| 0.3.28 | Create `@angular-verifier` sub-agent | `.github/agents/angular-verifier.agent.md` — testing, review, validation (replaces /orch-validate for Angular domain) | 0.3.1 | 1d |
+| 0.3.29 | Build `/angular-test-unit` skill | Run/generate unit tests (Jest), analyze results, suggest fixes | 0.3.28 | 1d |
+| 0.3.30 | Build `/angular-test-e2e` skill | Run/generate e2e tests (Playwright), analyze results | 0.3.28 | 1d |
+| 0.3.31 | Build `/angular-test-lint` skill | Run linting (ESLint + Angular-specific rules), auto-fix, report | 0.3.28 | 0.5d |
+| 0.3.32 | Build `/angular-review` skill | Code review against Angular best practices, anti-patterns, a11y | 0.3.28 | 1d |
+| 0.3.33 | Build `/angular-docs-audit` skill | Audit documentation coverage and quality | 0.3.28 | 0.5d |
+| **Integration** | | | | |
+| 0.3.34 | Build `/present-deck` shared skill | `.github/skills/present-deck/SKILL.md` — generate Mermaid/Markdown presentation decks from scan/audit data (shared skill under @orch, replaces @showcase) | Stage 0.0 | 1.5d |
+| 0.3.35 | Build `/present-dashboard` shared skill | `.github/skills/present-dashboard/SKILL.md` — generate status dashboards from audit/scan data (shared skill under @orch) | Stage 0.0 | 1d |
+| 0.3.36 | Build override system | `.github/skill-overrides/` structure, overrides.yaml schema, override resolution in agent instructions | 0.3.14 | 1d |
+| 0.3.37 | Build internal library skills (/hds, /elevate) | `.github/skills/hds/SKILL.md` + `.github/skills/elevate/SKILL.md` — internal component lib and platform integration | 0.3.14 | 2.5d |
+| 0.3.38 | Test all skills against sample Angular project | Verify each skill produces correct output through coordinator → sub-agent → skill chain | 0.3.3–0.3.37 | 3d |
 
-**Stage total: ~15 days**
+**Stage total: ~22 days**
 
 ### Stage 0.4 — Pilot Deployment
 
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
 | 0.4.1 | Identify 2-3 pilot teams (Angular projects) | Team list, repo list, current Angular versions | None | 1d |
-| 0.4.2 | Scan pilot repos | Architecture docs + pattern inventories per repo | 0.1.8, 0.4.1 | 2d |
-| 0.4.3 | Run drift detection on pilot repos | Drift reports per repo | 0.1.10, 0.4.2 | 1d |
-| 0.4.4 | Deploy ORCH to pilot repos | Copy agents, skills, instructions, references into each repo's .github/ | 0.3.11 | 1d |
-| 0.4.5 | Pilot team onboarding sessions | Walk teams through available agents, skills, slash commands | 0.4.4 | 1d |
+| 0.4.2 | Scan pilot repos | Architecture docs + pattern inventories per repo (via @angular-planner scan skills) | 0.3.38, 0.4.1 | 2d |
+| 0.4.3 | Run drift detection on pilot repos | Drift reports per repo | 0.1.9, 0.4.2 | 1d |
+| 0.4.4 | Deploy ORCH to pilot repos | Copy agents, skills, instructions, references, `.orch/config.yaml` into each repo's .github/ | 0.3.38 | 1d |
+| 0.4.5 | Pilot team onboarding sessions | Walk teams through available agents, skills, slash commands, role-based sub-agents | 0.4.4 | 1d |
 | 0.4.6 | Collect feedback (2-week sprint) | Feedback log — what worked, what didn't, what's missing | 0.4.5 | 10d |
 | 0.4.7 | Measure pilot metrics via audit data | Pattern adherence (from audit adherence scores), review turnaround, token consumption, developer satisfaction | 0.4.6 | 2d |
-| 0.4.8 | Generate first audit reports | Run `/orch-audit-usage`, `/orch-audit-tokens`, `/orch-audit-compliance` on pilot data | 0.4.7 | 0.5d |
+| 0.4.8 | Generate first audit reports | Run `/audit-usage`, `/audit-tokens`, `/audit-compliance` on pilot data | 0.4.7 | 0.5d |
 
 **Stage total: ~18.5 days (includes 10-day feedback period)**
 
-### Stage 0.5 — Showcase Agent & Explain Skill
-
-| # | Task | Deliverable | Dependencies | Est. |
-|---|------|-------------|-------------|------|
-| 0.5.1 | Create @showcase agent | `marketplace/.github/agents/showcase.agent.md` | Stage 0.3 | 0.5d |
-| 0.5.2 | Build /present skill | `marketplace/.github/skills/present/` with templates + assets | 0.5.1 | 2d |
-| 0.5.3 | Build /dashboard skill | `marketplace/.github/skills/dashboard/` | 0.5.1 | 1d |
-| 0.5.4 | Build /explain skill | `marketplace/.github/skills/explain/` | Stage 0.1 | 1d |
-
-**Stage total: ~4.5 days**
-
-**Phase 0 total: ~10 weeks**
+**Phase 0 total: ~11 weeks**
 
 ---
 
 ## Phase 1 — Expand
 
-**Goal:** Build remaining domains, add governance, iterate on feedback.
+**Goal:** Build remaining domains (each following the coordinator + planner + engineer + verifier pattern), add governance, iterate on feedback.
 
 ### Stage 1.1 — Pilot Feedback Iteration
 
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
 | 1.1.1 | Analyze pilot feedback | Prioritized list of improvements | Phase 0 complete | 1d |
-| 1.1.2 | Update angular-typescript instructions | Revised instructions based on real usage | 1.1.1 | 1d |
+| 1.1.2 | Update Angular planner/engineer/verifier instructions | Revised instructions based on real usage | 1.1.1 | 1d |
 | 1.1.3 | Update/add Angular skills per feedback | New or modified skills | 1.1.1 | 2d |
 | 1.1.4 | Fix doc quality issues | Updated reference docs | 1.1.1 | 1d |
 | 1.1.5 | Update registry and refresh stale docs | Current registry status | 1.1.4 | 0.5d |
@@ -192,71 +209,75 @@ The audit framework is built before anything else. Every subsequent stage is aut
 
 ### Stage 1.2 — Backend Java Spring Boot Domain
 
+> **Architecture:** Follows the same role-based pattern — `@springboot` coordinator with `@springboot-planner`, `@springboot-engineer`, `@springboot-verifier` sub-agents and granular domain skills.
+
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
 | 1.2.1 | Register + convert Spring Boot reference docs | `.github/references/spring-boot/` | Doc pipeline | 2d |
-| 1.2.2 | Create backend-springboot agent | `.github/agents/backend-springboot.agent.md` | None | 0.5d |
-| 1.2.3 | Create java-springboot instructions | `.github/instructions/java-springboot.instructions.md` | 1.2.1 | 2d |
-| 1.2.4 | Build /spring-rest-endpoint skill | `.github/skills/spring-rest-endpoint/SKILL.md` + `templates/` | 1.2.3 | 1d |
-| 1.2.5 | Build Spring Boot test generation skill | `.github/skills/spring-test/SKILL.md` | 1.2.3 | 1d |
-| 1.2.6 | Build Spring Boot PR review skill | `.github/skills/spring-pr-review/SKILL.md` | 1.2.3 | 1d |
-| 1.2.7 | Build Spring Boot migration skills | Version upgrade, security migration skills | 1.2.1 | 2d |
-| 1.2.8 | Test against sample Spring Boot project | Verify output quality | 1.2.4–1.2.7 | 1d |
+| 1.2.2 | Create `@springboot` coordinator agent | `.github/agents/springboot.agent.md` — triage + routing | None | 0.5d |
+| 1.2.3 | Create `@springboot-planner` sub-agent | `.github/agents/springboot-planner.agent.md` + planner skills: /springboot-scan-deps, /springboot-scan-arch, /springboot-scan-quality, /springboot-scan-tests, /springboot-explain, /springboot-compatibility | 1.2.1 | 3d |
+| 1.2.4 | Create `@springboot-engineer` sub-agent | `.github/agents/springboot-engineer.agent.md` + engineer skills: /springboot-generate-endpoint, /springboot-generate-service, /springboot-migrate-version, /springboot-migrate-security, /springboot-refactor, /springboot-docs-generate | 1.2.3 | 4d |
+| 1.2.5 | Create `@springboot-verifier` sub-agent | `.github/agents/springboot-verifier.agent.md` + verifier skills: /springboot-test-unit, /springboot-test-integration, /springboot-test-lint, /springboot-review, /springboot-docs-audit | 1.2.4 | 3d |
+| 1.2.6 | Test against sample Spring Boot project | Verify full coordinator → sub-agent → skill chain | 1.2.5 | 1.5d |
 
-**Stage total: ~10.5 days**
+**Stage total: ~14 days**
 
 ### Stage 1.3 — Backend Python FastAPI Domain
+
+> **Architecture:** Same role-based pattern — `@fastapi` coordinator with `@fastapi-planner`, `@fastapi-engineer`, `@fastapi-verifier` sub-agents.
 
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
 | 1.3.1 | Register + convert FastAPI reference docs | `.github/references/fastapi/` | Doc pipeline | 1.5d |
-| 1.3.2 | Create backend-fastapi agent | `.github/agents/backend-fastapi.agent.md` | None | 0.5d |
-| 1.3.3 | Create python-fastapi instructions | `.github/instructions/python-fastapi.instructions.md` | 1.3.1 | 2d |
-| 1.3.4 | Build FastAPI route scaffolding skill | `.github/skills/fastapi-route/SKILL.md` + `templates/` | 1.3.3 | 1d |
-| 1.3.5 | Build FastAPI test generation skill | `.github/skills/fastapi-test/SKILL.md` | 1.3.3 | 1d |
-| 1.3.6 | Build FastAPI PR review skill | `.github/skills/fastapi-pr-review/SKILL.md` | 1.3.3 | 1d |
-| 1.3.7 | Test against sample FastAPI project | Verify output quality | 1.3.4–1.3.6 | 1d |
+| 1.3.2 | Create `@fastapi` coordinator agent | `.github/agents/fastapi.agent.md` — triage + routing | None | 0.5d |
+| 1.3.3 | Create `@fastapi-planner` sub-agent | `.github/agents/fastapi-planner.agent.md` + planner skills: /fastapi-scan-deps, /fastapi-scan-arch, /fastapi-scan-quality, /fastapi-scan-tests, /fastapi-explain, /fastapi-compatibility | 1.3.1 | 3d |
+| 1.3.4 | Create `@fastapi-engineer` sub-agent | `.github/agents/fastapi-engineer.agent.md` + engineer skills: /fastapi-generate-route, /fastapi-generate-service, /fastapi-migrate-version, /fastapi-refactor, /fastapi-docs-generate | 1.3.3 | 3d |
+| 1.3.5 | Create `@fastapi-verifier` sub-agent | `.github/agents/fastapi-verifier.agent.md` + verifier skills: /fastapi-test-unit, /fastapi-test-integration, /fastapi-test-lint, /fastapi-review, /fastapi-docs-audit | 1.3.4 | 2.5d |
+| 1.3.6 | Test against sample FastAPI project | Verify full coordinator → sub-agent → skill chain | 1.3.5 | 1d |
 
-**Stage total: ~8 days**
+**Stage total: ~11.5 days**
 
 ### Stage 1.4 — Operations CI (Glue) Domain
+
+> **Architecture:** Same role-based pattern — `@ops-ci` coordinator with `@ops-ci-planner`, `@ops-ci-engineer`, `@ops-ci-verifier` sub-agents.
 
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
 | 1.4.1 | Register + convert GitHub Actions reference docs | `.github/references/github-actions/` | Doc pipeline | 1d |
-| 1.4.2 | Create ops-ci agent | `.github/agents/ops-ci.agent.md` | None | 0.5d |
-| 1.4.3 | Create ci-github-actions instructions | `.github/instructions/ci-github-actions.instructions.md` | 1.4.1 | 1.5d |
-| 1.4.4 | Build /ci-pipeline skill | `.github/skills/ci-pipeline/SKILL.md` | 1.4.3 | 1d |
-| 1.4.5 | Build CI optimization skill | `.github/skills/ci-optimize/SKILL.md` | 1.4.3 | 1d |
-| 1.4.6 | Test against sample workflows | Verify output quality | 1.4.4–1.4.5 | 0.5d |
+| 1.4.2 | Create `@ops-ci` coordinator agent | `.github/agents/ops-ci.agent.md` — triage + routing | None | 0.5d |
+| 1.4.3 | Create `@ops-ci-planner` sub-agent | `.github/agents/ops-ci-planner.agent.md` + planner skills: /ci-scan-workflows, /ci-scan-deps, /ci-scan-quality, /ci-explain, /ci-compatibility | 1.4.1 | 2d |
+| 1.4.4 | Create `@ops-ci-engineer` sub-agent | `.github/agents/ops-ci-engineer.agent.md` + engineer skills: /ci-generate-pipeline, /ci-generate-action, /ci-optimize, /ci-migrate, /ci-docs-generate | 1.4.3 | 2.5d |
+| 1.4.5 | Create `@ops-ci-verifier` sub-agent | `.github/agents/ops-ci-verifier.agent.md` + verifier skills: /ci-test-workflow, /ci-review, /ci-docs-audit | 1.4.4 | 1.5d |
+| 1.4.6 | Test against sample workflows | Verify full coordinator → sub-agent → skill chain | 1.4.5 | 0.5d |
 
-**Stage total: ~5.5 days**
+**Stage total: ~8 days**
 
 ### Stage 1.5 — Operations CD (DPS) Domain
+
+> **Architecture:** Same role-based pattern — `@ops-cd` coordinator with `@ops-cd-planner`, `@ops-cd-engineer`, `@ops-cd-verifier` sub-agents.
 
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
 | 1.5.1 | Register + convert internal deployment platform docs | `.github/references/deployment/` | Doc pipeline | 1.5d |
-| 1.5.2 | Create ops-cd agent | `.github/agents/ops-cd.agent.md` | None | 0.5d |
-| 1.5.3 | Create cd-deployment instructions | `.github/instructions/cd-deployment.instructions.md` | 1.5.1 | 1.5d |
-| 1.5.4 | Build /cd-deploy skill | `.github/skills/cd-deploy/SKILL.md` | 1.5.3 | 1d |
-| 1.5.5 | Build rollback planning skill | `.github/skills/cd-rollback/SKILL.md` | 1.5.3 | 1d |
-| 1.5.6 | Test against sample deployment configs | Verify output quality | 1.5.4–1.5.5 | 0.5d |
+| 1.5.2 | Create `@ops-cd` coordinator agent | `.github/agents/ops-cd.agent.md` — triage + routing | None | 0.5d |
+| 1.5.3 | Create `@ops-cd-planner` sub-agent | `.github/agents/ops-cd-planner.agent.md` + planner skills: /cd-scan-configs, /cd-scan-deps, /cd-explain, /cd-compatibility | 1.5.1 | 2d |
+| 1.5.4 | Create `@ops-cd-engineer` sub-agent | `.github/agents/ops-cd-engineer.agent.md` + engineer skills: /cd-generate-deploy, /cd-generate-rollback, /cd-migrate, /cd-docs-generate | 1.5.3 | 2d |
+| 1.5.5 | Create `@ops-cd-verifier` sub-agent | `.github/agents/ops-cd-verifier.agent.md` + verifier skills: /cd-test-deploy, /cd-review, /cd-docs-audit | 1.5.4 | 1.5d |
+| 1.5.6 | Test against sample deployment configs | Verify full coordinator → sub-agent → skill chain | 1.5.5 | 0.5d |
 
-**Stage total: ~6 days**
+**Stage total: ~8 days**
 
 ### Stage 1.6 — Model Benchmarking
 
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
-| 1.6.1 | Create benchmark test suites per domain | `skills/orch-benchmark-models/test-suites/angular-benchmark.md`, springboot, fastapi | All domains complete | 1.5d |
-| 1.6.2 | Build `/orch-benchmark-models` skill | `.github/skills/orch-benchmark-models/SKILL.md` — runs test suite across models, generates comparison report | 1.6.1 | 1d |
-| 1.6.3 | Run initial benchmarks for Angular domain | Benchmark report: Claude Sonnet 4 vs GPT-4.1 vs o4-mini across all Angular skills | 1.6.2 | 1d |
-| 1.6.4 | Run benchmarks for all domains | Benchmark reports per domain | 1.6.3 | 2d |
-| 1.6.5 | Update agent model recommendations | Pin optimal model per agent based on benchmark data | 1.6.4 | 0.5d |
-| 1.6.6 | Create model guide for consumers | `docs/model-guide.md` — which model for which task, trade-offs | 1.6.5 | 0.5d |
+| 1.6.1 | Create benchmark test suites per domain | `skills/audit-benchmark/test-suites/angular-benchmark.md`, springboot, fastapi | All domains complete | 1.5d |
+| 1.6.2 | Run initial benchmarks for Angular domain | Benchmark report: Claude Sonnet 4 vs GPT-4.1 vs o4-mini across all Angular skills | 1.6.1 | 1d |
+| 1.6.3 | Run benchmarks for all domains | Benchmark reports per domain | 1.6.2 | 2d |
+| 1.6.4 | Update agent model recommendations | Pin optimal model per agent based on benchmark data | 1.6.3 | 0.5d |
+| 1.6.5 | Create model guide for consumers | `docs/model-guide.md` — which model for which task, trade-offs | 1.6.4 | 0.5d |
 
-**Stage total: ~6.5 days**
+**Stage total: ~5.5 days**
 
 ### Stage 1.7 — Governance Hooks
 
@@ -275,16 +296,16 @@ Note: Prompt auditing is already handled by the audit framework (Stage 0.0). Gov
 
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
-| 1.8.1 | Create deployment guide | docs/deployment-guide.md — includes audit setup instructions | All domains complete | 1d |
-| 1.8.2 | Create onboarding materials | Quick-start guide per domain + audit dashboard walkthrough | 1.8.1 | 1d |
+| 1.8.1 | Create deployment guide | docs/deployment-guide.md — includes audit setup instructions, `.orch/config.yaml` setup, pre-flight checks | All domains complete | 1d |
+| 1.8.2 | Create onboarding materials | Quick-start guide per domain + audit dashboard walkthrough + role-based agent explanation | 1.8.1 | 1d |
 | 1.8.3 | Roll out to remaining Angular teams | ORCH + audit deployed to all Angular repos | 1.8.2 | 2d |
 | 1.8.4 | Roll out to Java/Python teams | ORCH + audit deployed to all backend repos | 1.8.2 | 2d |
 | 1.8.5 | Roll out to Ops teams | ORCH + audit deployed to all CI/CD repos | 1.8.2 | 1d |
-| 1.8.6 | Collect org-wide metrics via audit reports | `/orch-audit-usage` + `/orch-audit-tokens` across all repos | 1.8.3–1.8.5 | 2d |
+| 1.8.6 | Collect org-wide metrics via audit reports | `/audit-usage` + `/audit-tokens` across all repos | 1.8.3–1.8.5 | 2d |
 
 **Stage total: ~9 days**
 
-**Phase 1 total: ~8 weeks**
+**Phase 1 total: ~9 weeks**
 
 ---
 
@@ -296,10 +317,10 @@ Note: Prompt auditing is already handled by the audit framework (Stage 0.0). Gov
 
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
-| 2.1.1 | Design handoff protocol between agents | Documented handoff patterns | Phase 1 complete | 1d |
-| 2.1.2 | Create orchestrator agent | `.github/agents/orchestrator.agent.md` with handoffs to all domain agents | 2.1.1 | 1d |
-| 2.1.3 | Define triage rules | When to route to which domain agent | 2.1.1 | 1d |
-| 2.1.4 | Test single-domain delegation | Orchestrator correctly routes to individual agents | 2.1.2, 2.1.3 | 1d |
+| 2.1.1 | Design handoff protocol between agents | Documented handoff patterns (coordinator → sub-agent → skill chain) | Phase 1 complete | 1d |
+| 2.1.2 | Create orchestrator agent | `.github/agents/orchestrator.agent.md` with handoffs to all domain coordinators | 2.1.1 | 1d |
+| 2.1.3 | Define triage rules | When to route to which domain coordinator | 2.1.1 | 1d |
+| 2.1.4 | Test single-domain delegation | Orchestrator correctly routes to domain coordinators, which delegate to sub-agents | 2.1.2, 2.1.3 | 1d |
 | 2.1.5 | Test cross-domain delegation | Orchestrator chains frontend → backend → CI for end-to-end tasks | 2.1.4 | 2d |
 
 **Stage total: ~6 days**
@@ -310,7 +331,7 @@ Note: Prompt auditing is already handled by the audit framework (Stage 0.0). Gov
 |---|------|-------------|-------------|------|
 | 2.2.1 | Build end-to-end feature workflow | Orchestrator scaffolds frontend + backend + tests + CI for a new feature | 2.1.5 | 3d |
 | 2.2.2 | Build cross-stack migration workflow | Orchestrator coordinates Angular upgrade + backend API changes + CI updates | 2.1.5 | 3d |
-| 2.2.3 | Build full-stack PR review workflow | Orchestrator delegates PR review to domain agents based on changed files | 2.1.5 | 2d |
+| 2.2.3 | Build full-stack PR review workflow | Orchestrator delegates PR review to domain verifiers based on changed files | 2.1.5 | 2d |
 | 2.2.4 | Test with pilot teams | Validate cross-domain workflows on real projects | 2.2.1–2.2.3 | 5d |
 
 **Stage total: ~13 days**
@@ -328,11 +349,11 @@ Note: Prompt auditing is already handled by the audit framework (Stage 0.0). Gov
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
 | 3.1.1 | Define plugin structure per domain | PLUGIN.md schema, versioning strategy | Phase 2 complete | 1d |
-| 3.1.2 | Package frontend-ts-angular as plugin | `plugins/frontend-ts-angular/` with all artifacts | 3.1.1 | 1d |
-| 3.1.3 | Package backend-java-springboot as plugin | `plugins/backend-java-springboot/` | 3.1.1 | 1d |
-| 3.1.4 | Package backend-python-fastapi as plugin | `plugins/backend-python-fastapi/` | 3.1.1 | 1d |
-| 3.1.5 | Package operations-ci-glue as plugin | `plugins/operations-ci-glue/` | 3.1.1 | 0.5d |
-| 3.1.6 | Package operations-cd-dps as plugin | `plugins/operations-cd-dps/` | 3.1.1 | 0.5d |
+| 3.1.2 | Package frontend-ts-angular as plugin | `plugins/frontend-ts-angular/` with coordinator + 3 sub-agents + all skills | 3.1.1 | 1d |
+| 3.1.3 | Package backend-java-springboot as plugin | `plugins/backend-java-springboot/` with coordinator + 3 sub-agents + all skills | 3.1.1 | 1d |
+| 3.1.4 | Package backend-python-fastapi as plugin | `plugins/backend-python-fastapi/` with coordinator + 3 sub-agents + all skills | 3.1.1 | 1d |
+| 3.1.5 | Package operations-ci-glue as plugin | `plugins/operations-ci-glue/` with coordinator + 3 sub-agents + all skills | 3.1.1 | 0.5d |
+| 3.1.6 | Package operations-cd-dps as plugin | `plugins/operations-cd-dps/` with coordinator + 3 sub-agents + all skills | 3.1.1 | 0.5d |
 | 3.1.7 | Package docs as plugin | `plugins/docs/` | 3.1.1 | 0.5d |
 | 3.1.8 | Package governance hooks as plugin | `plugins/governance/` | 3.1.1 | 0.5d |
 | 3.1.9 | Test plugin installation flow | Verify `copilot plugin install` works for each | 3.1.2–3.1.8 | 2d |
@@ -360,11 +381,23 @@ Note: Prompt auditing is already handled by the audit framework (Stage 0.0). Gov
 
 | Phase | Duration | Key Deliverable |
 |-------|----------|----------------|
-| **Phase 0: Foundation** | ~10 weeks | Audit framework + doc pipeline (incl. source-embedded extraction) + Angular domain + pilot validation |
-| **Phase 1: Expand** | ~8 weeks | All 5 domains + governance + model benchmarking + org rollout |
+| **Phase 0: Foundation** | ~11 weeks | Audit framework + pre-flight checks + config.yaml + doc pipeline (reference supply chain) + Angular domain (coordinator + planner + engineer + verifier) + shared presentation skills + pilot validation |
+| **Phase 1: Expand** | ~9 weeks | All 5 domains (each with coordinator + planner + engineer + verifier) + governance + model benchmarking + org rollout |
 | **Phase 2: Orchestrate** | ~4 weeks | Master orchestrator + cross-domain workflows |
 | **Phase 3: Distribute** | ~3 weeks | Plugin packaging + internal marketplace |
-| **Total** | ~25 weeks | Full ORCH platform with complete audit observability |
+| **Total** | ~27 weeks | Full ORCH platform with role-based agents, granular skills, pre-flight checks, per-run telemetry, and complete audit observability |
+
+---
+
+## Instruction Files Reference
+
+| File | Status | Notes |
+|------|--------|-------|
+| `auto-mode.instructions.md` | **Keep** | Active — controls autonomous operation behavior |
+| `workflows.instructions.md` | **Removed** | Absorbed into agent handoff chain — coordinator → sub-agent routing replaces static workflow definitions |
+| `angular-typescript.instructions.md` | **Absorbed** | Content absorbed into Angular skill references — planner/engineer/verifier each reference relevant sections |
+| `internal-component-lib.instructions.md` | **Reference doc** | Becomes `.github/references/internal/ui-components.md` via doc pipeline |
+| `doc-conversion.instructions.md` | **Absorbed** | Content absorbed into `@docs` agent internals |
 
 ---
 
@@ -390,35 +423,38 @@ Note: Prompt auditing is already handled by the audit framework (Stage 0.0). Gov
 - [ ] **Token estimation** produces per-session input/output/total estimates
 - [ ] **Adherence checking** scores generated code against instruction rules
 - [ ] **Audit report skills** produce usage, token, compliance, and drift reports
-- [ ] Doc pipeline converts external URLs and local files to token-efficient markdown
+- [ ] **Pre-flight checks operational** — `@orch-preflight` validates config, boundaries, references, tool availability before sessions
+- [ ] **`.orch/config.yaml`** controlling workflow behavior: model selection, token budgets, audit level, agent routing
+- [ ] **`.orch/runs/`** capturing per-run telemetry with structured audit records
+- [ ] **`.github/copilot-instructions.md`** global rules enforced across all agents
+- [ ] Doc pipeline converts external URLs and local files to token-efficient markdown (reference supply chain: fetch → status → refresh → drift)
 - [ ] Doc pipeline sessions produce complete audit trails
 - [ ] Registry tracks all sources with status and staleness
-- [ ] Doc-scan produces architecture docs with git enrichment for a real repo
-- [ ] Doc-drift identifies mismatches between docs and code
-- [ ] Frontend Angular agent, skills, and instructions are functional
+- [ ] **Role-based agents working with handoffs** — Angular coordinator delegates to planner/engineer/verifier sub-agents
+- [ ] **Granular skills functional** — all Angular planner (10), engineer (12), and verifier (5) skills tested
+- [ ] **Shared presentation skills** (/present-deck, /present-dashboard) working under @orch
 - [ ] At least 2 pilot teams actively using ORCH
 - [ ] Pilot feedback collected and analyzed, informed by audit data
 - [ ] **Status bar extension** shows glanceable progress for bounded tasks and quality indicator
 - [ ] **Notifications** fire only for: needs input, something broke, quality degraded — nothing else
 - [ ] **Context rot** detected and surfaced as "quality declining" before user notices degradation
 - [ ] **Override system** works: team can create temporary override with 90-day expiry
-- [ ] **Skills are domain-agnostic**: same /generate skill works with @angular agent using Angular references
 
 ### Phase 1 Exit Criteria
-- [ ] All 5 domain customization sets are functional and tested
+- [ ] All 5 domain customization sets are functional and tested, each with coordinator + planner + engineer + verifier
 - [ ] All domain agents registered in boundaries.yaml with declared tools and scope
 - [ ] Governance hooks (secrets scanner, tool-use gate) active in all deployed repos
-- [ ] Model benchmarks completed for all domains with recommendations documented
+- [ ] Model benchmarks completed for all domains via `/audit-benchmark` with recommendations documented
 - [ ] Org-wide rollout to all target teams complete
 - [ ] Adoption metrics collected via audit reports (adherence scores, token consumption, violation rates)
 
 ### Phase 2 Exit Criteria
-- [ ] Orchestrator correctly routes to domain agents
+- [ ] Orchestrator correctly routes to domain coordinators, which delegate to role-based sub-agents
 - [ ] At least 2 cross-domain workflows validated with pilot teams
 - [ ] No regression in individual domain agent quality
 
 ### Phase 3 Exit Criteria
-- [ ] All domains packaged as installable plugins
+- [ ] All domains packaged as installable plugins (including coordinator + sub-agents + skills per domain)
 - [ ] Internal marketplace operational with `copilot plugin install` working
 - [ ] CONTRIBUTING.md and review process in place
 - [ ] At least 1 external team has contributed a plugin

@@ -42,15 +42,16 @@ The goal: Copilot stops suggesting generic code and starts suggesting **your tea
 
 | Area | Description |
 |------|-------------|
-| **Audit Framework** | Foundation layer: session tracking, token estimation, tool boundary enforcement, file scope checks, instruction adherence scoring, behavioral drift detection, compliance reporting |
-| **Doc Agent** | An agent + skills for converting, curating, scanning, and managing reference documentation — fully integrated with audit |
-| **5 Domain Customization Sets** | Agents, skills, and instructions for: @angular, @springboot, @fastapi, @ci, @cd. Skills are generic actions (/generate, /migrate, /test, /review, /refactor) that work across all domains. |
+| **Audit Framework** | Foundation layer: session tracking, token estimation, tool boundary enforcement, file scope checks, instruction adherence scoring, behavioral drift detection, compliance reporting. Pre-flight checks via @orch-preflight. Per-run telemetry in `.orch/runs/`. |
+| **Doc Agent** | @docs agent narrowed to **reference supply chain** — converting, curating, refreshing, and drift-checking reference documentation. Codebase scanning and explanation moved to domain planners. |
+| **5 Domain Customization Sets** | Agents, skills, and instructions for: @angular, @springboot, @fastapi, @ci, @cd. Each domain uses a **role-based sub-agent pattern**: coordinator (triage + loop), planner (scan + explain + plan), engineer (generate + migrate + refactor), verifier (test + review + audit). Skills are **granular and domain-prefixed** (e.g., `/angular-scan-deps`, `/angular-migrate-signals`). |
 | **Skill Override System** | Temporary team overrides with 90-day expiry and mandatory path-to-central tracking. Escape hatch for domain teams, not a permanent customization layer. |
 | **Documentation Registry** | A YAML-based registry tracking all doc sources, versions, scan snapshots, and drift status |
 | **Validation & Benchmarking** | Automated output validation (deterministic + heuristic checks) and model quality benchmarking across skills |
 | **Governance Hooks** | Lifecycle hooks for secrets scanning, prompt auditing, and tool-use gating |
-| **Master Orchestrator** | An agent that triages requests and delegates to domain-specific agents via handoffs |
-| **Showcase Agent** | @showcase agent with /present (slide decks) and /dashboard (metrics dashboard) skills for presenting ORCH data in forums |
+| **Master Orchestrator** | @orch agent that triages requests and delegates to domain-specific agents via handoffs. Owns shared presentation skills (`/present-deck`, `/present-dashboard`). |
+| **Pre-flight Agent** | @orch-preflight for environment and configuration validation before agent sessions |
+| **Per-run Telemetry** | `.orch/runs/` directory captures per-run telemetry: timing, tokens, tool calls, outcomes |
 | **Internal Marketplace** | Plugin packaging and distribution for cross-team consumption |
 
 ### 3.2 Out of Scope
@@ -105,30 +106,35 @@ Audit is the foundation layer — it is built first and everything else runs thr
 | **File scope enforcement** | `postToolUse` hook checks file edits against agent's declared `applyTo` patterns |
 | **Instruction adherence scoring** | Post-session scan of generated code against programmatic rule checks |
 | **Behavioral drift tracking** | Adherence scores over time; detects regression in agent quality |
-| **Model benchmarking** | Run same tasks across models, compare quality/speed/adherence scores; recommend best model per skill |
-| **Compliance reporting** | `/orch-audit-usage`, `/orch-audit-tokens`, `/orch-audit-compliance`, `/orch-audit-drift` |
+| **Model benchmarking** | Run same tasks across models, compare quality/speed/adherence scores; recommend best model per skill. Invoked via `/audit-benchmark`. |
+| **Compliance reporting** | `/audit-usage`, `/audit-tokens`, `/audit-compliance`, `/audit-drift`, `/audit-benchmark` |
+| **Pre-flight checks** | @orch-preflight agent validates environment, dependencies, and configuration before agent sessions. Replaces the former `/orch-validate` skill — validation is now the domain verifier's responsibility during execution; pre-flight handles readiness checks. |
 | **Context rot detection** | Track token accumulation and adherence score within a session; detect quality degradation; surface as "quality declining" (not raw token metrics) via status bar and agent self-warn |
 | **Session status tracking** | Track work progress for bounded tasks (migration from scan, doc conversion from registry); provide % complete when denominator is known |
 | **Notification system** | Three channels: status bar (glanceable, silent), agent in-chat (primary), VS Code toast (interrupt-only for decisions/errors/quality). OS notification only for critical security alerts |
-| **Sub-agent delegation** | Coordinators (@docs, @angular) delegate heavy work to internal worker sub-agents (@scan-worker, @migrate-worker, @doc-convert-worker) for context isolation. Only results flow back. Reduces context rot by 80%+ for scanning and migration workflows. |
+| **Sub-agent delegation** | Domain coordinators (@angular, @springboot, etc.) delegate to role-based sub-agents: @{domain}-planner (scan, explain, plan), @{domain}-engineer (generate, migrate, refactor), @{domain}-verifier (test, review, audit). Only results flow back. Reduces context rot by 80%+ for scanning and migration workflows. |
 | **Semantic analysis** | Type-aware codebase analysis via language-specific adapters (ts-morph for TypeScript, adapter pattern for Java/Python). Generates lossless semantic summaries for agent context and executes precise, formatting-preserving transforms for migrations. |
 
-**Audit storage:** JSON log files per session in `.orch/audit/`, append-only violation log, daily/weekly metrics rollups. Designed for export to enterprise observability stacks (Splunk, ELK, Datadog).
+**Audit storage:** JSON log files per session in `.orch/audit/`, append-only violation log, daily/weekly metrics rollups. Per-run telemetry (timing, tokens, tool calls, outcomes) in `.orch/runs/`. Designed for export to enterprise observability stacks (Splunk, ELK, Datadog).
 
-### 5.1 Documentation Pipeline (Doc Agent)
+### 5.1 Documentation Pipeline (Doc Agent — Reference Supply Chain)
 
-The doc agent ensures all other agents and skills have clean, token-efficient reference material. It operates within the audit framework — every conversion, scan, and drift check is tracked.
+The @docs agent is **narrowed to reference supply chain** — ensuring all other agents and skills have clean, token-efficient reference material. It operates within the audit framework — every conversion and drift check is tracked.
 
-| Capability | Description |
-|------------|-------------|
-| **Convert** | Transform source content (HTML, YAML, JSON, PDF, Confluence export) and source-embedded docs (JSDoc, TSDoc, Compodoc, PyDoc, Javadoc) into concise, token-efficient markdown. For source-embedded formats, runs the appropriate generator tool (typedoc, compodoc, sphinx, javadoc) to extract API surfaces before converting. |
-| **Register** | Add new documentation sources to the central registry |
-| **Refresh** | Re-fetch and re-convert sources when they become stale |
-| **Status** | Dashboard showing all sources, versions, staleness, and drift |
-| **Scan** | Deep-scan a codebase to produce architecture documentation, enriched with git history. Includes inline documentation coverage inventory — detects which doc format (JSDoc/TSDoc/Compodoc/PyDoc/Javadoc) is present, coverage percentage, and quality assessment |
-| **Scan Diff** | Compare two scan snapshots to track migration progress |
-| **Drift Detection** | Compare reference docs against code scans to surface mismatches |
-| **Explain** | Answer developer questions about ORCH architecture, agent capabilities, skill usage, and customization options using curated internal knowledge |
+Capabilities that moved out of @docs:
+- **Codebase scanning** → domain planners (e.g., `/angular-scan-arch`, `/angular-scan-deps`)
+- **Explain** → domain planners (e.g., `/angular-explain`)
+- **Code documentation** → domain agents (e.g., `/angular-docs-audit`, `/angular-docs-generate`, `/angular-docs-repair`)
+- **Version/compatibility matrix** → domain planners (e.g., `/angular-compatibility`)
+
+**@docs skills:**
+
+| Skill | Description |
+|-------|-------------|
+| `/docs-fetch` | Transform source content (HTML, YAML, JSON, PDF, Confluence export) and source-embedded docs (JSDoc, TSDoc, Compodoc, PyDoc, Javadoc) into concise, token-efficient markdown. For source-embedded formats, runs the appropriate generator tool (typedoc, compodoc, sphinx, javadoc) to extract API surfaces before converting. Also registers new documentation sources to the central registry. |
+| `/docs-status` | Dashboard showing all sources, versions, staleness, and drift |
+| `/docs-refresh` | Re-fetch and re-convert sources when they become stale |
+| `/docs-drift` | Compare reference docs against code scans to surface mismatches between documentation and actual codebase state |
 
 ### 5.2 Domain Customization Sets
 
@@ -140,15 +146,19 @@ Each domain provides three layers:
 | **Skills** | Invoked on demand via /slash-commands. Task-focused. | User or agent triggers explicitly |
 | **Agents** | Selected per session. Persona with tool access. | User selects via @mention |
 
-### 5.2.1 Code Documentation Skills (cross-domain)
+### 5.2.1 Code Documentation Skills (domain-owned)
 
-All domain agents share three code documentation skills that ensure source code is properly documented — enabling the doc extraction pipeline to function.
+Code documentation skills are **no longer cross-domain shared skills**. They are owned by each domain's role-based agents, using domain-prefixed names. This ensures documentation follows domain-specific conventions and formats.
 
-| Capability | Description |
-|------------|-------------|
-| **Code Comment Audit** (`/code-comment-audit`) | Scan source code for missing, incomplete, stale, or wrong-format doc comments. Produces coverage report with prioritized fix list. Detects JSDoc/TSDoc/Compodoc/Javadoc/PyDoc format and flags misuse (e.g., JSDoc `{type}` syntax in TypeScript). |
-| **Code Comment Generate** (`/code-comment-generate`) | Add meaningful doc comments to undocumented public APIs. Reads function bodies to understand purpose — not just template `@param name - description`. Generates TSDoc for Angular/TS, Javadoc for Java, Google-style docstrings for Python. |
-| **Code Comment Repair** (`/code-comment-repair`) | Fix stale docs (signature mismatch), incomplete docs (missing @param/@returns/@throws), and wrong-format docs (JSDoc → TSDoc migration in TypeScript files). |
+**Example (Angular domain):**
+
+| Skill | Owner | Description |
+|-------|-------|-------------|
+| `/angular-docs-audit` | @angular-verifier | Scan Angular/TypeScript source for missing, incomplete, stale, or wrong-format doc comments. Produces coverage report with prioritized fix list. Detects TSDoc format and flags misuse (e.g., JSDoc `{type}` syntax in TypeScript). |
+| `/angular-docs-generate` | @angular-engineer | Add meaningful TSDoc comments to undocumented public APIs. Reads function bodies to understand purpose — not just template `@param name - description`. |
+| `/angular-docs-repair` | @angular-engineer | Fix stale docs (signature mismatch), incomplete docs (missing @param/@returns/@throws), and wrong-format docs (JSDoc to TSDoc migration in TypeScript files). |
+
+Other domains follow the same pattern: `/springboot-docs-audit`, `/fastapi-docs-generate`, etc.
 
 **Frontend doc format decision:**
 
@@ -185,12 +195,14 @@ All domain agents share three code documentation skills that ensure source code 
 | **Internal Marketplace** | Repository-based marketplace for discovery and installation |
 | **Version Management** | Track and distribute versioned customizations per target platform |
 
-### 5.6 Showcase
+### 5.6 Presentation (Shared Skills under @orch)
 
-| Capability | Description |
-|------------|-------------|
-| **Present** (`/present`) | Generate slide decks from ORCH data — audit summaries, migration progress, drift reports — formatted for stakeholder forums and architecture reviews |
-| **Dashboard** (`/dashboard`) | Build metrics dashboards from ORCH audit data — token consumption, adherence scores, adoption trends — for team leads and management visibility |
+The @showcase agent has been **removed**. Presentation capabilities are now **shared skills under @orch**, available to any agent or user via the orchestrator.
+
+| Skill | Description |
+|-------|-------------|
+| `/present-deck` | Generate slide decks from ORCH data — audit summaries, migration progress, drift reports — formatted for stakeholder forums and architecture reviews. Converts markdown to reveal.js HTML or PPTX. Supports mermaid diagrams, HDS design tokens, and dark/light themes. |
+| `/present-dashboard` | Build metrics dashboards from ORCH audit data — token consumption, adherence scores, adoption trends — for team leads and management visibility. Reads from `.orch/audit/` and `.orch/runs/` telemetry. |
 
 ---
 
@@ -208,23 +220,55 @@ All domain agents share three code documentation skills that ensure source code 
 - Accessibility (ARIA, semantic HTML, keyboard navigation)
 - Internal component library usage patterns
 
-**Skills (on-demand):**
-- `/angular-component` — scaffold component with org boilerplate
-- `/angular-service` — scaffold injectable service
-- `/angular-test` — generate unit tests per org conventions
-- `/angular-pr-review` — review PR for Angular anti-patterns
-- `/angular-migrate-standalone` — NgModules to standalone
-- `/angular-migrate-signals` — observables/inputs to signals
-- `/angular-migrate-control-flow` — *ngIf/*ngFor to @if/@for
-- `/angular-migrate-jest` — Karma to Jest/Vitest
-- `/angular-migrate-rxjs` — deprecated operator replacement
-- `/angular-refactor` — general modernization
+**Agent structure (role-based pattern):**
 
-**Agent (@angular):**
-- Deep Angular + TypeScript + RxJS expertise
-- Knows internal component library and design system
-- Access to codebase + terminal tools (ng CLI, lint, test)
-- Pinned model for consistency
+| Agent | Role | Responsibility |
+|-------|------|----------------|
+| **@angular** | Coordinator + triage + loop owner | Receives user requests, triages to the appropriate sub-agent, manages the planner-engineer-verifier loop, handles handoffs and escalations |
+| **@angular-planner** | Scan + explain + plan | Understands the codebase: scans architecture, dependencies, patterns, test coverage, deployment, git history, docs, and features. Answers questions and builds migration/upgrade plans. |
+| **@angular-engineer** | Generate + migrate + refactor | Executes changes: scaffolds components/services/routes, runs migrations, refactors code, generates and repairs documentation. |
+| **@angular-verifier** | Test + review + audit | Validates work: runs unit/e2e tests, lints, reviews code for anti-patterns, audits documentation coverage. |
+
+**Skills by sub-agent:**
+
+*@angular-planner:*
+| Skill | Description |
+|-------|-------------|
+| `/angular-scan-deps` | Scan and report on project dependencies, versions, and compatibility |
+| `/angular-scan-arch` | Produce architecture documentation (C4 model, dependency graphs) |
+| `/angular-scan-quality` | Analyze code quality metrics, complexity, and technical debt |
+| `/angular-scan-tests` | Report test coverage, test health, and testing gaps |
+| `/angular-scan-deploy` | Analyze build and deployment configuration |
+| `/angular-scan-git` | Analyze git history — churn, hotspots, authors, commit patterns |
+| `/angular-scan-docs` | Inventory inline documentation coverage and quality |
+| `/angular-scan-features` | Catalog application features and their implementation status |
+| `/angular-explain` | Answer developer questions about the codebase, architecture, and ORCH capabilities |
+| `/angular-compatibility` | Check version compatibility matrix for Angular, TypeScript, RxJS, third-party libs |
+
+*@angular-engineer:*
+| Skill | Description |
+|-------|-------------|
+| `/angular-generate-component` | Scaffold component with org boilerplate (standalone, OnPush, signals, TSDoc, HDS tokens) |
+| `/angular-generate-service` | Scaffold injectable service with inject(), logging, config |
+| `/angular-generate-route` | Scaffold lazy-loaded route with guards and resolvers |
+| `/angular-migrate-standalone` | NgModules to standalone components |
+| `/angular-migrate-signals` | Observables/inputs to signals |
+| `/angular-migrate-control-flow` | *ngIf/*ngFor to @if/@for |
+| `/angular-migrate-jest` | Karma to Jest/Vitest |
+| `/angular-migrate-playwright` | Protractor/Cypress to Playwright |
+| `/angular-migrate-version` | Full Angular version upgrade (multi-phase) |
+| `/angular-refactor` | General modernization and pattern updates |
+| `/angular-docs-generate` | Add meaningful TSDoc comments to undocumented public APIs |
+| `/angular-docs-repair` | Fix stale, incomplete, or wrong-format doc comments |
+
+*@angular-verifier:*
+| Skill | Description |
+|-------|-------------|
+| `/angular-test-unit` | Generate and run unit tests per org conventions |
+| `/angular-test-e2e` | Generate and run end-to-end tests |
+| `/angular-test-lint` | Run linting and report violations |
+| `/angular-review` | Review code for Angular anti-patterns and org standard violations |
+| `/angular-docs-audit` | Audit source code documentation coverage and quality |
 
 **Reference docs needed:**
 - Angular core docs (versioned: v17, v18, v19)
@@ -236,29 +280,25 @@ All domain agents share three code documentation skills that ensure source code 
 ### 6.2 backend-java-springboot
 
 **Instructions:** REST API design, DI patterns, JPA conventions, security configuration, exception handling
-**Skills:** Endpoint scaffolding, test generation, PR review, migration helpers
-**Agent:** Spring Boot expert with Maven/Gradle + terminal access
+**Agent structure:** Same role-based pattern as Angular — @springboot (coordinator), @springboot-planner, @springboot-engineer, @springboot-verifier. Skills follow the `springboot-{action}` naming convention (e.g., `/springboot-scan-deps`, `/springboot-generate-endpoint`, `/springboot-migrate-version`, `/springboot-test-unit`, `/springboot-docs-audit`).
 **Reference docs:** Spring Boot (versioned), Spring Security, internal service templates
 
 ### 6.3 backend-python-fastapi
 
 **Instructions:** Async patterns, Pydantic models, dependency injection, API documentation standards
-**Skills:** Route scaffolding, test generation, PR review, migration helpers
-**Agent:** FastAPI expert with pip/poetry + terminal access
+**Agent structure:** Same role-based pattern — @fastapi (coordinator), @fastapi-planner, @fastapi-engineer, @fastapi-verifier. Skills follow the `fastapi-{action}` naming convention (e.g., `/fastapi-scan-deps`, `/fastapi-generate-route`, `/fastapi-migrate-version`, `/fastapi-test-unit`, `/fastapi-docs-audit`).
 **Reference docs:** FastAPI docs, Pydantic v2, internal service templates
 
 ### 6.4 operations-ci-glue
 
 **Instructions:** GitHub Actions best practices, workflow structure, secret management, artifact handling
-**Skills:** Pipeline scaffolding, workflow debugging, optimization
-**Agent:** CI expert with GitHub Actions + terminal access
+**Agent structure:** Same role-based pattern — @ci (coordinator), @ci-planner, @ci-engineer, @ci-verifier. Skills follow the `ci-{action}` naming convention (e.g., `/ci-scan-pipelines`, `/ci-generate-workflow`, `/ci-test-workflow`, `/ci-docs-audit`).
 **Reference docs:** GitHub Actions docs, internal CI templates
 
 ### 6.5 operations-cd-dps
 
 **Instructions:** Deployment strategies, environment promotion, rollback procedures, observability
-**Skills:** Deployment config scaffolding, rollback planning, health check setup
-**Agent:** CD expert with deployment tooling access
+**Agent structure:** Same role-based pattern — @cd (coordinator), @cd-planner, @cd-engineer, @cd-verifier. Skills follow the `cd-{action}` naming convention (e.g., `/cd-scan-environments`, `/cd-generate-config`, `/cd-test-rollback`, `/cd-docs-audit`).
 **Reference docs:** Internal deployment platform docs, infrastructure patterns
 
 ---
@@ -348,7 +388,7 @@ snapshots:
     summary: "156 NgModule components, 67 manual subscribes, Angular 16.2"
 ```
 
-`/doc-scan-diff` compares any two snapshots to track migration velocity and remaining work.
+Scan comparison is handled by domain planner scan skills (e.g., `/angular-scan-arch` can compare against a previous snapshot to track migration velocity and remaining work).
 
 ---
 
@@ -387,11 +427,11 @@ Drift reports include git context:
 | Migration effort estimation accuracy | Ad-hoc guessing | Within 20% of actual | Compare scan estimates vs actuals |
 | Doc freshness | Unknown staleness | All sources refreshed within 30 days | Registry status dashboard |
 | Drift detection | Discovered during migration | Discovered before migration | Drift reports |
-| Audit coverage | No tracking | 100% of agent sessions have complete audit records | `/orch-audit-usage` |
-| Tool boundary violations | Undetected | 0 unblocked unauthorized tool calls | `/orch-audit-compliance` |
-| Token visibility | No data | Token estimates per session, agent, model, and skill | `/orch-audit-tokens` |
-| Behavioral drift | Undetected | Adherence score regression detected within 1 week | `/orch-audit-drift` |
-| Model optimization | Guesswork | Best model identified per skill category with benchmark data | `/orch-benchmark-models` |
+| Audit coverage | No tracking | 100% of agent sessions have complete audit records | `/audit-usage` |
+| Tool boundary violations | Undetected | 0 unblocked unauthorized tool calls | `/audit-compliance` |
+| Token visibility | No data | Token estimates per session, agent, model, and skill | `/audit-tokens` |
+| Behavioral drift | Undetected | Adherence score regression detected within 1 week | `/audit-drift` |
+| Model optimization | Guesswork | Best model identified per skill category with benchmark data | `/audit-benchmark` |
 | Notification noise | N/A | <3 toast notifications per day per developer | Count notification triggers from session status |
 | Context rot detection | Undetected | Quality decline surfaced before user notices | Compare rot detection timestamp vs first bad output |
 
@@ -418,7 +458,8 @@ How a team goes from nothing to a fully configured ORCH setup.
 ```mermaid
 sequenceDiagram
     actor Dev as Developer
-    participant CLI as orch CLI
+    participant CLI as orch init CLI
+    participant PF as @orch-preflight
     participant MP as marketplace/
     participant Proj as Target Project
     participant VS as VS Code + Copilot
@@ -429,216 +470,230 @@ sequenceDiagram
     CLI->>Proj: Read package.json, angular.json, nx.json
     CLI-->>CLI: Detect: Angular 18, Nx, Jest, Playwright
     CLI->>MP: Read available agents + skills
-    CLI->>Proj: Copy @angular agent + 7 skills
-    CLI->>Proj: Copy @audit agent + 3 skills
+    CLI->>Proj: Copy @angular coordinator + 3 sub-agents (planner, engineer, verifier)
+    CLI->>Proj: Copy 27 Angular skills (scan, generate, migrate, test, review, docs)
     CLI->>Proj: Copy audit hooks (4) + scripts (12)
-    CLI->>Proj: Copy .orch/audit/config/
+    CLI->>Proj: Copy .orch/audit/config/ + .orch/runs/
     CLI->>Proj: Create docs-registry.yaml (12 sources for Angular 18)
     CLI->>Proj: Write .nvmrc + .node-version
-    CLI-->>Dev: ✓ Done. Run 'orch doctor' to verify.
+    CLI-->>Dev: Done. Run 'orch doctor' to verify.
 
     Dev->>CLI: orch doctor
-    CLI->>Proj: Check hooks, config, versions, compatibility
-    CLI-->>Dev: ✓ All checks passed
+    CLI->>PF: @orch-preflight checks
+    PF->>Proj: Check bash, jq, python3 availability
+    PF->>Proj: Check hooks, config, versions, compatibility
+    PF-->>Dev: All checks passed
 
     Note over Dev,VS: Phase 2: First Use in VS Code
 
     Dev->>VS: Open project in VS Code
     VS-->>VS: Copilot loads .github/agents/, skills/, instructions/
-    VS-->>VS: Status bar shows "ORCH ✓"
+    VS-->>VS: Status bar shows "ORCH"
     VS-->>VS: Audit hooks activate automatically
 
     Dev->>VS: @angular explain this repo
-    VS->>Proj: Read package.json, angular.json, file structure
-    VS->>Proj: Run git log -5
-    VS-->>Dev: C4 architecture overview with diagrams
+    VS->>Proj: @angular triages to @angular-planner
+    Proj->>Proj: /angular-explain reads package.json, angular.json, file structure, git log
+    Proj-->>Dev: C4 architecture overview with diagrams
 ```
 
-### 12.2 Creating a New Feature — `/generate` Workflow
+### 12.2 Creating a New Feature — Role-Based Agent Flow
 
 ```mermaid
 sequenceDiagram
     actor Dev as Developer
-    participant AG as @angular Agent
-    participant SK as /generate Skill
-    participant TMPL as templates/angular/
+    participant CO as @angular (coordinator)
+    participant PL as @angular-planner
+    participant EN as @angular-engineer
+    participant VE as @angular-verifier
     participant FS as File System
     participant AUD as Audit Hooks
 
-    Dev->>AG: "Create a trade blotter component with AG Grid"
+    Dev->>CO: "Create a trade blotter component with AG Grid"
 
     AUD-->>AUD: Log prompt (audit-prompts hook)
 
-    AG->>SK: Load /generate skill
-    AG->>AG: Detect domain: Angular 18 (from package.json)
-    AG->>AG: Check overrides: .github/skill-overrides/generate/
-    AG->>TMPL: Load component.ts.tmpl, component.html.tmpl, spec.ts.tmpl
-    AG->>AG: Read instructions (angular-typescript, internal-component-lib)
+    CO->>CO: Triage: generation task -> engineer
+    CO->>PL: Quick context: /angular-scan-arch (lightweight)
+    PL-->>CO: Angular 18, standalone, signals, HDS design system
 
-    Note over AG,FS: Generate files following all org standards
+    CO->>EN: Handoff: "Generate trade blotter component"
+    EN->>EN: Load /angular-generate-component skill
+    EN->>EN: Read instructions (angular-typescript, internal-component-lib)
 
-    AG->>FS: Write trade-blotter.component.ts
+    Note over EN,FS: Generate files following all org standards
+
+    EN->>FS: Write trade-blotter.component.ts
     Note right of FS: standalone, OnPush, inject(),<br/>signals, TSDoc, HDS tokens
     AUD-->>AUD: Check file scope (audit-scope hook)
-    AG->>FS: Write trade-blotter.component.html
+    EN->>FS: Write trade-blotter.component.html
     Note right of FS: @if/@for, data-testid,<br/>semantic HTML, @yourorg/hds AG Grid
-    AG->>FS: Write trade-blotter.component.scss
+    EN->>FS: Write trade-blotter.component.scss
     Note right of FS: :host, HDS tokens, BEM
-    AG->>FS: Write trade-blotter.component.spec.ts
-    Note right of FS: Jest, ng-mocks, TestBed
-    AG->>FS: Write trade-blotter.service.ts
+    EN->>EN: Load /angular-generate-service skill
+    EN->>FS: Write trade-blotter.service.ts
     Note right of FS: inject(), LoggingService, ConfigService
-    AG->>FS: Write trade-blotter.service.spec.ts
+    EN-->>CO: 4 source files created
 
-    AG->>AG: Run ng build (verify compilation)
-    AG->>AG: Run ng test (verify tests pass)
+    CO->>VE: Handoff: "Verify trade blotter"
+    VE->>VE: /angular-test-unit — generate + run specs
+    VE->>FS: Write trade-blotter.component.spec.ts
+    VE->>FS: Write trade-blotter.service.spec.ts
+    VE->>VE: /angular-test-lint — run linting
+    VE->>VE: /angular-review — check for anti-patterns
+    VE-->>CO: 6 files total. Build pass. Tests 6/6 pass. Lint clean.
 
     AUD-->>AUD: Log session end + adherence check
     AUD-->>AUD: Score: 100% adherence, 6 files created
 
-    AG-->>Dev: ✓ 6 files created. Build pass. Tests 6/6 pass.
+    CO-->>Dev: 6 files created. Build pass. Tests 6/6 pass. Lint clean.
 ```
 
-### 12.3 Migration — Full Angular Version Upgrade
+### 12.3 Migration — Full Angular Version Upgrade (Role-Based Agent Chain)
 
 ```mermaid
 sequenceDiagram
     actor Dev as Developer
-    participant AG as @angular Agent
-    participant SK as /migrate Skill
-    participant MW as @migrate-worker
-    participant CM as Compatibility Matrix
-    participant TSM as ts-morph
+    participant CO as @angular (coordinator)
+    participant PL as @angular-planner
+    participant EN as @angular-engineer
+    participant VE as @angular-verifier
     participant GIT as Git
     participant AUD as Audit Hooks
 
-    Dev->>AG: "Upgrade this app from Angular 17 to 19"
+    Dev->>CO: "Upgrade this app from Angular 17 to 19"
 
-    Note over AG,GIT: Pre-flight checks
+    Note over CO,GIT: Pre-flight checks
 
-    AG->>GIT: git status --porcelain
-    GIT-->>AG: Clean ✓
-    AG->>GIT: git checkout -b migrate/angular-19-20260318
-    AG->>SK: Load /migrate skill
+    CO->>GIT: git status --porcelain
+    GIT-->>CO: Clean
+    CO->>GIT: git checkout -b migrate/angular-19-20260318
 
-    Note over AG,CM: Planning phase (runs in coordinator context)
+    Note over CO,AUD: Planning phase (planner)
 
-    AG->>CM: Read compatibility matrix
-    CM-->>AG: Angular 19 needs: TS>=5.5, Node>=18.19, RxJS 7.8, Zone.js 0.15
-    AG->>AG: Read package.json → current: Angular 17, TS 5.2, PrimeNG 16
-    AG->>AG: Run detect-version.sh + count-patterns.sh
-    AG-->>Dev: Plan: 8 phases. Approve?
-    Dev-->>AG: Go
+    CO->>PL: Handoff: "Plan migration 17 → 19"
+    PL->>PL: /angular-compatibility — check version matrix
+    PL-->>PL: Angular 19 needs: TS>=5.5, Node>=18.19, RxJS 7.8, Zone.js 0.15
+    PL->>PL: /angular-scan-deps — read package.json, current versions
+    PL->>PL: /angular-scan-arch — count patterns (45 NgModule, 67 subscribe, 312 *ngIf)
+    PL-->>CO: Plan: 8 phases with confidence levels
+    CO-->>Dev: Plan: 8 phases. Approve?
+    Dev-->>CO: Go
 
-    Note over AG,AUD: Phase 1: TypeScript (auto — high confidence)
+    Note over CO,AUD: Phase 1: TypeScript (auto — high confidence)
 
-    AG->>MW: Delegate: "Upgrade TypeScript 5.2 → 5.5"
-    MW->>MW: npm install typescript@5.5
-    MW->>MW: ng build → PASS
-    MW->>MW: ng test → 247/247 PASS
-    MW-->>AG: "TS upgraded. 3 files. Build ✓ Tests ✓"
-    AG->>GIT: commit + tag migrate/checkpoint-typescript
+    CO->>EN: Handoff: /angular-migrate-version "Upgrade TypeScript 5.2 → 5.5"
+    EN->>EN: npm install typescript@5.5
+    EN-->>CO: "TS upgraded. 3 files."
+    CO->>VE: Handoff: verify phase 1
+    VE->>VE: /angular-test-unit → 247/247 PASS
+    VE->>VE: /angular-test-lint → PASS
+    VE-->>CO: "Build + Tests + Lint pass"
+    CO->>GIT: commit + tag migrate/checkpoint-typescript
 
-    Note over AG,AUD: Phase 2: Angular 17 → 18 (medium — pause)
+    Note over CO,AUD: Phase 2: Angular 17 → 18 (medium — pause)
 
-    AG-->>Dev: Phase 2: Angular 17 → 18 via ng update. Proceed?
-    Dev-->>AG: Yes
-    AG->>MW: Delegate: "ng update @angular/core@18 @angular/cli@18"
-    MW->>MW: ng update → auto-applies schematics
-    MW->>MW: ng build → PASS
-    MW->>MW: ng test → 247/247 PASS
-    MW-->>AG: "Angular 18. 14 files. Build ✓ Tests ✓"
-    AG->>GIT: commit + tag migrate/checkpoint-angular-18
+    CO-->>Dev: Phase 2: Angular 17 → 18 via ng update. Proceed?
+    Dev-->>CO: Yes
+    CO->>EN: Handoff: /angular-migrate-version "ng update @angular/core@18 @angular/cli@18"
+    EN->>EN: ng update → auto-applies schematics
+    EN-->>CO: "Angular 18. 14 files."
+    CO->>VE: Handoff: verify phase 2
+    VE->>VE: /angular-test-unit → 247/247 PASS
+    VE-->>CO: "Build + Tests pass"
+    CO->>GIT: commit + tag migrate/checkpoint-angular-18
 
-    Note over AG,AUD: Phase 3: Angular 18 → 19 (medium)
+    Note over CO,AUD: Phase 3: Angular 18 → 19 (medium)
 
-    AG->>MW: Delegate: "ng update @angular/core@19 @angular/cli@19"
-    MW->>MW: ng update
-    MW->>MW: ng build → PASS
-    MW->>MW: ng test → 245/247 FAIL
-    MW-->>AG: "Angular 19. 2 test failures."
-    AG-->>Dev: 2 tests failed. Fix or rollback?
-    Dev-->>AG: Fix them
-    AG->>MW: Delegate: "Fix test failures"
-    MW->>MW: Fix tests → 247/247 PASS
-    MW-->>AG: "Fixed. Tests ✓"
-    AG->>GIT: commit + tag migrate/checkpoint-angular-19
+    CO->>EN: Handoff: /angular-migrate-version "ng update @angular/core@19 @angular/cli@19"
+    EN->>EN: ng update
+    EN-->>CO: "Angular 19. 14 files."
+    CO->>VE: Handoff: verify phase 3
+    VE->>VE: /angular-test-unit → 245/247 FAIL
+    VE-->>CO: "2 test failures"
+    CO-->>Dev: 2 tests failed. Fix or rollback?
+    Dev-->>CO: Fix them
+    CO->>EN: Handoff: "Fix test failures"
+    EN->>EN: Fix tests
+    CO->>VE: Re-verify
+    VE->>VE: /angular-test-unit → 247/247 PASS
+    VE-->>CO: "Tests pass"
+    CO->>GIT: commit + tag migrate/checkpoint-angular-19
 
-    Note over AG,AUD: Phase 4: Standalone (auto — high confidence)
+    Note over CO,AUD: Phase 4: Standalone (auto — high confidence)
 
-    AG->>MW: Delegate: "Standalone migration via ts-morph"
-    MW->>TSM: transform.ts standalone src/
-    TSM-->>MW: 33 components converted, imports resolved
-    MW->>MW: ng build → PASS
-    MW->>MW: ng test → 247/247 PASS
-    MW-->>AG: "Standalone. 33 files. 4 modules removed. Build ✓ Tests ✓"
-    AG->>GIT: commit + tag migrate/checkpoint-standalone
+    CO->>EN: Handoff: /angular-migrate-standalone
+    EN->>EN: ts-morph transform: 33 components converted, imports resolved
+    CO->>VE: Verify
+    VE->>VE: /angular-test-unit → PASS, /angular-test-lint → PASS
+    VE-->>CO: "33 files. 4 modules removed. All pass."
+    CO->>GIT: commit + tag migrate/checkpoint-standalone
 
-    Note over AG,AUD: Phase 5: Control flow (auto — high confidence)
+    Note over CO,AUD: Phase 5: Control flow (auto — high confidence)
 
-    AG->>MW: Delegate: "Control flow migration via Angular CLI"
-    MW->>MW: ng generate @angular/core:control-flow-migration
-    MW->>MW: ng build → PASS, ng test → PASS
-    MW-->>AG: "Control flow. 38 templates. Build ✓ Tests ✓"
-    AG->>GIT: commit + tag migrate/checkpoint-control-flow
+    CO->>EN: Handoff: /angular-migrate-control-flow
+    EN->>EN: ng generate @angular/core:control-flow-migration
+    CO->>VE: Verify
+    VE-->>CO: "38 templates. All pass."
+    CO->>GIT: commit + tag migrate/checkpoint-control-flow
 
-    Note over AG,AUD: Phases 6-8: inject, signals, PrimeNG (similar pattern)
+    Note over CO,AUD: Phases 6-8: inject, signals, PrimeNG (same engineer → verifier pattern)
 
-    AG-->>AG: ... (3 more phases, each delegated to @migrate-worker)
+    CO-->>CO: ... (3 more phases, each following planner/engineer/verifier chain)
 
-    Note over AG,GIT: Post-migration
+    Note over CO,GIT: Post-migration
 
-    AG->>AG: Run count-patterns.sh (verify all old patterns gone)
-    AG->>AG: Run verify-migration.sh (final build + test + lint)
-    AUD-->>AUD: Complete audit trail: 8 phases, 187 files, 84K tokens
+    CO->>PL: /angular-scan-arch (compare with pre-migration snapshot)
+    PL-->>CO: All old patterns eliminated, migration complete
+    CO->>VE: Final verification: /angular-test-unit + /angular-test-e2e + /angular-test-lint
+    VE-->>CO: All pass
+    AUD-->>AUD: Complete audit trail in .orch/runs/: 8 phases, 187 files, 84K tokens
 
-    AG-->>Dev: ✓ Migration complete!<br/>Branch: migrate/angular-19-20260318<br/>8 phases, 187 files, all tests passing.<br/>Push: git push -u origin migrate/angular-19-20260318<br/>PR: gh pr create
+    CO-->>Dev: Migration complete!<br/>Branch: migrate/angular-19-20260318<br/>8 phases, 187 files, all tests passing.<br/>Push: git push -u origin migrate/angular-19-20260318<br/>PR: gh pr create
 ```
 
-### 12.4 Documentation Pipeline — Scan → Convert → Drift
+### 12.4 Documentation Pipeline — Narrowed @docs Scope
+
+@docs is focused on the **reference supply chain**. Codebase scanning is handled by domain planners.
 
 ```mermaid
 sequenceDiagram
     actor Dev as Developer
     participant DOC as @docs Agent
-    participant SW as @scan-worker
-    participant CW as @doc-convert-worker
     participant REG as docs-registry.yaml
     participant REF as .github/references/
     participant GIT as Git History
 
-    Note over Dev,GIT: Step 1: Scan the codebase
+    Note over Dev,GIT: Step 1: Fetch and convert reference docs
 
-    Dev->>DOC: "@docs /proof trade-app"
-    DOC->>SW: Delegate scan to @scan-worker
-    SW->>SW: Scan file structure (342 TS files, 198 components)
-    SW->>GIT: git log (churn, authors, hotspots)
-    SW->>SW: Count patterns (45 NgModule, 67 subscribe, 312 *ngIf)
-    SW->>SW: Check inline doc coverage (63%)
-    SW->>SW: Generate mermaid dependency graph
-    SW-->>DOC: Complete scan output (~3K tokens)
-    DOC->>REF: Write to scans/trade-app/2026-03-18/
-    DOC->>REG: Add snapshot entry
-    DOC-->>Dev: Architecture docs ready. 45 NgModules, 63% doc coverage.
-
-    Note over Dev,GIT: Step 2: Convert reference docs
-
-    Dev->>DOC: "@docs /packs convert angular-essentials-v19"
-    DOC->>CW: Delegate conversion to @doc-convert-worker
-    CW->>CW: Fetch https://angular.dev/essentials
-    CW->>CW: Strip HTML chrome, convert to markdown
-    CW->>CW: Apply token budget (< 500 lines)
-    CW->>CW: Tables for APIs, mermaid for flows
-    CW-->>DOC: Converted markdown (~280 lines)
+    Dev->>DOC: "@docs /docs-fetch angular-essentials-v19"
+    DOC->>DOC: Fetch https://angular.dev/essentials
+    DOC->>DOC: Strip HTML chrome, convert to markdown
+    DOC->>DOC: Apply token budget (< 500 lines)
+    DOC->>DOC: Tables for APIs, mermaid for flows
     DOC->>REF: Write to angular/v19/essentials-guide.md
+    DOC->>REG: Register source + update status: current, last_refreshed: today
+    DOC-->>Dev: Converted. 280 lines, under budget.
+
+    Note over Dev,GIT: Step 2: Check registry status
+
+    Dev->>DOC: "@docs /docs-status"
+    DOC->>REG: Read all entries
+    DOC-->>Dev: 12 sources: 10 current, 2 stale (PrimeNG, AG Grid)
+
+    Note over Dev,GIT: Step 3: Refresh stale docs
+
+    Dev->>DOC: "@docs /docs-refresh primeng-v17"
+    DOC->>DOC: Re-fetch and re-convert PrimeNG docs
+    DOC->>REF: Overwrite stale reference
     DOC->>REG: Update status: current, last_refreshed: today
-    DOC-->>Dev: ✓ Converted. 280 lines, under budget.
+    DOC-->>Dev: Refreshed. PrimeNG v17 is current.
 
-    Note over Dev,GIT: Step 3: Check for drift
+    Note over Dev,GIT: Step 4: Check for drift
 
-    Dev->>DOC: "@docs /drift trade-app"
+    Dev->>DOC: "@docs /docs-drift trade-app"
     DOC->>REF: Read reference docs for Angular scope
-    DOC->>REF: Read latest scan snapshot
+    DOC->>REF: Read latest scan snapshot (produced by domain planner)
     DOC->>DOC: Compare: docs say X, code does Y
     DOC->>GIT: For each drift: when was it introduced? By whom?
     DOC-->>Dev: Drift report: 2 critical, 3 moderate, 4 aligned.
@@ -651,14 +706,14 @@ sequenceDiagram
     participant VS as VS Code
     participant AG as Any Agent Session
     participant HK as Audit Hooks (automatic)
-    participant ST as .orch/audit/
+    participant ST as .orch/audit/ + .orch/runs/
     participant SB as Status Bar Extension
-    participant AU as @audit Agent
+    participant AU as @orch Agent (audit skills)
 
     Note over VS,AU: During any agent session (automatic — no user action)
 
     AG->>HK: sessionStart
-    HK->>ST: Log session (identity, agent, config)
+    HK->>ST: Log session (identity, agent, config) + init run in .orch/runs/
 
     AG->>HK: userPromptSubmitted
     HK->>ST: Log prompt text + estimate tokens
@@ -672,49 +727,48 @@ sequenceDiagram
     HK->>ST: Log result + estimate tokens
     HK->>SB: Update session-status.json
 
-    SB-->>VS: Status bar: "ORCH: 8/12 components ✓"
+    SB-->>VS: Status bar: "ORCH: 8/12 components"
 
     AG->>HK: sessionEnd
     HK->>ST: Log duration, file changes
     HK->>HK: Run adherence check (grep rules)
     HK->>HK: Run token estimation
-    HK->>ST: Write complete audit record JSON
+    HK->>ST: Write complete audit record JSON + finalize .orch/runs/ telemetry
 
     Note over VS,AU: Later — on-demand reporting
 
     actor Mgr as Manager/Tech Lead
-    Mgr->>AU: "@audit /report this week"
-    AU->>ST: Read sessions/, tokens/, violations.jsonl
+    Mgr->>AU: "/audit-usage this week"
+    AU->>ST: Read sessions/, tokens/, violations.jsonl, .orch/runs/
     AU->>AU: Aggregate: 47 sessions, 84K tokens, 96% adherence
     AU-->>Mgr: Usage + tokens + compliance + drift report
 
-    Mgr->>AU: "@audit /benchmark models for /migrate"
+    Mgr->>AU: "/audit-benchmark models for /angular-migrate-version"
     AU->>AU: Run same migration task on Claude Sonnet, GPT-4.1, o4-mini
     AU->>AU: Score: quality, speed, adherence per model
     AU-->>Mgr: Recommendation: Sonnet for migrations, GPT-4.1 for scaffolding
 ```
 
-### 12.6 Showcase — Presenting ORCH Data
+### 12.6 Presentation — Shared Skill under @orch
 
 ```mermaid
 sequenceDiagram
     actor Dev as Developer
-    participant SC as @showcase Agent
-    participant EX as /explain Output
-    participant PR as /present Skill
+    participant OR as @orch Agent
+    participant PD as /present-deck (shared skill)
     participant HDS as HDS Design Tokens
     participant OUT as Output File
 
-    Dev->>SC: "@showcase /present architecture from PROJECT.md"
-    SC->>EX: Read PROJECT.md (C4 structure)
-    SC->>HDS: Read design tokens (colors, fonts, dark theme)
-    SC->>PR: Load architecture template
-    PR->>PR: Parse markdown sections → slide structure
-    PR->>PR: Render mermaid blocks → inline SVG
-    PR->>PR: Style tables with HDS theme
-    PR->>PR: Build reveal.js HTML
-    PR->>OUT: Write architecture-deck.html
-    SC-->>Dev: ✓ Deck ready. Open architecture-deck.html in browser.
+    Dev->>OR: "/present-deck architecture from PROJECT.md"
+    OR->>PD: Load /present-deck skill
+    PD->>PD: Read PROJECT.md (C4 structure)
+    PD->>HDS: Read design tokens (colors, fonts, dark theme)
+    PD->>PD: Parse markdown sections → slide structure
+    PD->>PD: Render mermaid blocks → inline SVG
+    PD->>PD: Style tables with HDS theme
+    PD->>PD: Build reveal.js HTML (or PPTX if requested)
+    PD->>OUT: Write architecture-deck.html
+    OR-->>Dev: Deck ready. Open architecture-deck.html in browser.
 
     Note over Dev,OUT: Developer opens HTML, presents in meeting
     Note over Dev,OUT: Arrow keys to navigate, F for fullscreen, ESC for overview
@@ -726,12 +780,12 @@ sequenceDiagram
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|-----------|
-| Customizations go stale | High | Medium | Registry tracks freshness; `/packs` surfaces staleness |
+| Customizations go stale | High | Medium | Registry tracks freshness; `/docs-status` surfaces staleness |
 | Teams don't adopt | Medium | High | Start with pilot teams; demonstrate measurable value before org rollout |
 | Instructions conflict across domains | Medium | Medium | One domain = one focus; clear `applyTo` scoping |
 | Token budget exceeded | Medium | Medium | Strict 500-line limit per reference doc; curate aggressively |
-| External doc sites change structure | Medium | Low | `/packs refresh` re-converts; snapshot previous version |
+| External doc sites change structure | Medium | Low | `/docs-refresh` re-converts; snapshot previous version |
 | Migration skills produce incorrect transformations | Low | High | Always run build + tests after migration; human review required |
-| **Windows incompatibility** | **High** | **High** | **All 15 audit/migration `.sh` scripts and 1 `.py` script are bash/python-only. They will not execute on Windows (cmd.exe or PowerShell). Audit hooks silently fail — no data captured. Mitigation: rewrite all 16 scripts as Node.js (`.js`) to eliminate bash/python/jq/grep dependencies. CLI TypeScript code is cross-platform. ts-morph adapters are cross-platform. Only the runtime hook scripts need rewriting. Tracked for future sprint.** |
-| Windows notification gap | Medium | Low | `notify.sh` has macOS (`osascript`) and Linux (`notify-send`) paths but no Windows path. Add PowerShell `BurntToast` or `[System.Windows.Forms.MessageBox]` support when scripts are rewritten to Node.js. |
-| `jq` dependency on non-dev machines | Medium | Medium | All `.sh` scripts depend on `jq` for JSON parsing. Not installed by default on any OS. Eliminated when scripts are rewritten to Node.js (native `JSON.parse`). |
+| **Windows incompatibility** | **High** | **High** | **All 15 audit/migration `.sh` scripts and 1 `.py` script are bash/python-only. They will not execute on Windows (cmd.exe or PowerShell). Audit hooks silently fail — no data captured. Mitigation: keep bash scripts as primary runtime. `orch doctor` checks for bash, jq, and python3 availability with platform-specific install guidance (Homebrew on macOS, apt/dnf on Linux, Git Bash + Chocolatey/Scoop on Windows). CLI TypeScript code is cross-platform. ts-morph adapters are cross-platform.** |
+| Windows notification gap | Medium | Low | `notify.sh` has macOS (`osascript`) and Linux (`notify-send`) paths but no Windows path. Add PowerShell `BurntToast` or `[System.Windows.Forms.MessageBox]` support. `orch doctor` surfaces this gap on Windows and provides install guidance. |
+| `jq` dependency on non-dev machines | Medium | Medium | All `.sh` scripts depend on `jq` for JSON parsing. Not installed by default on any OS. `orch doctor` checks for `jq` and provides platform-specific install instructions (brew install jq, apt install jq, choco install jq). |

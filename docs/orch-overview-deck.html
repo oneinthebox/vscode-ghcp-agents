@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORCH — Orchestra for coding agents</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+  <link rel="stylesheet" href="deck-tokens.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════
+       LAYOUT — consumes tokens from deck-tokens.css
+       ═══════════════════════════════════════ */
+
+    .reveal {
+      font-family: var(--f-body);
+      color: var(--fg-primary);
+      background: var(--bg-page);
+      font-size: 28px;
+    }
+    .reveal .slides { text-align: left; }
+    /* Outer vertical-stack sections: no custom layout */
+    .reveal .slides > section {
+      padding: 0;
+      background: var(--bg-page);
+    }
+
+    /* Inner sections (actual slides): centered layout */
+    .reveal .slides > section > section,
+    .reveal .slides > section:not(:has(> section)) {
+      padding: var(--slide-pad-y) var(--slide-pad-x);
+      background: var(--bg-page);
+      height: 100%;
+      box-sizing: border-box;
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* ── Type ── */
+    .reveal h2 {
+      font-family: var(--f-display);
+      font-size: var(--fs-h2);
+      font-weight: 400;
+      color: var(--fg-primary);
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      margin: 0 0 var(--sp-2) 0;
+      text-align: left;
+    }
+    .reveal header p {
+      font-size: var(--fs-body);
+      color: var(--fg-secondary);
+      margin: 0;
+      text-align: left;
+    }
+    .reveal header {
+      width: 100%;
+      margin-bottom: var(--sp-3);
+    }
+    /* Body wrapper centers content */
+    .reveal .slides section > .body {
+      width: 100%;
+    }
+
+    .reveal h3 {
+      font-family: var(--f-body);
+      font-size: var(--fs-h3);
+      font-weight: 700;
+      color: var(--fg-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: var(--sp-5) 0 var(--sp-2) 0;
+    }
+    .reveal p {
+      font-size: var(--fs-body);
+      line-height: 1.65;
+      color: var(--fg-secondary);
+      margin: 0 0 var(--sp-3) 0;
+    }
+    .reveal ul { list-style: none; padding: 0; margin: var(--sp-1) 0; }
+    .reveal li {
+      font-size: var(--fs-small);
+      line-height: 1.75;
+      color: var(--fg-secondary);
+      padding-left: 1.1em;
+      position: relative;
+      margin-bottom: var(--sp-1);
+    }
+    .reveal li::before {
+      content: '\2014'; position: absolute; left: 0;
+      color: var(--fg-faint); font-size: 0.75em;
+    }
+    .reveal pre {
+      background: var(--bg-inset);
+      border-radius: var(--radius-md);
+      padding: var(--sp-6) var(--sp-8);
+      margin: var(--sp-5) 0;
+      border: none; box-shadow: none;
+      width: 100%; box-sizing: border-box;
+    }
+    .reveal pre code {
+      font-family: var(--f-mono);
+      font-size: var(--fs-code);
+      color: var(--neutral-200);
+      line-height: 2;
+    }
+    .reveal code {
+      font-family: var(--f-mono);
+      color: var(--fg-accent);
+      font-size: 0.9em;
+    }
+    .reveal table {
+      width: 100%; border-collapse: collapse;
+      font-size: var(--fs-small); margin: var(--sp-3) 0;
+    }
+    .reveal table th {
+      font-family: var(--f-body); font-weight: 600;
+      font-size: 0.88em; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--fg-muted);
+      padding: var(--sp-2) var(--sp-3); text-align: left;
+      border-bottom: 1.5px solid var(--fg-primary);
+    }
+    .reveal table td {
+      padding: var(--sp-2) var(--sp-3);
+      border-bottom: 0.5px solid var(--border-default);
+      color: var(--fg-primary);
+      line-height: 1.6;
+    }
+    .reveal table tr:last-child td { border-bottom: 1.5px solid var(--fg-primary); }
+    .reveal table td code {
+      background: var(--bg-surface); padding: 1px 5px;
+      border-radius: var(--radius-sm); font-size: 0.95em;
+    }
+
+    /* ═══ SLIDE TYPES ═══ */
+
+    .title-slide {
+      align-items: flex-start !important;
+      text-align: left !important;
+      padding-left: 88px !important;
+    }
+    .title-slide .overline {
+      font-family: var(--f-body); font-size: var(--fs-caption);
+      font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--fg-accent);
+      margin-bottom: var(--sp-4);
+    }
+    .title-slide h1 {
+      font-family: var(--f-display);
+      font-size: var(--fs-display);
+      font-weight: 400; font-style: italic;
+      color: var(--fg-primary); line-height: 1.2;
+      letter-spacing: -0.015em; max-width: 620px;
+      margin: 0 0 var(--sp-3) 0;
+    }
+    .title-slide .lead {
+      font-size: var(--fs-body); color: var(--fg-secondary);
+      max-width: 480px; line-height: 1.7;
+    }
+    .title-slide .dateline {
+      font-family: var(--f-mono); font-size: var(--fs-tiny);
+      color: var(--fg-faint); margin-top: var(--sp-10);
+    }
+    .title-slide .mark {
+      position: absolute; top: var(--slide-pad-y);
+      right: var(--slide-pad-x); width: 24px; height: 24px;
+      border: 1.5px solid var(--fg-accent);
+    }
+
+    .section-slide {
+      align-items: flex-start !important;
+      background: var(--bg-inset) !important;
+      padding-left: 88px !important;
+    }
+    .section-slide .bar {
+      width: 32px; height: 2px;
+      background: var(--fg-accent);
+      margin-bottom: var(--sp-6);
+    }
+    .section-slide h2 {
+      color: var(--fg-inverse) !important;
+      font-size: var(--fs-section); font-style: italic;
+      max-width: 600px;
+    }
+    .section-slide p {
+      color: var(--neutral-400) !important;
+      font-size: var(--fs-body); max-width: 440px;
+      margin-top: var(--sp-2);
+    }
+
+    .closing {
+      align-items: flex-start !important;
+      padding-left: 88px !important;
+    }
+    .closing h1 {
+      font-family: var(--f-display);
+      font-size: 1.45em; font-style: italic;
+      max-width: 580px; margin: 0 0 var(--sp-3) 0;
+    }
+    .closing p { font-size: var(--fs-body) !important; max-width: none; white-space: nowrap; }
+    .closing .cta {
+      font-family: var(--f-mono); font-size: var(--fs-caption);
+      color: var(--fg-accent); margin-top: var(--sp-8);
+      padding: var(--sp-2) var(--sp-5);
+      border: 1.5px solid var(--fg-accent);
+      display: inline-block; letter-spacing: 0.02em;
+    }
+
+    /* ═══ COMPONENTS ═══ */
+
+    .split { display: grid; gap: var(--sp-8); }
+    .split-2 { grid-template-columns: 1fr 1fr; }
+    .split-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .split-narrow { grid-template-columns: 0.55fr 1.45fr; }
+
+    .ladder { margin: var(--sp-3) 0; }
+    .ladder-item {
+      display: grid; grid-template-columns: 22px 1fr auto;
+      gap: var(--sp-3); padding: var(--sp-2) 0;
+      border-bottom: 0.5px solid var(--border-default);
+      align-items: baseline;
+    }
+    .ladder-item:last-child { border-bottom: 1.5px solid var(--fg-primary); }
+    .ladder-item .num {
+      font-family: var(--f-display); font-size: 0.7em;
+      color: var(--fg-faint);
+    }
+    .ladder-item .content {
+      font-size: var(--fs-small); color: var(--fg-secondary);
+    }
+    .ladder-item .content strong { color: var(--fg-primary); font-weight: 600; }
+    .ladder-item .right-tag { text-align: right; }
+    .ladder-item.hl {
+      background: var(--bg-accent);
+      margin: 0 calc(-1 * var(--sp-4));
+      padding: var(--sp-2) var(--sp-4);
+      border-radius: var(--radius-sm);
+      border-bottom-color: transparent;
+    }
+    .ladder-item.hl .num { color: var(--fg-accent); }
+    .tag {
+      display: inline-block; font-size: var(--fs-small);
+      font-weight: 600; padding: 2px 8px;
+      border-radius: var(--radius-sm); white-space: nowrap;
+    }
+    .reveal table .tag {
+      font-size: 1.1em;
+      padding: 3px 10px;
+    }
+    .tag-red   { background: oklch(0.94 0.03 240);  color: var(--brand-600); }
+    .tag-amber { background: oklch(0.94 0.04 85);  color: oklch(0.45 0.12 85); }
+    .tag-teal  { background: var(--teal-100); color: var(--teal-500); }
+
+    .pain-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--sp-3); margin: var(--sp-4) 0;
+    }
+    .pain-item {
+      padding: var(--sp-3) var(--sp-4);
+      border-left: 2px solid oklch(0.55 0.2 25);
+      background: oklch(0.97 0.01 25);
+      font-size: var(--fs-small); line-height: 1.6;
+    }
+    .pain-item strong { color: oklch(0.45 0.15 25); display: block; margin-bottom: 2px; }
+    .pain-item span { color: var(--fg-muted); }
+
+    .flow {
+      display: flex; align-items: center;
+      gap: var(--sp-2); margin: var(--sp-3) 0;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .flow-step {
+      padding: var(--sp-2) var(--sp-4);
+      font-size: var(--fs-small); font-weight: 600;
+      color: var(--fg-primary); background: var(--flow-bg);
+      border: 0.5px solid var(--flow-border);
+      border-radius: var(--radius-md);
+      text-align: center; line-height: 1.5;
+      min-width: 80px;
+    }
+    .flow-step small {
+      display: block; font-weight: 400;
+      color: var(--fg-muted); font-size: 0.85em;
+    }
+    .flow-step.accent {
+      background: var(--bg-warm);
+      color: var(--fg-primary);
+      border-color: var(--neutral-300);
+    }
+    .flow-step.done {
+      background: var(--flow-success); color: var(--fg-inverse);
+      border-color: var(--flow-success);
+    }
+    .flow-arr { color: var(--flow-arrow); font-size: var(--fs-small); }
+
+    .stat-row {
+      display: flex; gap: var(--sp-10);
+      padding: var(--sp-4) 0;
+      border-top: 1.5px solid var(--fg-primary);
+      border-bottom: 1.5px solid var(--fg-primary);
+      margin: var(--sp-4) 0;
+      justify-content: center;
+    }
+    .stat .val {
+      font-family: var(--f-display);
+      font-size: var(--fs-stat); color: var(--fg-primary);
+      line-height: 1;
+    }
+    .stat .lbl {
+      font-size: var(--fs-tiny); color: var(--fg-muted);
+      margin-top: 3px; text-transform: uppercase;
+      letter-spacing: 0.05em; font-weight: 600;
+    }
+    .stat.accent .val { color: var(--fg-accent); }
+    .stat.teal .val { color: var(--fg-teal); }
+
+    .agent-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--sp-5); margin: var(--sp-4) 0;
+    }
+    .agent-card {
+      padding: var(--sp-4);
+      border: 0.5px solid var(--border-default);
+      border-radius: var(--radius-md);
+    }
+    .agent-card .name {
+      font-family: var(--f-mono); font-weight: 500;
+      font-size: var(--fs-body); margin-bottom: 2px;
+    }
+    .agent-card .role {
+      font-size: var(--fs-tiny); color: var(--fg-muted);
+      margin-bottom: var(--sp-2);
+    }
+    .agent-card .desc {
+      font-size: var(--fs-caption); color: var(--fg-secondary);
+      line-height: 1.6;
+    }
+
+    .ba { margin: var(--sp-4) 0; }
+    .ba-row {
+      display: grid; grid-template-columns: 1fr 1fr;
+      font-size: var(--fs-small);
+      border-bottom: 0.5px solid var(--border-default);
+      line-height: 1.65;
+    }
+    .ba-row.header {
+      font-weight: 700; font-size: var(--fs-tiny);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--fg-muted);
+      border-bottom: 1.5px solid var(--fg-primary);
+    }
+    .ba-row > div { padding: var(--sp-2) var(--sp-3); }
+    .ba-row > div:first-child { color: var(--fg-muted); }
+    .ba-row > div:last-child { color: var(--fg-primary); background: var(--bg-teal); }
+    .ba-row:last-child { border-bottom: 1.5px solid var(--fg-primary); }
+
+    .accent-text { color: var(--fg-accent); }
+    .highlight-text {
+      background: oklch(0.88 0.08 240);
+      color: var(--fg-primary);
+      padding: 0.02em 0.2em;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+    .teal-text { color: var(--fg-teal); }
+    .callout {
+      font-family: var(--f-display) !important;
+      font-style: italic;
+      font-size: 0.68em !important;
+      color: var(--fg-primary) !important;
+      text-align: left !important;
+      margin-top: 56px !important;
+      line-height: 1.4 !important;
+      border-top: 1.5px solid var(--fg-primary);
+      border-bottom: 1.5px solid var(--fg-primary);
+      padding: var(--sp-3) 0;
+      width: 100%;
+    }
+    .centered { text-align: center; align-self: center; }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- 1 — Title -->
+      <section class="title-slide">
+        <div class="mark"></div>
+        <div class="overline">Orchestra for coding agents</div>
+        <h1>What if Copilot <span class="highlight-text">knew</span> your team's code?</h1>
+        <div class="lead">Enterprise-grade agents, skills, and audit that turn generic AI suggestions into standardized, observable, org-specific development workflows.</div>
+        <div class="dateline">March 2026</div>
+      </section>
+
+      <!-- 2 — Dev's Day (standalone) -->
+      <section>
+        <header><h2>A Developer's Day</h2><p>VS Code + GitHub Copilot. Real productivity gains. But&hellip;</p></header>
+        <div class="body">
+          <div class="split split-2">
+            <div><h3>What works</h3><ul><li>Inline completions save keystrokes</li><li>Chat explains unfamiliar code quickly</li><li>Agent mode edits across multiple files</li><li>Plan mode thinks before it acts</li></ul></div>
+            <div><h3>What breaks at scale</h3><ul><li>Suggestions ignore your org's patterns</li><li>Every developer gets different AI behavior</li><li>No way to enforce standards through AI</li><li>No visibility into what agents actually do</li></ul></div>
+          </div>
+          <p class="callout fragment">Copilot is powerful. Out of the box, it just doesn't know <em>you</em>.</p>
+        </div>
+      </section>
+
+      <!-- 3 — What Copilot Offers + vertical: Ask, Plan, Agent -->
+      <section>
+        <section>
+          <header><h2>What Copilot Offers Today</h2><p>Three modes + built-in agents. A solid foundation.</p></header>
+          <div class="body">
+            <table><thead><tr><th>Feature</th><th>Behavior</th><th>Best for</th></tr></thead><tbody>
+              <tr><td><strong>Ask</strong></td><td>Answers questions. No file changes.</td><td>Learning, exploring</td></tr>
+              <tr><td><strong>Plan</strong></td><td>Step-by-step plan, then implements.</td><td>Multi-step features</td></tr>
+              <tr><td><strong>Agent</strong></td><td>Autonomously plans, edits, runs commands.</td><td>End-to-end tasks</td></tr>
+              <tr><td><strong>Built-in Agents</strong></td><td><code>@workspace</code>, <code>@terminal</code>, <code>@vscode</code> &mdash; scoped helpers.</td><td>Workspace search, terminal, settings</td></tr>
+              <tr><td><strong>Custom Agents</strong></td><td>Your own <code>@angular</code>, <code>@docs</code> &mdash; domain experts.</td><td>Org-specific workflows</td></tr>
+            </tbody></table>
+          </div>
+        </section>
+        <section>
+          <header><h2>Ask Mode</h2><p>Read-only. Answers questions. Never touches files.</p></header>
+          <div class="body">
+            <pre><code>"What does this service do?"
+"Explain this RxJS operator"
+"How does auth work in this project?"</code></pre>
+            <h3>How it works</h3>
+            <p>Copilot reads your codebase and answers questions. No file changes, no side effects. Safe to use anytime.</p>
+            <h3>Why it's helpful</h3>
+            <p>Fastest way to understand unfamiliar code. Use it before making changes &mdash; build a mental model first, then act.</p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Plan Mode</h2><p>Think first, act second. Review the strategy before any code changes.</p></header>
+          <div class="body">
+            <pre><code>"Add pagination to the user list"
+
+→ Step 1: Add pageSize param to UserService
+→ Step 2: Update UserList component with paginator
+→ Step 3: Add route query params for page state
+→ Step 4: Write unit tests for pagination logic
+→ Step 5: Update e2e test
+
+[Approve] [Edit plan] [Cancel]</code></pre>
+            <h3>How it works</h3>
+            <p>Copilot generates a structured plan. You review, edit, or cancel before any code is written. Then it implements exactly what you approved.</p>
+            <h3>Why it's helpful</h3>
+            <p>You stay in control of the approach. Catch wrong assumptions early &mdash; before they become 8 files of wrong code to undo.</p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Agent Mode</h2><p>Full autonomy. Plans, edits, runs commands &mdash; all without pausing.</p></header>
+          <div class="body">
+            <pre><code>"Refactor auth to use JWT"
+
+→ Reading auth.service.ts, auth.guard.ts...
+→ Installing jsonwebtoken package
+→ Editing 8 files
+→ Running ng test... 42/42 passed
+→ Running ng build... success</code></pre>
+            <h3>How it works</h3>
+            <p>Agent drives end-to-end. Reads code, makes changes, runs terminal commands, fixes test failures &mdash; all autonomously in one session.</p>
+            <h3>Why it's helpful</h3>
+            <p>Maximum speed for well-defined tasks. But also most opaque &mdash; no visibility into decisions, no audit trail, no boundaries. Can we do better?</p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Built-in Agents</h2><p>VS Code ships with scoped helper agents out of the box.</p></header>
+          <div class="body">
+            <pre><code>"@workspace find all API endpoints"
+"@terminal explain this error"
+"@vscode how do I change the theme?"</code></pre>
+            <h3>How it works</h3>
+            <p><code>@workspace</code> searches your project. <code>@terminal</code> understands terminal output. <code>@vscode</code> helps with settings. Each is scoped to one concern.</p>
+            <h3>Why it's helpful</h3>
+            <p>Quick, focused help for common tasks. But they're general-purpose &mdash; they don't know your org's patterns, libraries, or standards.</p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Custom Agents</h2><p>You define your own agents &mdash; domain experts with tools and guardrails.</p></header>
+          <div class="body">
+            <pre><code># .github/agents/angular.agent.md
+---
+name: angular
+description: "Angular, TypeScript, RxJS expert"
+tools: [codebase, terminal, edit]
+---
+
+You are an Angular expert for enterprise apps.
+Follow OnPush, standalone, signals patterns.
+Use @yourorg/hds design system.</code></pre>
+            <h3>How it works</h3>
+            <p>A markdown file defines the agent's persona, tools, and rules. VS Code loads it automatically. Invoke with <code>@angular</code> in chat.</p>
+            <h3>Why it's helpful</h3>
+            <p>Your AI now knows your stack, your libraries, your conventions. Not generic Angular &mdash; <em>your</em> Angular. But who manages all these agents?</p>
+          </div>
+        </section>
+      </section>
+
+      <!-- 4 — How Devs Customize + vertical: Instructions, Agents, Skills, Hooks, Handoffs -->
+      <section>
+        <section>
+          <header><h2>How Developers Customize Copilot</h2><p>Five layers beyond raw prompts. Each adds more control.</p></header>
+          <div class="body">
+            <table><thead><tr><th>Layer</th><th>What it is</th><th>How it works</th></tr></thead><tbody>
+              <tr><td><strong>Instructions</strong></td><td>Persistent coding standards</td><td>Always active &mdash; no action needed</td></tr>
+              <tr><td><strong>Custom Agents</strong></td><td>AI personas with tools &amp; guardrails</td><td>User selects via <code>@mention</code></td></tr>
+              <tr><td><strong>Skills</strong></td><td>Reusable workflows with references</td><td>Invoked via <code>/slash-command</code></td></tr>
+              <tr><td><strong>Hooks</strong></td><td>Auto-execute at lifecycle events</td><td>Fires on preToolUse, postToolUse, etc.</td></tr>
+              <tr><td><strong>Handoffs</strong></td><td>Agent-to-agent transitions</td><td>Context passed, visible in VS Code</td></tr>
+            </tbody></table>
+            <p class="callout fragment">These layers exist. The question is: who's actually using them?</p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Instructions</h2><p>Persistent coding standards Copilot reads automatically.</p></header>
+          <div class="body">
+            <pre><code># .github/copilot-instructions.md
+
+All Angular components must use OnPush change detection.
+Never use manual .subscribe() — use async pipe instead.
+No 'any' type annotations in TypeScript files.</code></pre>
+            <h3>How it works</h3>
+            <p>A markdown file in your repo. Copilot reads it before every response. Rules apply to all matching files automatically.</p>
+            <h3>Why it's helpful</h3>
+            <p>Zero effort from developers. Standards are enforced passively &mdash; no need to remember rules or paste them into prompts.</p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Custom Agents</h2><p>AI personas with specific tools, knowledge, and guardrails.</p></header>
+          <div class="body">
+            <pre><code># .github/agents/angular.agent.md
+---
+name: angular
+description: "Angular, TypeScript, RxJS expert"
+tools: [codebase, terminal, edit]
+---
+
+You are an Angular expert. Follow OnPush, standalone,
+signals patterns. Use @yourorg/hds design system.</code></pre>
+            <h3>How it works</h3>
+            <p>A markdown file defines persona, tools, and rules. VS Code loads it. User invokes with <code>@angular</code> in chat.</p>
+            <h3>Why it's helpful</h3>
+            <p>Domain expertise on demand. The agent knows your internal libraries, not just the framework. Every developer gets the same expert.</p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Skills</h2><p>Reusable workflows bundling scripts, references, and templates.</p></header>
+          <div class="body">
+            <pre><code># .github/skills/angular-migrate-standalone/SKILL.md
+---
+name: angular-migrate-standalone
+references:
+  - references/angular/v19/standalone-guide.md
+---
+
+## Steps
+1. Scan for NgModule components
+2. Convert to standalone via ts-morph
+3. Remove empty NgModules
+4. Run build + test</code></pre>
+            <h3>How it works</h3>
+            <p>A SKILL.md file defines steps, references, and scripts. Invoked via <code>/angular-migrate-standalone</code>. Agent follows the steps exactly.</p>
+            <h3>Why it's helpful</h3>
+            <p>Repeatable quality. Same workflow, same references, same validation &mdash; whether it's your first migration or your fiftieth.</p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Hooks</h2><p>Commands that auto-execute at lifecycle events.</p></header>
+          <div class="body">
+            <pre><code># .github/hooks/audit-tools.json
+{
+  "hooks": {
+    "preToolUse": [{
+      "type": "command",
+      "bash": "./scripts/audit/check-tool-boundary.sh"
+    }]
+  }
+}</code></pre>
+            <h3>How it works</h3>
+            <p>JSON config triggers shell scripts at lifecycle events. <code>preToolUse</code> fires before every tool call. <code>postToolUse</code> logs every result.</p>
+            <h3>Why it's helpful</h3>
+            <p>Deterministic guardrails. No AI recall needed. Unauthorized tool? Blocked. Out-of-scope file edit? Logged. Every action auditable.</p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Handoffs</h2><p>Transitions between agents with context passed along.</p></header>
+          <div class="body">
+            <div class="flow" style="flex-wrap: nowrap;">
+              <div class="flow-step" style="border-color: var(--fg-accent);">@angular<small>coordinator</small></div>
+              <div class="flow-arr">&rarr;</div>
+              <div class="flow-step">@angular-planner<small>scans &amp; plans</small></div>
+              <div class="flow-arr">&rarr;</div>
+              <div class="flow-step">@angular-engineer<small>implements</small></div>
+              <div class="flow-arr">&rarr;</div>
+              <div class="flow-step">@angular-verifier<small>validates</small></div>
+            </div>
+            <h3>How it works</h3>
+            <p>One agent suggests the next. VS Code shows the transition. A compact session state passes context &mdash; not the entire conversation history.</p>
+            <h3>Why it's helpful</h3>
+            <p>Each agent starts with a fresh context window. No token bloat from long sessions. The chain is visible in VS Code &mdash; you see exactly where you are.</p>
+          </div>
+        </section>
+      </section>
+
+      <!-- 5 — Maturity Ladder (standalone, no sub-slides — concepts already explained above) -->
+      <section>
+        <header><h2>The Maturity Ladder</h2><p>Six levels. Most teams never get past level two.</p></header>
+        <div class="body">
+          <div class="ladder">
+            <div class="ladder-item"><div class="num">1</div><div class="content"><strong>Raw prompts</strong> &mdash; type in chat, get generic output</div><div class="right-tag"><span class="tag tag-red">most teams</span></div></div>
+            <div class="ladder-item"><div class="num">2</div><div class="content"><strong>Instructions</strong> &mdash; always-on coding standards, auto-applied</div><div class="right-tag"><span class="tag tag-amber">some teams</span></div></div>
+            <div class="ladder-item"><div class="num">3</div><div class="content"><strong>Custom agents</strong> &mdash; specialized personas with guardrails</div><div class="right-tag"><span class="tag tag-amber">few teams</span></div></div>
+            <div class="ladder-item"><div class="num">4</div><div class="content"><strong>Skills</strong> &mdash; reusable workflows with references &amp; scripts</div><div class="right-tag"><span class="tag tag-amber">few teams</span></div></div>
+            <div class="ladder-item"><div class="num">5</div><div class="content"><strong>Hooks</strong> &mdash; lifecycle events, tool gating, boundaries</div><div class="right-tag"><span class="tag tag-amber">very few</span></div></div>
+            <div class="ladder-item hl"><div class="num">6</div><div class="content"><strong>Full orchestration</strong> &mdash; role-based agents, handoffs, audit, auto</div><div class="right-tag"><span class="tag tag-teal">ORCH</span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 — What Unlocks -->
+      <section>
+        <header><h2>What Unlocks at Each Level</h2></header>
+        <div class="body">
+          <table><thead><tr><th>Level</th><th>You gain</th><th>Concrete example</th></tr></thead><tbody>
+            <tr><td>1. Prompts</td><td>Speed</td><td>"Write a component" &mdash; fast but generic</td></tr>
+            <tr><td>2. Instructions</td><td>Consistency</td><td>"Always use OnPush" &mdash; passive enforcement</td></tr>
+            <tr><td>3. Agents</td><td>Expertise</td><td><code>@angular</code> knows your internal libraries</td></tr>
+            <tr><td>4. Skills</td><td>Repeatability</td><td><code>/angular-migrate-standalone</code> &mdash; same workflow, every time</td></tr>
+            <tr><td>5. Hooks</td><td>Governance</td><td>Block unauthorized tool calls. Log every prompt.</td></tr>
+            <tr><td style="color: var(--fg-accent); font-weight: 600;">6. Orchestration</td><td style="color: var(--fg-accent); font-weight: 600;">Full control</td><td>Planner &rarr; Engineer &rarr; Verifier. Audit everything.</td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section>
+        <header><h2>The Enterprise Gap</h2><p>Even with customization, enterprise teams face unsolved problems.</p></header>
+        <div class="body">
+          <div class="pain-grid">
+            <div class="pain-item"><strong>Inconsistent standards</strong><span>50 developers, 50 Copilot configs. AI code doesn't follow your patterns.</span></div>
+            <div class="pain-item"><strong>No governance</strong><span>Which tools did the agent use? What files? Was it authorized? Nobody knows.</span></div>
+            <div class="pain-item"><strong>Invisible cost</strong><span>Token consumption is a black box. No tracking per team, agent, or task.</span></div>
+            <div class="pain-item"><strong>Slow onboarding</strong><span>New devs get generic AI. Can't teach internal libraries or conventions.</span></div>
+            <div class="pain-item"><strong>Painful migrations</strong><span>Angular 17 &rarr; 19 across repos. Weeks of manual, error-prone work.</span></div>
+            <div class="pain-item"><strong>Quality drift</strong><span>Agent output degrades over time. Nobody notices until reviews pile up.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 -->
+      <section class="section-slide">
+        <div class="bar"></div>
+        <h2>What if we could solve <span class="highlight-text">all</span> of this?</h2>
+      </section>
+
+      <!-- 8 — vertical stack: intro + what orch installs -->
+      <section>
+        <section>
+          <header><h2>Introducing ORCH</h2><p>Enterprise agents, skills, and audit &mdash; one command.</p></header>
+          <div class="body">
+            <pre><code>npm install -g @orch/cli
+orch init
+orch doctor</code></pre>
+            <div class="split split-2">
+              <div><h3>What it creates</h3><ul><li>Role-based agents tailored to your stack</li><li>27+ granular skills per domain</li><li>Audit hooks on every lifecycle event</li><li>Token-efficient references from your dependencies</li><li>Configurable behavior &mdash; auto or manual gates</li></ul></div>
+              <div><h3>What stays in your hands</h3><ul><li>Which agents are installed</li><li>What tools each agent can access</li><li>Auto mode or approval at every step</li><li>Retry limits, token budgets, model selection</li><li><code>orch reset</code> removes everything cleanly</li></ul></div>
+            </div>
+          </div>
+        </section>
+        <section>
+          <header><h2>What VS Code Sees</h2><p><code>.github/</code> &mdash; Copilot reads this automatically.</p></header>
+          <div class="body">
+            <pre><code>.github/
+  copilot-instructions.md       # global safety + behavior rules
+  agents/
+    angular.agent.md            # @angular coordinator
+    angular-planner.agent.md    # scans, plans, explains
+    angular-engineer.agent.md   # builds, migrates, generates
+    angular-verifier.agent.md   # tests, reviews, validates
+    docs.agent.md               # reference supply chain
+    audit.agent.md              # observability
+  skills/
+    angular-scan-deps/SKILL.md  # 27+ granular skills
+    angular-migrate-standalone/SKILL.md
+    ...
+  hooks/
+    audit-lifecycle.json        # session tracking
+    audit-tools.json            # tool boundary enforcement</code></pre>
+          </div>
+        </section>
+        <section>
+          <header><h2>What ORCH Manages</h2><p><code>.orch/</code> &mdash; configuration, references, audit, telemetry.</p></header>
+          <div class="body">
+            <pre><code>.orch/
+  config.yaml                    # max_retries, auto_mode, models
+  config/
+    boundaries.yaml              # allowed tools + scope per agent
+    adherence-rules.yaml         # post-session compliance checks
+  references/
+    angular/v19/migration.md     # fetched, token-efficient docs
+    angular/v19/standalone.md
+  runs/
+    2026-03-23/
+      &lt;run-id&gt;/
+        plan.md                  # planner output
+        changes.diff             # all file changes
+        verify.md                # verifier result
+        report.md                # final report
+  registry.yaml                  # doc source tracking</code></pre>
+          </div>
+        </section>
+      </section>
+
+      <!-- 9 — vertical stack: architecture + triage detail -->
+      <section>
+        <section>
+          <header><h2>Role-Based Agent Architecture</h2><p>Every request triaged. Every agent has one job. Handoffs visible in VS Code.</p></header>
+          <div class="body">
+            <div class="flow" style="flex-wrap: nowrap;">
+              <div class="flow-step" style="background: var(--bg-warm); border-color: var(--neutral-300);">@orch<small>orchestrate</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step">Pre-flight<small>readiness</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step" style="border-color: var(--fg-accent);">@angular<small>coordinate</small></div><div class="flow-arr">&rarr;</div>
+              <div style="border: 1.5px dashed var(--neutral-300); border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-3); display: flex; align-items: center; gap: var(--sp-2); position: relative;">
+                <span style="position: absolute; top: -8px; left: var(--sp-3); background: var(--bg-page); padding: 0 4px; font-size: var(--fs-tiny); color: var(--fg-muted); font-weight: 600;">domain sub-agents</span>
+                <div class="flow-step">Planner<small>scan &amp; plan</small></div><div class="flow-arr">&rarr;</div>
+                <div class="flow-step">Engineer<small>build &amp; change</small></div><div class="flow-arr">&rarr;</div>
+                <div class="flow-step">Verifier<small>test &amp; review</small></div>
+              </div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step done">Done</div>
+            </div>
+            <div class="split split-2" style="margin-top: var(--sp-4);">
+              <div><h3>Three triage modes</h3><ul><li><strong>Query</strong> &mdash; read-only, instant answer</li><li><strong>Quick fix</strong> &mdash; single-file, engineer + verifier</li><li><strong>Workflow</strong> &mdash; multi-file, full pipeline</li></ul></div>
+              <div><h3>Self-correcting loop</h3><ul><li>Verifier fails &rarr; coordinator re-routes</li><li>Minor fix &rarr; back to engineer</li><li>Plan wrong &rarr; back to planner</li><li>3 retries max &rarr; human escalation</li></ul></div>
+            </div>
+          </div>
+        </section>
+        <section>
+          <header><h2>Triage: Query</h2><p>Read-only. @angular answers directly. No sub-agents needed.</p></header>
+          <div class="body">
+            <pre><code>@angular "What version of Angular is this app using?"
+
+→ Reads package.json
+→ "Angular 18.2.0, with Nx 19.8, TypeScript 5.5"</code></pre>
+            <p>Instant answer. No planner, no engineer, no verifier. The coordinator recognizes this is a question and handles it directly.</p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Triage: Quick Fix</h2><p>Single file, clear intent. Engineer + Verifier only.</p></header>
+          <div class="body">
+            <pre><code>@angular "Add trackBy to this @for loop"
+
+→ Engineer edits dashboard.component.html
+→ Verifier runs build + lint
+→ Done. 1 file changed.</code></pre>
+            <p>Skips the planner &mdash; the "plan" is obvious. Engineer makes the change, verifier confirms it compiles and passes lint.</p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Triage: Workflow</h2><p>Multi-file, structural, or ambiguous. Full pipeline.</p></header>
+          <div class="body">
+            <pre><code>@angular "Add a loading spinner to the dashboard"
+
+→ Planner: scans dashboard, identifies 3 API calls,
+  recommends HDS LoadingIndicator, plans 4 file changes
+→ Engineer: implements across component, service, template, test
+→ Verifier: build pass, 12/12 tests pass, no lint warnings</code></pre>
+            <p>Full pipeline. If verifier fails, feedback loops back. If engineer realizes scope is bigger, it <strong>self-escalates</strong> to coordinator for re-planning.</p>
+          </div>
+        </section>
+      </section>
+
+      <!-- 10 -->
+      <section>
+        <header><h2>One Skill, One Job</h2><p>No generic <code>/test</code>. Every skill is domain-specific, scoped, declares its own references.</p></header>
+        <div class="body">
+          <table><thead><tr><th>Role</th><th>Skill</th><th>What it does</th></tr></thead><tbody>
+            <tr><td>Planner</td><td><code>/angular-scan-deps</code></td><td>Dependencies, versions, upgrade paths, compatibility</td></tr>
+            <tr><td>Planner</td><td><code>/angular-scan-quality</code></td><td>Lint, Lighthouse, bundle size, a11y, performance</td></tr>
+            <tr><td>Planner</td><td><code>/angular-explain</code></td><td>Full C4 architecture walkthrough</td></tr>
+            <tr><td>Engineer</td><td><code>/angular-migrate-standalone</code></td><td>NgModules &rarr; standalone via ts-morph (type-safe)</td></tr>
+            <tr><td>Engineer</td><td><code>/angular-generate-component</code></td><td>Scaffold with OnPush, TSDoc, HDS, tests included</td></tr>
+            <tr><td>Verifier</td><td><code>/angular-test-unit</code></td><td>Generate Jest tests per org conventions</td></tr>
+            <tr><td>Verifier</td><td><code>/angular-review</code></td><td>Review against anti-pattern checklist</td></tr>
+          </tbody></table>
+          <p style="font-size: var(--fs-caption); color: var(--fg-muted); text-align: center;">27+ Angular skills. Each declares reference dependencies &mdash; only loads what it needs.</p>
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section class="section-slide">
+        <div class="bar"></div>
+        <h2>In <span class="highlight-text">practice</span></h2>
+        <p>A real Angular migration and a full project recap.</p>
+      </section>
+
+      <!-- 12 -->
+      <section>
+        <header><h2>Upgrade Angular 17 &rarr; 19</h2><p>One command. Full upgrade. Verified at every step.</p></header>
+        <div class="body">
+          <pre><code>@angular upgrade this app from Angular 17 to 19</code></pre>
+          <div class="flow">
+            <div class="flow-step">1. Scan<small>deps, arch</small></div><div class="flow-arr">&rarr;</div>
+            <div class="flow-step">2. Plan<small>8 phases</small></div><div class="flow-arr">&rarr;</div>
+            <div class="flow-step">3. Approve<small>or --auto</small></div><div class="flow-arr">&rarr;</div>
+            <div class="flow-step">4. Execute<small>per phase</small></div><div class="flow-arr">&rarr;</div>
+            <div class="flow-step">5. Verify<small>build+test</small></div><div class="flow-arr">&rarr;</div>
+            <div class="flow-step done">6. Report</div>
+          </div>
+          <div class="split split-2">
+            <div><h3>Automated phases</h3><ul><li>TypeScript 5.2 &rarr; 5.5</li><li>Angular 17 &rarr; 18 &rarr; 19 via <code>ng update</code></li><li>NgModules &rarr; standalone (ts-morph)</li><li>*ngIf &rarr; @if, *ngFor &rarr; @for</li><li>Signals migration + git checkpoint each phase</li></ul></div>
+            <div><h3>Deliverables</h3><ul><li>Build + test verified at every step</li><li>Rollback-safe &mdash; one revert per phase</li><li>Audit: 8 phases, 187 files, 84K tokens, 96% adherence</li><li>Branch ready for PR</li><li>Migration report with before/after metrics</li></ul></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 -->
+      <section>
+        <header><h2>Project Recap</h2><p>New to a codebase? One command. Complete picture.</p></header>
+        <div class="body">
+          <pre><code>@angular recap this project</code></pre>
+          <table><thead><tr><th>Scan</th><th>What you learn</th></tr></thead><tbody>
+            <tr><td><code>/angular-scan-deps</code></td><td>Every dependency, version currency, upgrade benefits</td></tr>
+            <tr><td><code>/angular-scan-arch</code></td><td>Module graph, component tree, route map</td></tr>
+            <tr><td><code>/angular-scan-quality</code></td><td>Lint, Lighthouse, bundle size, a11y rating</td></tr>
+            <tr><td><code>/angular-scan-tests</code></td><td>Coverage %, unit/e2e/smoke counts, gap analysis</td></tr>
+            <tr><td><code>/angular-scan-deploy</code></td><td>CI/CD pipelines, release strategy, environments</td></tr>
+            <tr><td><code>/angular-scan-git</code></td><td>Commit patterns, contributors, changelogs</td></tr>
+          </tbody></table>
+          <p style="font-size: var(--fs-caption); color: var(--fg-secondary); text-align: center;">Output: <code>PROJECT-RECAP.md</code> &mdash; present it with <code>/present-deck</code></p>
+        </div>
+      </section>
+
+      <!-- 14 -->
+      <section>
+        <header><h2>The Agent Ecosystem</h2><p>One orchestrator. Domain-specific agents. Full observability.</p></header>
+        <div class="body">
+          <div style="display: flex; flex-direction: column; gap: var(--sp-4); width: 100%;">
+            <!-- Tier 1: Orchestrator -->
+            <div>
+              <div style="font-size: var(--fs-tiny); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin-bottom: var(--sp-2);">Orchestrator</div>
+              <div class="agent-grid" style="grid-template-columns: 1fr;">
+                <div class="agent-card"><div class="name" style="color: var(--fg-accent);">@orch</div><div class="role">Master orchestrator</div><div class="desc">Routes requests to domain agents. Pre-flight checks. Shared presentation skills. Full workflow coordination.</div></div>
+              </div>
+            </div>
+            <!-- Tier 2: Domain-specific -->
+            <div>
+              <div style="font-size: var(--fs-tiny); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin-bottom: var(--sp-2);">Domain-specific &mdash; each with planner + engineer + verifier</div>
+              <div class="agent-grid">
+                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@angular</div><div class="role">TypeScript / Angular</div><div class="desc">27 skills: scan, generate, migrate, test, review, refactor, docs.</div></div>
+                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@springboot</div><div class="role">Java / Spring Boot</div><div class="desc">Same pattern. REST endpoints, JPA, security, testing.</div></div>
+                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@fastapi</div><div class="role">Python / FastAPI</div><div class="desc">Same pattern. Async, Pydantic, dependency injection.</div></div>
+              </div>
+            </div>
+            <!-- Tier 3: Shared across domains -->
+            <div>
+              <div style="font-size: var(--fs-tiny); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin-bottom: var(--sp-2);">Shared across all domains</div>
+              <div class="agent-grid">
+                <div class="agent-card"><div class="name" style="color: oklch(0.5 0.1 85);">@docs</div><div class="role">Reference supply chain</div><div class="desc">Fetch, convert, track freshness, detect doc-code drift.</div></div>
+                <div class="agent-card"><div class="name" style="color: var(--neutral-500);">@audit</div><div class="role">Observability &amp; compliance</div><div class="desc">Usage, tokens, compliance, drift, model benchmarks.</div></div>
+                <div class="agent-card"><div class="name" style="color: var(--neutral-500);">@local</div><div class="role">Local environment setup</div><div class="desc">Setup env, install dependencies, configure Docker, localstack, and more.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15 -->
+      <section>
+        <header><h2>Full Control</h2><p>Three-level rule cascade. Global &rarr; domain &rarr; skill.</p></header>
+        <div class="body">
+          <div class="split split-2">
+            <div><h3>Configuration</h3><pre><code># .orch/config.yaml
+workflow:
+  max_retries: 3
+  auto_mode: false
+models:
+  planner: claude-sonnet-4
+  engineer: claude-sonnet-4
+preflight:
+  max_stale_days: 30
+  check_build_baseline: true</code></pre></div>
+            <div><h3>Boundaries</h3><pre><code># .orch/config/boundaries.yaml
+agents:
+  angular-engineer:
+    allowed_tools:
+      - codebase
+      - terminal
+      - edit
+    allowed_scope:
+      - "src/**/*.ts"
+      - "src/**/*.html"
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"</code></pre></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 16 -->
+      <section>
+        <header><h2>Open for Contribution</h2><p>Build once, share across the org.</p></header>
+        <div class="body">
+          <div class="split split-narrow">
+            <div><h3>Add a domain</h3><ul><li>1 coordinator + 3 sub-agents</li><li>Granular skills with declared references</li><li>Boundary config + adherence rules</li><li>Marketplace: <code>orch install @springboot</code></li></ul></div>
+            <div><h3>Add a skill</h3><pre><code># SKILL.md
+---
+name: angular-migrate-signals
+description: "Migrate to Angular signals"
+references:
+  - references/angular/v19/signals.md
+---
+## Steps
+1. Scan for BehaviorSubject patterns
+2. Convert to signal()
+3. Update templates to use signal()
+4. Run build + test</code></pre></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 17 -->
+      <section>
+        <header><h2>Before and After</h2></header>
+        <div class="body">
+          <div class="ba">
+            <div class="ba-row header"><div>Before ORCH</div><div>With ORCH</div></div>
+            <div class="ba-row"><div>Type prompt, get generic code</div><div>Invoke expert agent, get org-standard code</div></div>
+            <div class="ba-row"><div>Manually check standards compliance</div><div>Verifier agent checks automatically</div></div>
+            <div class="ba-row"><div>Different patterns across teams</div><div>Enforced consistency, same agents everywhere</div></div>
+            <div class="ba-row"><div>Migration: weeks of manual work per repo</div><div>One command, verified at every phase</div></div>
+            <div class="ba-row"><div>New dev: read wikis, ask teammates</div><div><code>@angular recap this project</code></div></div>
+            <div class="ba-row"><div>No audit trail of AI actions</div><div>Every tool call, file edit, token logged</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 18 -->
+      <section>
+        <header><h2>The Numbers</h2></header>
+        <div class="body">
+          <div class="stat-row">
+            <div class="stat accent"><div class="val">90%+</div><div class="lbl">Pattern adherence</div></div>
+            <div class="stat teal"><div class="val">&minus;40%</div><div class="lbl">Onboarding time</div></div>
+            <div class="stat teal"><div class="val">&minus;30%</div><div class="lbl">Review turnaround</div></div>
+            <div class="stat"><div class="val">100%</div><div class="lbl">Sessions audited</div></div>
+          </div>
+          <div class="split split-3">
+            <div><h3>Standardization</h3><ul><li>AI follows org patterns automatically</li><li>Consistent code across all teams</li><li>Standards enforced, not just documented</li></ul></div>
+            <div><h3>Productivity</h3><ul><li>Full project context in one command</li><li>Automated migrations with verification</li><li>Expert agents from day one</li></ul></div>
+            <div><h3>Governance</h3><ul><li>Token cost visibility per team</li><li>Tool boundary enforcement</li><li>Behavioral drift detection</li></ul></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 19 -->
+      <section>
+        <header><h2>Getting Started</h2><p>Three commands to full orchestration.</p></header>
+        <div class="body">
+          <pre><code>npm install -g @orch/cli
+orch init
+orch doctor
+
+# In VS Code
+@orch upgrade this app to Angular 19
+@angular recap this project
+@audit /audit-usage this week</code></pre>
+          <table><thead><tr><th>Phase</th><th>What ships</th><th>Status</th></tr></thead><tbody>
+            <tr><td><strong class="accent-text">Phase 1</strong></td><td>Audit framework + docs pipeline + Angular domain + pilot</td><td><span class="tag tag-teal">available</span></td></tr>
+            <tr><td>Phase 2</td><td>Spring Boot, FastAPI, CI/CD, Deployment + benchmarking</td><td><span class="tag tag-amber">coming up</span></td></tr>
+            <tr><td>Phase 3</td><td>Cross-domain orchestration</td><td><span class="tag tag-amber">coming up</span></td></tr>
+            <tr><td>Phase 4</td><td>Plugin marketplace</td><td><span class="tag tag-teal">available</span></td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <!-- 20 -->
+      <section class="closing">
+        <div class="mark"></div>
+        <h1>Copilot is powerful. <span class="highlight-text">ORCH</span> makes it yours.</h1>
+        <p>Your standards. Your patterns. Your audit trail. One CLI. Full control.</p>
+        <div class="cta">npm install -g @orch/cli</div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      width: 1280,
+      height: 720,
+      margin: 0.04,
+    });
+  </script>
+</body>
+</html>
