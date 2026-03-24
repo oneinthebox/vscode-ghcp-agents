@@ -75,6 +75,19 @@ phases:
     report-section: "What Was Created"
     on-failure: continue
 
+  - name: Setup mock server (if API-dependent)
+    id: mock-setup
+    agent: planner
+    skill: /local-mock-generate
+    args: --from src/app/models/ --mode synthetic
+    checkpoint: false
+    verify: false
+    approval: auto=safe
+    collect:
+      - mock-endpoints
+    report-section: "Mock API Setup"
+    on-failure: continue
+
   - name: Apply HDS design system
     id: hds-apply
     agent: engineer

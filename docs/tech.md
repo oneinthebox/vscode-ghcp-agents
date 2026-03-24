@@ -298,7 +298,7 @@ vscode-ghcp-agents/
 │   │   │   ├── orch.agent.md                    # Master orchestrator
 │   │   │   └── orch-preflight.agent.md          # Pre-flight checks sub-agent
 │   │   │
-│   │   ├── skills/                              (54 skill directories with SKILL.md + local refs)
+│   │   ├── skills/                              (58 skill directories with SKILL.md + local refs)
 │   │   │   ├── angular-compatibility/           # @angular-planner: version compatibility
 │   │   │   │   └── SKILL.md
 │   │   │   ├── angular-docs-api/                # @angular-engineer: API docs
@@ -324,7 +324,7 @@ vscode-ghcp-agents/
 │   │   │   │   └── SKILL.md
 │   │   │   ├── angular-test-unit/               # @angular-verifier: Jest tests
 │   │   │   │   └── SKILL.md
-│   │   │   ├── ...                              # (37 angular + 17 shared skills total)
+│   │   │   ├── ...                              # (38 angular + 20 shared skills total)
 │   │   │   ├── audit-benchmark/                 # @audit: model comparison
 │   │   │   │   └── SKILL.md
 │   │   │   ├── audit-compliance/                # @audit: compliance report

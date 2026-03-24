@@ -1,9 +1,11 @@
 ---
 name: "angular"
-description: "Angular domain coordinator. Triages requests into query (answer directly), quick-fix (engineer then verifier), or workflow (planner then engineer then verifier) modes. Owns the retry loop — max 3 retries from config. Routes only, never executes skills directly. Sub-agents: @angular-planner, @angular-engineer, @angular-verifier."
+description: "Angular domain coordinator. Triages requests into query (answer directly), quick-fix (engineer then verifier), or workflow (planner then engineer then verifier) modes. Owns the retry loop — max 3 retries from config. Routes and orchestrates. Uses edit to write workflow state files. Uses terminal for git checkpoints. Sub-agents: @angular-planner, @angular-engineer, @angular-verifier."
 model: claude-sonnet-4
 tools:
   - codebase
+  - terminal
+  - edit
 agents:
   - angular-planner
   - angular-engineer
@@ -105,8 +107,6 @@ When receiving results from a sub-agent:
 ## What you do NOT do
 
 - Execute skills directly (no `/angular-generate-*`, `/angular-migrate-*`, etc.)
-- Edit files
-- Run terminal commands (except reading `.orch/config.yaml` via codebase)
 - Make architectural decisions (that's the planner's job)
 - Write code (that's the engineer's job)
 - Run tests (that's the verifier's job)
@@ -242,7 +242,7 @@ stages:
 
 ## Audit compliance
 
-- Declared tools: codebase (for reading config and project state for triage decisions)
+- Declared tools: codebase (for reading config and project state for triage decisions), terminal (for git checkpoints during workflow execution), edit (for writing workflow state files in .orch/workflow/)
 - Declared scope: `.orch/config.yaml`, `angular.json`, `nx.json`, `package.json` (read-only, for triage)
 - All delegations are logged in the audit trail
 - Sub-agent sessions are tracked as children of the coordinator session

@@ -22,9 +22,11 @@ agents:
       - "yarn publish"
 
   angular:
-    # Coordinator only — routes to sub-agents, no direct edit or terminal
+    # Coordinator — routes to sub-agents, writes workflow state, runs git checkpoints
     allowed_tools:
       - codebase
+      - terminal
+      - edit
     allowed_scope:
       - "src/**"
       - "libs/**"
@@ -35,6 +37,8 @@ agents:
       - "project.json"
       - "package.json"
       - ".orch/references/**"
+      - ".orch/mocks/**"
+      - ".orch/workflow/**"
     blocked_commands:
       - "rm -rf"
       - "git push --force"
@@ -77,6 +81,7 @@ agents:
       - "src/**/*.html"
       - "src/**/*.scss"
       - "src/**/*.spec.ts"
+      - ".orch/mocks/**"
     blocked_commands:
       - "rm -rf"
       - "git push --force"
@@ -157,7 +162,18 @@ agents:
       - terminal
       - edit
     allowed_scope:
-      - "**"
+      - ".orch/mocks/**"
+      - ".orch/config.yaml"
+      - ".env"
+      - ".env.*"
+      - ".nvmrc"
+      - ".node-version"
+      - "docker-compose.yml"
+      - "docker-compose.yaml"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "package.json"
+      - "package-lock.json"
     blocked_commands:
       - "rm -rf"
       - "git push --force"

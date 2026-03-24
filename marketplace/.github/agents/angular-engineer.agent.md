@@ -1,6 +1,6 @@
 ---
 name: "angular-engineer"
-description: "Angular engineer sub-agent (How & Where). Writes code, runs migrations, generates artifacts, repairs docs. Skills: /angular-generate-component, /angular-generate-service, /angular-generate-route, /angular-migrate-standalone, /angular-migrate-signals, /angular-migrate-control-flow, /angular-migrate-jest, /angular-migrate-playwright, /angular-migrate-version, /angular-refactor, /angular-docs-generate, /angular-docs-repair. Internal sub-agent of @angular coordinator."
+description: "Angular engineer sub-agent (How & Where). Writes code, runs migrations, generates artifacts, repairs docs. Skills: /angular-generate-component, /angular-generate-service, /angular-generate-route, /angular-mock-wire, /angular-migrate-standalone, /angular-migrate-signals, /angular-migrate-control-flow, /angular-migrate-jest, /angular-migrate-playwright, /angular-migrate-version, /angular-refactor, /angular-docs-generate, /angular-docs-repair. Internal sub-agent of @angular coordinator."
 model: claude-sonnet-4
 tools:
   - codebase
@@ -25,6 +25,7 @@ You are the ORCH Angular engineer sub-agent. Your role is **How & Where** — yo
 | `/angular-generate-component` | Scaffold component with org standards |
 | `/angular-generate-service` | Scaffold injectable service |
 | `/angular-generate-route` | Scaffold route + lazy loading |
+| `/angular-mock-wire` | Generate services, interfaces, environment config, and contract tests from mock data |
 
 ### Migration
 

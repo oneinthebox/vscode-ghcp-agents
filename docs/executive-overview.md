@@ -30,7 +30,7 @@ ORCH is a **marketplace of custom Copilot agents, skills, and workflows** instal
 | Capability | Description |
 |------------|-------------|
 | **Role-based agents** | Planner, Engineer, and Verifier sub-agents per domain |
-| **50+ granular skills** | One skill per task — scan, generate, migrate, test, deploy |
+| **58 granular skills** | One skill per task — scan, generate, migrate, test, deploy |
 | **Declarative workflows** | YAML-defined, phase-by-phase execution with checkpoints |
 | **Full audit trail** | Every action logged — tokens, tools, adherence, drift |
 
@@ -47,6 +47,7 @@ ORCH is a **marketplace of custom Copilot agents, skills, and workflows** instal
 | Design system (HDS) integration | Audit + apply + generate with org tokens | Consistent look and feel across all UIs |
 | Platform (Elevate) integration | Auth, logging, config compliance | No rogue `console.log` or custom auth patterns |
 | Reports | HTML reports with diagrams, progress bars | Recap a project, migration status, audit compliance |
+| Mock data pipeline | Capture from running apps, generate from OpenAPI/interfaces, serve locally with full CRUD + WebSocket | Develop frontend without waiting for backend. Contract-first development. |
 | Marketplace CLI | `orch list`, `install`, `update`, `doctor`, `reset` | One CLI for everything |
 
 ---
@@ -100,7 +101,7 @@ ORCH is a **marketplace of custom Copilot agents, skills, and workflows** instal
 
 The Angular domain serves as the reference implementation. All domains follow the same pattern.
 
-### Skill Inventory (37 skills)
+### Skill Inventory (38 skills)
 
 | Category | Count | Examples |
 |----------|-------|----------|
@@ -110,7 +111,8 @@ The Angular domain serves as the reference implementation. All domains follow th
 | HDS (Design System) | 3 | `angular-hds-audit`, `angular-hds-apply`, `angular-hds-generate` |
 | Elevate (Platform) | 3 | `angular-elevate-audit`, `angular-elevate-apply`, `angular-elevate-generate` |
 | Documentation | 4 | `angular-docs-readme`, `angular-docs-api`, `angular-docs-changelog`, `angular-docs-comment` |
-| **Total** | **37** | |
+| Mock integration | 1 | `angular-mock-wire` |
+| **Total** | **38** | |
 
 ### Example: Upgrade to Angular 19
 
@@ -241,7 +243,7 @@ Then in VS Code with GitHub Copilot:
 | What is ORCH? | A marketplace of custom Copilot agents, skills, and workflows for enterprise teams |
 | Why do we need it? | Generic Copilot doesn't know our standards, patterns, or conventions |
 | What does it replace? | Ad hoc Copilot usage with no governance or consistency |
-| What's the first domain? | Angular — 37 skills, 3 role-based agents, declarative workflows |
+| What's the first domain? | Angular — 38 skills, 3 role-based agents, declarative workflows |
 | What about other stacks? | Same pattern — Spring Boot, FastAPI, and any domain follow the coordinator + planner + engineer + verifier model |
 | Is it audited? | 100% — every session, every token, every tool call |
 | How do teams adopt it? | `orch init` — one command to start |

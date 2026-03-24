@@ -189,6 +189,7 @@ export function createAssemblyPlan(
           'angular-hds-audit', 'angular-hds-apply', 'angular-hds-generate',
           'angular-elevate-audit', 'angular-elevate-apply', 'angular-elevate-generate',
           'angular-docs-comment', 'angular-docs-readme', 'angular-docs-changelog', 'angular-docs-api',
+          'angular-mock-wire',
         );
         plan.semanticAdapters.push('typescript');
 

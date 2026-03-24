@@ -321,6 +321,15 @@ The @showcase agent has been **removed**. Presentation capabilities are now **sh
 | `/local-setup-docker` | Set up Docker, docker-compose, localstack for local development and testing |
 | `/local-setup-deps` | Install and verify project dependencies (npm, maven, pip) with version alignment checks |
 | `/local-diagnose` | Diagnose common environment issues: port conflicts, version mismatches, missing tools, permission problems |
+| `/local-mock-capture` | Import HAR file + optional Chrome snippet to extract API endpoints, response schemas, relationships, and WebSocket messages |
+| `/local-mock-generate` | Generate mock data from any source — HAR capture, OpenAPI/Swagger, TypeScript interfaces, or manual description. Outputs json-server compatible db.json with relationships, routes, and WebSocket replay data |
+| `/local-mock-server` | Start a mock API server from generated data — full CRUD REST + WebSocket replay + CORS + relationship enforcement |
+
+**Angular mock integration:**
+
+| Skill | Agent | Description |
+|-------|-------|-------------|
+| `/angular-mock-wire` | @angular-engineer | Generate Angular services, TypeScript interfaces, environment config, and contract tests from mock server schema |
 
 **Reference docs:** Internal environment setup guides, Docker templates, localstack configuration
 
@@ -494,7 +503,7 @@ sequenceDiagram
     CLI-->>CLI: Detect: Angular 18, Nx, Jest, Playwright
     CLI->>MP: Read available agents + skills
     CLI->>Proj: Copy @angular coordinator + 3 sub-agents (planner, engineer, verifier)
-    CLI->>Proj: Copy 37 Angular skills (scan, generate, migrate, test, review, docs)
+    CLI->>Proj: Copy 38 Angular skills (scan, generate, migrate, test, review, docs, mock-wire)
     CLI->>Proj: Copy audit hooks (4) + scripts (12)
     CLI->>Proj: Copy .orch/audit/config/ + .orch/runs/
     CLI->>Proj: Create .orch/registry.yaml (12 sources for Angular 18)

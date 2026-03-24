@@ -36,6 +36,7 @@ const AGENT_PACKAGES: Record<string, {
       'angular-hds-audit', 'angular-hds-apply', 'angular-hds-generate',
       'angular-elevate-audit', 'angular-elevate-apply', 'angular-elevate-generate',
       'angular-docs-comment', 'angular-docs-readme', 'angular-docs-changelog', 'angular-docs-api',
+      'angular-mock-wire',
     ],
     instructions: [],
     semanticAdapters: ['typescript'],
@@ -68,6 +69,7 @@ const AGENT_PACKAGES: Record<string, {
     skills: [
       'local-setup-env', 'local-setup-docker',
       'local-setup-deps', 'local-diagnose',
+      'local-mock-capture', 'local-mock-generate', 'local-mock-server',
     ],
     instructions: [],
     semanticAdapters: [],

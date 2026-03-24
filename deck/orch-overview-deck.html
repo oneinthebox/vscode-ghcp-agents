@@ -668,7 +668,7 @@ orch init
 orch doctor
 orch reset</code></pre>
             <div class="split split-2">
-              <div><h3>What it creates</h3><ul><li>Role-based agents tailored to your stack</li><li>54 granular skills across domains, audit, docs, and local setup</li><li>Audit hooks on every lifecycle event</li><li>Styled reports &mdash; recap, migration, docs, benchmarking</li><li>Model and approach benchmarking out of the box</li></ul></div>
+              <div><h3>What it creates</h3><ul><li>Role-based agents tailored to your stack</li><li>58 granular skills across domains, audit, docs, and local setup</li><li>Audit hooks on every lifecycle event</li><li>Styled reports &mdash; recap, migration, docs, benchmarking</li><li>Model and approach benchmarking out of the box</li></ul></div>
               <div><h3>What stays in your hands</h3><ul><li>Which agents are installed</li><li>What tools each agent can access</li><li>Auto mode or approval at every step</li><li>Model selection backed by benchmark data</li><li>Clean removal with one command when needed</li></ul></div>
             </div>
           </div>
@@ -686,7 +686,7 @@ orch reset</code></pre>
     docs.agent.md               # reference supply chain
     audit.agent.md              # observability
   skills/
-    angular-scan-deps/SKILL.md  # 54 granular skills
+    angular-scan-deps/SKILL.md  # 58 granular skills
     angular-migrate-standalone/SKILL.md
     ...
   hooks/
@@ -788,7 +788,7 @@ orch reset</code></pre>
             <tr><td>Verifier</td><td><code>/angular-test-unit</code></td><td>Generate Jest tests per org conventions</td></tr>
             <tr><td>Verifier</td><td><code>/angular-review</code></td><td>Review against anti-pattern checklist</td></tr>
           </tbody></table>
-          <p style="font-size: var(--fs-caption); color: var(--fg-muted); text-align: center;">37 Angular skills + 17 shared (audit, docs, local, presentation). Each declares reference dependencies &mdash; only loads what it needs.</p>
+          <p style="font-size: var(--fs-caption); color: var(--fg-muted); text-align: center;">38 Angular skills + 20 shared (audit, docs, local, presentation). Each declares reference dependencies &mdash; only loads what it needs.</p>
         </div>
       </section>
 
@@ -912,7 +912,7 @@ phases:
             <div>
               <div style="font-size: var(--fs-tiny); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin-bottom: var(--sp-2);">Domain-specific &mdash; each with planner + engineer + verifier</div>
               <div class="agent-grid">
-                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@angular</div><div class="role">TypeScript / Angular</div><div class="desc">37 skills: scan, generate, migrate, test, review, refactor, HDS, elevate.</div></div>
+                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@angular</div><div class="role">TypeScript / Angular</div><div class="desc">38 skills: scan, generate, migrate, test, review, refactor, HDS, elevate, mock-wire.</div></div>
                 <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@springboot</div><div class="role">Java / Spring Boot</div><div class="desc">Same pattern. REST endpoints, JPA, security, testing.</div></div>
                 <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@fastapi</div><div class="role">Python / FastAPI</div><div class="desc">Same pattern. Async, Pydantic, dependency injection.</div></div>
               </div>
@@ -923,7 +923,7 @@ phases:
               <div class="agent-grid">
                 <div class="agent-card"><div class="name" style="color: oklch(0.5 0.1 85);">@docs</div><div class="role">Reference supply chain</div><div class="desc">Fetch, convert, track freshness, detect doc-code drift.</div></div>
                 <div class="agent-card"><div class="name" style="color: var(--neutral-500);">@audit</div><div class="role">Observability &amp; compliance</div><div class="desc">Usage, tokens, compliance, drift, model benchmarks.</div></div>
-                <div class="agent-card"><div class="name" style="color: var(--neutral-500);">@local</div><div class="role">Local environment setup</div><div class="desc">Setup env, install dependencies, configure Docker, localstack, and more.</div></div>
+                <div class="agent-card"><div class="name" style="color: var(--neutral-500);">@local</div><div class="role">Local environment setup</div><div class="desc">Setup env, dependencies, Docker, mock API servers, and more.</div></div>
               </div>
             </div>
           </div>
@@ -984,7 +984,7 @@ agents:
           <header><h2>Marketplace</h2><p>Discover, install, update, and manage. Everything via CLI.</p></header>
           <div class="body">
             <pre><code>orch list                        # see all available agents and skills
-orch install @angular            # install a domain (37 skills + 5 agents)
+orch install @angular            # install a domain (38 skills + 5 agents)
 orch install @local              # install shared agent
 orch update                      # pull latest from marketplace
 orch doctor                      # verify installation health

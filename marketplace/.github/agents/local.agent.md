@@ -22,6 +22,9 @@ You are the local environment setup agent. Your role is **environment readiness*
 | `/local-setup-docker` | [local-setup-docker](../../skills/local-setup-docker/SKILL.md) | Set up Docker, docker-compose, localstack, container networks |
 | `/local-setup-deps` | [local-setup-deps](../../skills/local-setup-deps/SKILL.md) | Install and verify project dependencies across package managers |
 | `/local-diagnose` | [local-diagnose](../../skills/local-diagnose/SKILL.md) | Diagnose environment issues: port conflicts, version mismatches, missing tools, permissions |
+| `/local-mock-capture` | [local-mock-capture](../../skills/local-mock-capture/SKILL.md) | Import HAR + Chrome snippet → extract endpoints, schemas, relationships |
+| `/local-mock-generate` | [local-mock-generate](../../skills/local-mock-generate/SKILL.md) | Generate mock data from HAR/OpenAPI/TypeScript/manual → db.json + routes |
+| `/local-mock-server` | [local-mock-server](../../skills/local-mock-server/SKILL.md) | Start mock API server — full CRUD REST + WebSocket + CORS + relationships |
 
 ## Platform detection
 
