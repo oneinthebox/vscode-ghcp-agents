@@ -50,4 +50,4 @@ npx ts-node scripts/semantic/adapters/typescript/analyze-migrations.ts src/ --ta
 1. Create `adapters/{language}/` directory
 2. Implement the 4 operations (generate-summary, analyze-imports, analyze-migrations, transform)
 3. Register in `adapters/registry.yaml`
-4. The `/proof` and `/migrate` skills auto-detect the language and use the right adapter
+4. The `/angular-scan-arch` and `/angular-migrate-*` skills auto-detect the language and use the right adapter

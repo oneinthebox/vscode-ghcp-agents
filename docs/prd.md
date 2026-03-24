@@ -204,6 +204,7 @@ The @showcase agent has been **removed**. Presentation capabilities are now **sh
 |-------|-------------|
 | `/present-deck` | Generate slide decks from ORCH data — audit summaries, migration progress, drift reports — formatted for stakeholder forums and architecture reviews. Converts markdown to reveal.js HTML or PPTX. Supports mermaid diagrams, HDS design tokens, and dark/light themes. |
 | `/present-dashboard` | Build metrics dashboards from ORCH audit data — token consumption, adherence scores, adoption trends — for team leads and management visibility. Reads from `.orch/audit/` and `.orch/runs/` telemetry. |
+| `/present-report` | Generate HTML reports from ORCH session data — migration summaries, recap reports, audit compliance — with diagrams, progress bars, and recommendations. |
 
 ---
 
@@ -493,7 +494,7 @@ sequenceDiagram
     CLI-->>CLI: Detect: Angular 18, Nx, Jest, Playwright
     CLI->>MP: Read available agents + skills
     CLI->>Proj: Copy @angular coordinator + 3 sub-agents (planner, engineer, verifier)
-    CLI->>Proj: Copy 27 Angular skills (scan, generate, migrate, test, review, docs)
+    CLI->>Proj: Copy 37 Angular skills (scan, generate, migrate, test, review, docs)
     CLI->>Proj: Copy audit hooks (4) + scripts (12)
     CLI->>Proj: Copy .orch/audit/config/ + .orch/runs/
     CLI->>Proj: Create .orch/registry.yaml (12 sources for Angular 18)
@@ -808,6 +809,6 @@ sequenceDiagram
 | Token budget exceeded | Medium | Medium | Strict 500-line limit per reference doc; curate aggressively |
 | External doc sites change structure | Medium | Low | `/docs-refresh` re-converts; snapshot previous version |
 | Migration skills produce incorrect transformations | Low | High | Always run build + tests after migration; human review required |
-| **Windows incompatibility** | **High** | **High** | **All 15 audit/migration `.sh` scripts and 1 `.py` script are bash/python-only. They will not execute on Windows (cmd.exe or PowerShell). Audit hooks silently fail — no data captured. Mitigation: keep bash scripts as primary runtime. `orch doctor` checks for bash, jq, and python3 availability with platform-specific install guidance (Homebrew on macOS, apt/dnf on Linux, Git Bash + Chocolatey/Scoop on Windows). CLI TypeScript code is cross-platform. ts-morph adapters are cross-platform.** |
+| **Windows incompatibility** | **High** | **High** | **All 15 audit/migration `.sh` scripts and 1 `.py` script are bash/python-only. They will not execute on Windows (cmd.exe or PowerShell). Audit hooks silently fail — no data captured. Mitigation: keep bash scripts as primary runtime. `orch doctor` checks for bash, jq, and python3 availability with platform-specific install guidance (Homebrew on macOS, winget + Git Bash on Windows). CLI TypeScript code is cross-platform. ts-morph adapters are cross-platform.** |
 | Windows notification gap | Medium | Low | `notify.sh` has macOS (`osascript`) and Linux (`notify-send`) paths but no Windows path. Add PowerShell `BurntToast` or `[System.Windows.Forms.MessageBox]` support. `orch doctor` surfaces this gap on Windows and provides install guidance. |
-| `jq` dependency on non-dev machines | Medium | Medium | All `.sh` scripts depend on `jq` for JSON parsing. Not installed by default on any OS. `orch doctor` checks for `jq` and provides platform-specific install instructions (brew install jq, apt install jq, choco install jq). |
+| `jq` dependency on non-dev machines | Medium | Medium | All `.sh` scripts depend on `jq` for JSON parsing. Not installed by default on any OS. `orch doctor` checks for `jq` and provides platform-specific install instructions (brew install jq, winget install jqlang.jq). |

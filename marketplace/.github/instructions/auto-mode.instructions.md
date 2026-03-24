@@ -16,7 +16,7 @@ Unless the user explicitly specifies otherwise, use `auto=safe` mode:
    - Low-confidence decisions (ambiguous API mappings, unknown compatibility)
    - Security-sensitive areas (auth, credentials, environment config)
 4. **Never pause for**:
-   - Read-only operations (angular-scan-*, docs-drift, angular-review, docs-status, explain, version-matrix)
+   - Read-only operations (angular-scan-*, docs-drift, angular-review, docs-status, angular-explain, angular-compatibility)
    - High-confidence mechanical transforms (standalone, control-flow, inject)
    - File creation (scaffolding, test generation, doc conversion)
    - Verification steps (build, test, lint — just run and report)
@@ -28,8 +28,8 @@ These skills are read-only and have no risk. **Never** show a plan or ask for ap
 - `/docs-drift` — doc-code mismatch detection
 - `/angular-review` — code review
 - `/docs-status` — registry dashboard
-- `/version-matrix` — compatibility check
-- `/explain` — project walkthrough
+- `/angular-compatibility` — compatibility check
+- `/angular-explain` — project walkthrough
 
 ### Write skills — plan approval required (auto=safe)
 
@@ -63,8 +63,8 @@ The user can override per-invocation:
 | `/docs-drift` | Run full analysis, report | **Run immediately, no approval** | Same |
 | `/angular-review` | Show each issue, ask to continue | **Run full review, show report** | Same |
 | `/docs-status` | Show status | **Run immediately** | Same |
-| `/version-matrix` | Show matrix | **Run immediately** | Same |
-| `/explain` | Show walkthrough | **Run immediately** | Same |
+| `/angular-compatibility` | Show matrix | **Run immediately** | Same |
+| `/angular-explain` | Show walkthrough | **Run immediately** | Same |
 | `/angular-migrate-*` | Pause per phase | Pause for plan + failures only | Only stop on build/test failures |
 | `/angular-generate-*` | Show template before creating | Show plan, then create files | Create files silently |
 | `/angular-refactor` | Show each change before applying | Show plan, apply all, verify build | Apply all, skip verification |

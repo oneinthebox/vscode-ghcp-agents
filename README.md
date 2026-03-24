@@ -187,7 +187,8 @@ For development setup, see [CONTRIBUTING.md](CONTRIBUTING.md).
 | [Product Requirements (PRD)](docs/prd.md) | Vision, scope, capabilities, audit framework, domains, versioning, drift detection, success metrics |
 | [Technical Design](docs/tech.md) | C4 architecture, audit schema, file structure, data flows, agent/skill/instruction/hook specs |
 | [Delivery Plan](docs/delivery.md) | Phased rollout — audit first, then doc pipeline, then domains. Stages, tasks, estimates, exit criteria |
-| [Architecture Redesign](docs/superpowers/specs/2026-03-23-orch-architecture-redesign.md) | New agent architecture, skill granularity, directory structure |
+| [Executive Overview](docs/executive-overview.md) | Vision, features, marketplace, Angular showcase |
+| [User Guide](docs/user-guide.md) | Hands-on guide: CLI, agents, skills, workflows, reports |
 
 ---
 

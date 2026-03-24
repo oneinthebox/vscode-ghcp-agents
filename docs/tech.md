@@ -150,15 +150,15 @@ graph TB
     end
 
     subgraph Planner["@angular-planner Sub-Agent"]
-        PlanSkills["/angular-analyze<br/>/angular-plan-migrate<br/>/angular-plan-refactor"]
+        PlanSkills["/angular-scan-deps<br/>/angular-scan-arch<br/>/angular-explain<br/>/angular-compatibility"]
     end
 
     subgraph Engineer["@angular-engineer Sub-Agent"]
-        EngSkills["/angular-generate<br/>/angular-migrate<br/>/angular-refactor<br/>/angular-hds<br/>/angular-elevate"]
+        EngSkills["/angular-generate-component<br/>/angular-migrate-standalone<br/>/angular-refactor<br/>/angular-hds-apply<br/>/angular-elevate-apply"]
     end
 
     subgraph Verifier["@angular-verifier Sub-Agent"]
-        VerSkills["/angular-test<br/>/angular-review<br/>/angular-lint-check"]
+        VerSkills["/angular-test-unit<br/>/angular-review<br/>/angular-test-lint"]
     end
 
     subgraph Refs["Reference Docs (orch://references/...)"]
@@ -298,31 +298,33 @@ vscode-ghcp-agents/
 │   │   │   ├── orch.agent.md                    # Master orchestrator
 │   │   │   └── orch-preflight.agent.md          # Pre-flight checks sub-agent
 │   │   │
-│   │   ├── skills/                              (all skill directories with SKILL.md + local refs)
-│   │   │   ├── angular-analyze/                 # @angular-planner: codebase analysis
+│   │   ├── skills/                              (54 skill directories with SKILL.md + local refs)
+│   │   │   ├── angular-compatibility/           # @angular-planner: version compatibility
 │   │   │   │   └── SKILL.md
-│   │   │   ├── angular-elevate/                 # @angular-engineer: platform services
+│   │   │   ├── angular-docs-api/                # @angular-engineer: API docs
 │   │   │   │   └── SKILL.md
-│   │   │   ├── angular-generate/                # @angular-engineer: scaffold components
+│   │   │   ├── angular-docs-audit/              # @angular-verifier: doc coverage scan
 │   │   │   │   └── SKILL.md
-│   │   │   ├── angular-hds/                     # @angular-engineer: design system
+│   │   │   ├── angular-explain/                 # @angular-planner: architecture walkthrough
 │   │   │   │   └── SKILL.md
-│   │   │   ├── angular-lint-check/              # @angular-verifier: lint validation
+│   │   │   ├── angular-generate-component/      # @angular-engineer: scaffold components
 │   │   │   │   └── SKILL.md
-│   │   │   ├── angular-migrate/                 # @angular-engineer: upgrade migrations
-│   │   │   │   ├── SKILL.md
-│   │   │   │   └── references/
-│   │   │   ├── angular-plan-migrate/            # @angular-planner: migration planning
+│   │   │   ├── angular-hds-apply/               # @angular-engineer: design system apply
 │   │   │   │   └── SKILL.md
-│   │   │   ├── angular-plan-refactor/           # @angular-planner: refactor planning
+│   │   │   ├── angular-migrate-standalone/      # @angular-engineer: NgModule removal
+│   │   │   │   └── SKILL.md
+│   │   │   ├── angular-migrate-signals/         # @angular-engineer: signals migration
 │   │   │   │   └── SKILL.md
 │   │   │   ├── angular-refactor/                # @angular-engineer: modernize code
 │   │   │   │   └── SKILL.md
 │   │   │   ├── angular-review/                  # @angular-verifier: PR review
 │   │   │   │   ├── SKILL.md
 │   │   │   │   └── references/
-│   │   │   ├── angular-test/                    # @angular-verifier: Jest/Playwright tests
+│   │   │   ├── angular-scan-deps/               # @angular-planner: dependency analysis
 │   │   │   │   └── SKILL.md
+│   │   │   ├── angular-test-unit/               # @angular-verifier: Jest tests
+│   │   │   │   └── SKILL.md
+│   │   │   ├── ...                              # (37 angular + 17 shared skills total)
 │   │   │   ├── audit-benchmark/                 # @audit: model comparison
 │   │   │   │   └── SKILL.md
 │   │   │   ├── audit-compliance/                # @audit: compliance report
@@ -1312,7 +1314,94 @@ Note: The current implementation uses the 4 audit hooks listed above. Secrets sc
 
 ---
 
-## 11. Cross-Cutting Concerns
+## 11. Workflow Engine
+
+### 11.1 Overview
+
+Workflows are declarative YAML files that define multi-phase pipelines. The domain coordinator reads the YAML and executes phases sequentially, collecting outputs for a final report.
+
+```
+.orch/workflows/
+  angular-migration.yaml      # upgrade Angular versions
+  angular-new-feature.yaml    # create new features
+```
+
+### 11.2 Phase Execution Loop
+
+For each phase in a workflow:
+
+1. **Pre-check** (if defined) — capture before state
+2. **Execute** — invoke skill on the declared agent (planner/engineer/verifier)
+3. **Post-check** (if defined) — capture after state, compute delta
+4. **Checkpoint** (if true) — git commit
+5. **Verify** (if true) — invoke verifier, handle failure per `on-failure`
+6. **Update status** — write `.orch/workflow/<name>.yaml` state file (polled by VS Code extension)
+7. **Collect** — store outputs in `.orch/runs/<run-id>/`
+
+### 11.3 Workflow YAML Schema
+
+```yaml
+name: angular-migration
+trigger: "upgrade|migrate angular"
+report:
+  title: "Angular {{from}} → {{to}} Upgrade"
+  attribution: "@angular → @angular-planner → @angular-engineer → @angular-verifier"
+
+phases:
+  - name: Standalone migration
+    id: standalone
+    agent: engineer
+    skill: /angular-migrate-standalone
+    pre-check:
+      skill: /angular-scan-arch
+      args: --counts-only
+      capture: before-patterns
+    post-check:
+      skill: /angular-scan-arch
+      args: --counts-only
+      capture: after-patterns
+    checkpoint: true          # git commit after phase
+    verify: true              # invoke verifier after phase
+    approval: auto=safe       # none | auto=safe | auto=all
+    collect: [files-changed, duration, pattern-delta]
+    report-section: "Phase Details"
+    on-failure: rollback-to-checkpoint
+
+post-workflow:
+  report:
+    sections: ["Before vs After", "Phase Timeline", "Phase Details", "Verification", "Recommendations"]
+  git:
+    tag: "migrate/angular-{{to}}-{{date}}"
+```
+
+### 11.4 Failure Modes
+
+| `on-failure` | Behavior |
+|--------------|----------|
+| `stop` | Abort workflow, report what completed |
+| `pause` | Show failure to human, wait for decision |
+| `rollback-to-checkpoint` | Git revert to last checkpoint, ask human |
+| `continue` | Log failure, skip phase, continue |
+| `report-as-partial` | Complete workflow, mark report as partial |
+
+### 11.5 Report Stitching
+
+After all phases complete, the coordinator:
+1. Reads collected data from `.orch/runs/<run-id>/`
+2. For each report section: pulls from phases with matching `report-section`
+3. Auto-generates: Phase Timeline (from durations), Risk Items (from verifier findings), Git History (from checkpoints), Recommendations (from risks + verification)
+4. Produces markdown report, optionally renders HTML via `/present-report`
+
+### 11.6 Status Bar Integration
+
+The coordinator writes `.orch/workflow/<name>.yaml` state file after every phase. The VS Code extension polls this every 3 seconds and displays:
+- Status bar: `ORCH: Migration 4/10 ✓`
+- Tooltip: all phases with ✅🔵⚪ icons
+- Webview panel: clickable phase pills with details
+
+---
+
+## 12. Cross-Cutting Concerns
 
 ### 11.1 Security & Audit
 

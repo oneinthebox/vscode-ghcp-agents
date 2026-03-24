@@ -9,7 +9,8 @@ ORCH welcomes contributions from both internal team members and external teams b
 - [Product Requirements (PRD)](docs/prd.md) — Vision, scope, capabilities
 - [Technical Design](docs/tech.md) — Architecture, schemas, file structure, agent/skill specs
 - [Delivery Plan](docs/delivery.md) — Phased rollout, tasks, estimates
-- [Architecture Redesign](docs/superpowers/specs/2026-03-23-orch-architecture-redesign.md) — Current architecture decisions
+- [Executive Overview](docs/executive-overview.md) — Vision, features, marketplace
+- [User Guide](docs/user-guide.md) — Hands-on guide for developers
 
 ---
 

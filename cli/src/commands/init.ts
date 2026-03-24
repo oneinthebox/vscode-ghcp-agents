@@ -195,7 +195,7 @@ export async function initCommand(options: any): Promise<void> {
   info("Run 'orch doctor' to verify setup");
   info("Run 'orch status' to see installed components");
   if (!options.skipScan) {
-    info("Use '@docs /proof' to scan your codebase");
+    info("Use '@angular /angular-scan-arch' to scan your codebase architecture");
   }
   console.log('');
 }

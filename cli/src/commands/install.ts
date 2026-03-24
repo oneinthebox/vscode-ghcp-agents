@@ -35,6 +35,7 @@ const AGENT_PACKAGES: Record<string, {
       'angular-review', 'angular-docs-audit',
       'angular-hds-audit', 'angular-hds-apply', 'angular-hds-generate',
       'angular-elevate-audit', 'angular-elevate-apply', 'angular-elevate-generate',
+      'angular-docs-comment', 'angular-docs-readme', 'angular-docs-changelog', 'angular-docs-api',
     ],
     instructions: [],
     semanticAdapters: ['typescript'],

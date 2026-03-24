@@ -1,6 +1,6 @@
 # Semantic Analysis Adapter Registry
 # Maps languages to their LST tools and adapter scripts.
-# The /proof and /migrate skills use this to select the right adapter.
+# The /angular-scan-arch and /angular-migrate-* skills use this to select the right adapter.
 
 adapters:
   typescript:

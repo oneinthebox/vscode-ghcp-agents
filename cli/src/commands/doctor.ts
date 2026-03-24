@@ -60,9 +60,9 @@ export async function doctorCommand(): Promise<void> {
   await section('Required Tools');
   const platform = detectPlatform();
   const toolChecks: { name: string; cmd: string; macInstall: string; linuxInstall: string; winInstall: string }[] = [
-    { name: 'bash', cmd: 'bash --version', macInstall: 'pre-installed on macOS', linuxInstall: 'pre-installed on Linux', winInstall: 'Install Git Bash or WSL' },
-    { name: 'jq', cmd: 'jq --version', macInstall: 'brew install jq', linuxInstall: 'apt install jq', winInstall: 'choco install jq or scoop install jq' },
-    { name: 'python3', cmd: 'python3 --version', macInstall: 'brew install python3', linuxInstall: 'apt install python3', winInstall: 'choco install python3 or scoop install python' },
+    { name: 'bash', cmd: 'bash --version', macInstall: 'pre-installed on macOS', linuxInstall: 'pre-installed', winInstall: 'Install Git Bash (comes with Git): winget install Git.Git' },
+    { name: 'jq', cmd: 'jq --version', macInstall: 'brew install jq', linuxInstall: 'brew install jq', winInstall: 'winget install jqlang.jq' },
+    { name: 'python3', cmd: 'python3 --version', macInstall: 'brew install python3', linuxInstall: 'brew install python3', winInstall: 'winget install Python.Python.3.12' },
   ];
 
   for (const tool of toolChecks) {
@@ -110,7 +110,7 @@ export async function doctorCommand(): Promise<void> {
   // 5. Audit config
   await section('Audit Config');
   for (const file of ['boundaries.yaml', 'adherence-rules.yaml']) {
-    const filePath = path.join(projectPath, '.orch', 'config', file);
+    const filePath = path.join(projectPath, '.orch', 'audit', 'config', file);
     if (fs.existsSync(filePath)) {
       statusRow(file, 'ok');
       ok++;
@@ -146,7 +146,7 @@ export async function doctorCommand(): Promise<void> {
       statusRow('TypeScript adapter (ts-morph)', 'ok');
       ok++;
     } else {
-      statusRow('TypeScript adapter', 'warn', 'Not installed — /proof --semantic unavailable');
+      statusRow('TypeScript adapter', 'warn', 'Not installed — /angular-scan-arch --semantic unavailable');
       warnings++;
     }
   }

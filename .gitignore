@@ -131,9 +131,6 @@ dist
 # macOS
 .DS_Store
 
-# Lock files for sample apps
-samples/**/package-lock.json
-
 # yarn v3
 .pnp.*
 .yarn/*

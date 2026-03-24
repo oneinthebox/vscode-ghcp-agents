@@ -72,7 +72,7 @@ tool_names = [t.get('tool','') for t in tools]
 result = {'bounded': False, 'total': 0, 'completed': 0, 'unit': 'items', 'pct': 0}
 
 # Check 1: Migration from scan — look for scan snapshots
-scan_dirs = glob.glob('.github/references/scans/*/')
+scan_dirs = glob.glob('.orch/references/scans/*/')
 for scan_dir in scan_dirs:
     inventory_files = glob.glob(os.path.join(scan_dir, '**', '*.md'), recursive=True)
     for inv in inventory_files:

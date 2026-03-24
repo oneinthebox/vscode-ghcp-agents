@@ -945,7 +945,7 @@ sources:
   # ═══════════════════════════════════════════════════════════════
   # INTERNAL / CUSTOM LIBRARIES
   # ═══════════════════════════════════════════════════════════════
-  # Add your internal libraries here via @docs /packs register.
+  # Add your internal libraries here via @docs /docs-fetch.
   # User-added sources get managed_by: "user" and are never
   # overwritten by orch update.
   #
