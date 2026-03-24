@@ -17,7 +17,7 @@ You are an internal sub-agent invoked by @docs to convert individual documentati
 ## What you receive
 
 - Source entry from registry (origin URL/path, format, output path)
-- Conversion rules (from doc-conversion.instructions.md)
+- Conversion rules (passed by @docs from the /docs-fetch skill)
 
 ## What you return
 
@@ -28,7 +28,7 @@ You are an internal sub-agent invoked by @docs to convert individual documentati
 
 1. Fetch/read source based on type:
    - URL → fetch tool
-   - Local file → read from .orch/references/staging/
+   - Local file → read from .orch/references/staging/ (Note: This directory is created by the CLI during `orch init` or by @docs during conversion workflows.)
    - Source-embedded → run generator tool first
 
 2. For source-embedded formats, run the extraction tool:
@@ -55,3 +55,9 @@ You are an internal sub-agent invoked by @docs to convert individual documentati
 - Never include raw HTML in output — pure markdown only
 - For source-embedded: always run the generator tool, never parse comments manually
 - If generator tool fails (not installed), report the error with install instructions
+
+## Audit compliance
+
+- Declared tools: codebase, terminal, fetch, edit
+- Declared scope: `.orch/references/**`, `.orch/references/staging/**`
+- Parent agent (@docs) handles session-level audit tracking

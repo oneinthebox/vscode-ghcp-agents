@@ -247,6 +247,7 @@ export function executeAssembly(
     '.orch/references',
     '.orch/scripts/audit',
     '.orch/workflow',
+    '.orch/workflows',
   ];
   for (const dir of dirs) {
     fs.mkdirSync(path.join(target, dir), { recursive: true });
@@ -400,6 +401,19 @@ export function executeAssembly(
       skipped++;
       manifest.checksums[orchConfigRelDest] = computeChecksum(orchConfigDest);
     }
+  }
+
+  // Copy workflow definitions from marketplace
+  const workflowsSrc = path.join(mp, '.orch', 'workflows');
+  if (fs.existsSync(workflowsSrc)) {
+    const workflowsRelDir = path.join('.orch', 'workflows');
+    const workflowsDest = path.join(target, workflowsRelDir);
+    const wfFiles = safeCopyDir(workflowsSrc, workflowsDest, workflowsRelDir);
+    for (const f of wfFiles) {
+      manifest.files.push(f);
+      manifest.checksums[f] = computeChecksum(path.join(target, f));
+    }
+    copied++;
   }
 
   // Copy .github/copilot-instructions.md from marketplace

@@ -3,6 +3,10 @@ name: angular-test-unit
 description: "Generate Jest unit tests following org conventions. TestBed setup, ng-mocks patterns, one-assertion-per-test guideline. Produces spec files that pass on first run."
 references:
   - references/angular/v19/testing-guide.md
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context
@@ -28,7 +32,7 @@ Generates Jest unit tests for Angular components, services, directives, and pipe
    d. Write tests for template bindings, event handlers, and lifecycle hooks.
 5. For **services**:
    a. Use `TestBed.inject()` for the service under test.
-   b. Mock HTTP calls with `HttpClientTestingModule`.
+   b. Mock HTTP calls with `provideHttpClientTesting()` (Angular 19 pattern).
    c. Test public methods, error handling, and observable chains.
 6. For **pipes/directives**:
    a. Test transform logic directly (pipes) or host-element behavior (directives).

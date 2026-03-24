@@ -12,6 +12,8 @@ allowed-tools: Bash(ng:*) Bash(npx:*) Read Edit
 
 Repairs broken documentation in Angular TypeScript files. Documentation drifts as code evolves — parameters get added or removed, return types change, JSDoc is used instead of TSDoc. This skill detects three categories of broken docs and fixes them by reading the current implementation.
 
+This skill operates from function signatures and bodies. No external reference docs required.
+
 ## Inputs
 
 - **Target** — File path, directory, component name, or service name to repair.

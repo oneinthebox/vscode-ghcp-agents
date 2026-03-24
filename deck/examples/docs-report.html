@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation Report — Reference Documentation Audit</title>
+  <link rel="stylesheet" href="../deck-tokens.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--f-body);
+      color: var(--fg-primary);
+      background: var(--bg-page);
+      line-height: 1.65;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+
+    /* ── Header ── */
+    .report-header {
+      border-bottom: 2px solid var(--fg-primary);
+      padding-bottom: 20px;
+      margin-bottom: 40px;
+    }
+    .report-header .overline {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--fg-accent);
+      margin-bottom: 8px;
+    }
+    .report-header h1 {
+      font-family: var(--f-display);
+      font-size: 2rem;
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .report-header .meta {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      font-family: var(--f-mono);
+    }
+
+    /* ── Executive Summary ── */
+    .exec-summary {
+      background: var(--bg-surface);
+      padding: 24px;
+      margin-bottom: 40px;
+      border-left: 3px solid var(--fg-accent);
+    }
+    .exec-summary h2 {
+      font-family: var(--f-display);
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+    }
+    .exec-summary p {
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+      margin-bottom: 8px;
+    }
+
+    .stat-strip {
+      display: flex;
+      gap: 32px;
+      padding: 16px 0;
+      border-top: 1.5px solid var(--fg-primary);
+      border-bottom: 1.5px solid var(--fg-primary);
+      margin: 24px 0;
+    }
+    .stat-strip .stat .val {
+      font-family: var(--f-display);
+      font-size: 1.6rem;
+      color: var(--fg-primary);
+      line-height: 1;
+    }
+    .stat-strip .stat .lbl {
+      font-size: 0.65rem;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .stat-strip .stat.accent .val { color: var(--fg-accent); }
+    .stat-strip .stat.teal .val { color: var(--fg-teal); }
+    .stat-strip .stat.warn .val { color: oklch(0.55 0.15 85); }
+
+    /* ── TOC ── */
+    .toc {
+      margin-bottom: 40px;
+    }
+    .toc h2 {
+      font-family: var(--f-display);
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+    }
+    .toc ol {
+      padding-left: 1.5em;
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+    }
+    .toc li {
+      margin-bottom: 4px;
+    }
+    .toc a {
+      color: var(--fg-accent);
+      text-decoration: none;
+    }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Sections ── */
+    .section {
+      margin-bottom: 48px;
+    }
+    .section h2 {
+      font-family: var(--f-display);
+      font-size: 1.35rem;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .section .section-sub {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      margin-bottom: 16px;
+    }
+    .section h3 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-accent);
+      margin: 24px 0 8px;
+    }
+    .section p {
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      margin: 12px 0 20px;
+    }
+    th {
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--fg-muted);
+      padding: 6px 12px;
+      text-align: left;
+      border-bottom: 1.5px solid var(--fg-primary);
+    }
+    td {
+      padding: 6px 12px;
+      border-bottom: 0.5px solid var(--border-default);
+      color: var(--fg-primary);
+    }
+    tr:last-child td { border-bottom: 1.5px solid var(--fg-primary); }
+    td code {
+      font-family: var(--f-mono);
+      font-size: 0.85em;
+      color: var(--fg-accent);
+      background: var(--bg-surface);
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    /* ── Tags ── */
+    .tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+    .tag-ok { background: var(--teal-100); color: var(--teal-500); }
+    .tag-warn { background: oklch(0.94 0.04 85); color: oklch(0.45 0.12 85); }
+    .tag-bad { background: oklch(0.94 0.04 25); color: oklch(0.48 0.14 25); }
+    .tag-info { background: var(--brand-100); color: var(--brand-500); }
+
+    /* ── Diagrams ── */
+    .diagram {
+      margin: 20px 0;
+      padding: 20px;
+      background: var(--bg-surface);
+      border-radius: 4px;
+      text-align: center;
+    }
+    .diagram-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-accent);
+      margin-bottom: 12px;
+      text-align: left;
+    }
+    .diagram-caption {
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+      margin-top: 8px;
+      font-style: italic;
+      text-align: left;
+    }
+    .diagram pre.mermaid {
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      text-align: center;
+    }
+
+    /* ── Code ── */
+    pre {
+      background: var(--neutral-950);
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    pre code {
+      font-family: var(--f-mono);
+      font-size: 0.75rem;
+      color: var(--neutral-200);
+      line-height: 1.7;
+    }
+
+    /* ── Progress bar ── */
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+    }
+    .progress .bar {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-warm);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress .bar .fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+    .progress .bar .fill.green { background: var(--teal-500); }
+    .progress .bar .fill.amber { background: oklch(0.6 0.15 85); }
+    .progress .bar .fill.red { background: oklch(0.55 0.18 25); }
+    .progress .pct {
+      font-family: var(--f-mono);
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* ── Recommendation cards ── */
+    .rec-list { margin: 12px 0; }
+    .rec-item {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 0.5px solid var(--border-default);
+      font-size: 0.82rem;
+    }
+    .rec-item:last-child { border-bottom: none; }
+    .rec-item .num {
+      font-family: var(--f-display);
+      font-size: 1.1rem;
+      color: var(--fg-accent);
+    }
+    .rec-item .body { color: var(--fg-secondary); }
+    .rec-item strong { color: var(--fg-primary); }
+
+    /* ── Footer ── */
+    .report-footer {
+      border-top: 1.5px solid var(--fg-primary);
+      padding-top: 16px;
+      margin-top: 48px;
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+      font-family: var(--f-mono);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="report-header">
+    <div class="overline">Documentation Report &mdash; generated by @docs</div>
+    <h1>Reference Documentation Audit</h1>
+    <div class="meta">Audited: 2026-03-24 &bull; Registry sources: 47 &bull; Scope: all reference docs &bull; max_stale_days: 30</div>
+  </div>
+
+  <!-- EXECUTIVE SUMMARY -->
+  <div class="exec-summary">
+    <h2>Executive Summary</h2>
+    <p>Audited 47 documentation sources across the registry. 32 sources are current (refreshed within max_stale_days), 11 are stale and need refresh, and 4 remain in draft status awaiting initial review. Detected 7 doc-code drift items where documentation no longer matches the codebase. During this run, 8 stale sources were auto-refreshed and 3 drift items were resolved. The remaining issues require human review.</p>
+    <p>Overall documentation health: <strong>68% current</strong>. The primary gaps are in internal library docs (only 45% coverage) and OpenAPI specs that have fallen behind recent API changes.</p>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat accent"><div class="val">47</div><div class="lbl">Sources</div></div>
+    <div class="stat teal"><div class="val">32</div><div class="lbl">Current</div></div>
+    <div class="stat warn"><div class="val">11</div><div class="lbl">Stale</div></div>
+    <div class="stat"><div class="val">4</div><div class="lbl">Draft</div></div>
+    <div class="stat" style="color: oklch(0.55 0.18 25);"><div class="val" style="color: oklch(0.55 0.18 25);">7</div><div class="lbl">Drift Items</div></div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#registry">Registry Status</a></li>
+      <li><a href="#stale">Staleness Report</a></li>
+      <li><a href="#drift">Drift Detection</a></li>
+      <li><a href="#conversion">Conversion Quality</a></li>
+      <li><a href="#coverage">Coverage by Domain</a></li>
+      <li><a href="#actions">Actions Taken</a></li>
+      <li><a href="#recs">Recommendations</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. REGISTRY STATUS -->
+  <div class="section" id="registry">
+    <h2>1. Registry Status</h2>
+    <div class="section-sub">Full inventory of documentation sources in the registry</div>
+
+    <h3>Overall Freshness</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 100px;">Freshness</span>
+      <div class="bar"><div class="fill green" style="width: 68%;"></div></div>
+      <span class="pct">68%</span>
+    </div>
+    <p>32 of 47 sources refreshed within the last 30 days. Target: 90%+.</p>
+
+    <h3>Source Inventory</h3>
+    <table>
+      <thead><tr><th>Name</th><th>Type</th><th>Version</th><th>Last Refreshed</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><code>Angular Style Guide</code></td><td>url</td><td>v18</td><td>2026-03-22</td><td><span class="tag tag-ok">current</span></td></tr>
+        <tr><td><code>Trade API Reference</code></td><td>openapi</td><td>3.1.0</td><td>2026-03-20</td><td><span class="tag tag-ok">current</span></td></tr>
+        <tr><td><code>Portfolio API Reference</code></td><td>openapi</td><td>3.0.2</td><td>2026-03-18</td><td><span class="tag tag-ok">current</span></td></tr>
+        <tr><td><code>Market Data API</code></td><td>openapi</td><td>2.4.1</td><td>2026-02-14</td><td><span class="tag tag-warn">stale</span></td></tr>
+        <tr><td><code>shared-models README</code></td><td>source-embedded</td><td>&mdash;</td><td>2026-03-21</td><td><span class="tag tag-ok">current</span></td></tr>
+        <tr><td><code>shared-ui Storybook</code></td><td>url</td><td>8.4.0</td><td>2026-03-19</td><td><span class="tag tag-ok">current</span></td></tr>
+        <tr><td><code>data-access README</code></td><td>source-embedded</td><td>&mdash;</td><td>2026-02-08</td><td><span class="tag tag-warn">stale</span></td></tr>
+        <tr><td><code>Nx Workspace Guide</code></td><td>url</td><td>20.x</td><td>2026-03-15</td><td><span class="tag tag-ok">current</span></td></tr>
+        <tr><td><code>AG Grid Enterprise Docs</code></td><td>url</td><td>33.1</td><td>2026-03-10</td><td><span class="tag tag-ok">current</span></td></tr>
+        <tr><td><code>Elevate Auth Guide</code></td><td>url</td><td>4.2.0</td><td>2026-01-28</td><td><span class="tag tag-warn">stale</span></td></tr>
+        <tr><td><code>Elevate Grid Wrapper</code></td><td>source-embedded</td><td>2.1.0</td><td>2026-02-05</td><td><span class="tag tag-warn">stale</span></td></tr>
+        <tr><td><code>WebSocket Protocol Spec</code></td><td>url</td><td>1.3</td><td>2026-03-23</td><td><span class="tag tag-ok">current</span></td></tr>
+        <tr><td><code>Risk Engine Integration</code></td><td>openapi</td><td>1.0.0</td><td>2026-02-20</td><td><span class="tag tag-warn">stale</span></td></tr>
+        <tr><td><code>Internal Auth Middleware</code></td><td>source-embedded</td><td>&mdash;</td><td>2026-01-15</td><td><span class="tag tag-warn">stale</span></td></tr>
+        <tr><td><code>Deployment Runbook</code></td><td>url</td><td>&mdash;</td><td>2026-03-12</td><td><span class="tag tag-ok">current</span></td></tr>
+        <tr><td><code>Testing Strategy Guide</code></td><td>url</td><td>&mdash;</td><td>2026-02-01</td><td><span class="tag tag-warn">stale</span></td></tr>
+        <tr><td><code>Monitoring & Alerting</code></td><td>url</td><td>&mdash;</td><td>&mdash;</td><td><span class="tag tag-info">draft</span></td></tr>
+        <tr><td><code>Performance Benchmarks</code></td><td>source-embedded</td><td>&mdash;</td><td>&mdash;</td><td><span class="tag tag-info">draft</span></td></tr>
+        <tr><td><code>Migration Guide (v18&rarr;19)</code></td><td>url</td><td>&mdash;</td><td>&mdash;</td><td><span class="tag tag-info">draft</span></td></tr>
+        <tr><td><code>Accessibility Audit Report</code></td><td>source-embedded</td><td>&mdash;</td><td>&mdash;</td><td><span class="tag tag-info">draft</span></td></tr>
+      </tbody>
+    </table>
+    <p>Showing 19 of 47 sources. Remaining 28 sources are current and omitted for brevity.</p>
+
+    <h3>Sources by Type</h3>
+    <table>
+      <thead><tr><th>Type</th><th>Count</th><th>Current</th><th>Stale</th><th>Draft</th></tr></thead>
+      <tbody>
+        <tr><td>url (external docs)</td><td>22</td><td>17</td><td>4</td><td>1</td></tr>
+        <tr><td>openapi (API specs)</td><td>11</td><td>7</td><td>3</td><td>1</td></tr>
+        <tr><td>source-embedded (inline)</td><td>14</td><td>8</td><td>4</td><td>2</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2. STALENESS REPORT -->
+  <div class="section" id="stale">
+    <h2>2. Staleness Report</h2>
+    <div class="section-sub">Sources past max_stale_days (30 days) with source change analysis</div>
+
+    <h3>Stale Sources</h3>
+    <table>
+      <thead><tr><th>Source</th><th>Last Refreshed</th><th>Days Stale</th><th>Source Changes Since Refresh</th></tr></thead>
+      <tbody>
+        <tr><td><code>Market Data API</code></td><td>2026-02-14</td><td>38</td><td>3 endpoints added (streaming quotes v2, batch lookup, heartbeat config)</td></tr>
+        <tr><td><code>data-access README</code></td><td>2026-02-08</td><td>44</td><td>2 new services added (CacheService, RetryInterceptor); install steps changed</td></tr>
+        <tr><td><code>Elevate Auth Guide</code></td><td>2026-01-28</td><td>55</td><td>Silent refresh deprecated in v4.3; PKCE flow added; new logout endpoint</td></tr>
+        <tr><td><code>Elevate Grid Wrapper</code></td><td>2026-02-05</td><td>47</td><td>Column API replaced with new GridApi; theme token names changed</td></tr>
+        <tr><td><code>Risk Engine Integration</code></td><td>2026-02-20</td><td>32</td><td>New /risk/var endpoint added; auth header format changed to Bearer</td></tr>
+        <tr><td><code>Internal Auth Middleware</code></td><td>2026-01-15</td><td>68</td><td>Session timeout config moved to env vars; new rate limiting middleware added</td></tr>
+        <tr><td><code>Testing Strategy Guide</code></td><td>2026-02-01</td><td>51</td><td>Jest replaced with Vitest in 2 libs; Playwright setup added; coverage thresholds updated</td></tr>
+        <tr><td><code>HDS Token Reference</code></td><td>2026-02-18</td><td>34</td><td>12 new spacing tokens; dark mode tokens added; deprecated 4 color aliases</td></tr>
+        <tr><td><code>CI/CD Pipeline Guide</code></td><td>2026-02-10</td><td>42</td><td>Nx Cloud remote caching enabled; parallel test execution added; deploy step refactored</td></tr>
+        <tr><td><code>Error Handling Patterns</code></td><td>2026-02-12</td><td>40</td><td>Global error handler refactored; new ErrorBoundary component; Sentry integration added</td></tr>
+        <tr><td><code>Docker Compose Reference</code></td><td>2026-02-22</td><td>30</td><td>LocalStack upgraded to v3; Redis image changed to Valkey; health checks added</td></tr>
+      </tbody>
+    </table>
+    <p>Most critical staleness: <strong>Elevate Auth Guide</strong> (55 days) and <strong>Internal Auth Middleware</strong> (68 days). Both have breaking changes in the source that will cause incorrect documentation.</p>
+  </div>
+
+  <!-- 3. DRIFT DETECTION -->
+  <div class="section" id="drift">
+    <h2>3. Drift Detection</h2>
+    <div class="section-sub">Mismatches between documentation claims and actual codebase behavior</div>
+
+    <h3>Drift Items</h3>
+    <table>
+      <thead><tr><th>Doc Says</th><th>Code Does</th><th>Classification</th><th>Changed By</th><th>When</th><th>Commit</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>"Use <code>this.http.get()</code> with <code>AuthInterceptor</code>"</td>
+          <td>AuthInterceptor removed; replaced with <code>withInterceptors([authFn])</code> functional API</td>
+          <td><span class="tag tag-warn">doc stale</span></td>
+          <td>jane</td>
+          <td>2026-03-08</td>
+          <td><code>f4a21cb</code></td>
+        </tr>
+        <tr>
+          <td>"Session timeout is 30 min idle"</td>
+          <td>Session timeout changed to 15 min idle via env var <code>SESSION_IDLE_TIMEOUT=900</code></td>
+          <td><span class="tag tag-warn">doc stale</span></td>
+          <td>mike</td>
+          <td>2026-03-12</td>
+          <td><code>b8e93d2</code></td>
+        </tr>
+        <tr>
+          <td>"AG Grid uses <code>columnDefs</code> property binding"</td>
+          <td>Migrated to new <code>GridApi.setColumnDefs()</code> imperative API in elevate-grid v2.1</td>
+          <td><span class="tag tag-warn">doc stale</span></td>
+          <td>sarah</td>
+          <td>2026-02-28</td>
+          <td><code>1c7f890</code></td>
+        </tr>
+        <tr>
+          <td>"Deploy to staging via <code>nx deploy staging</code>"</td>
+          <td>Deploy command is now <code>nx run trading-app:deploy --configuration=staging</code></td>
+          <td><span class="tag tag-warn">doc stale</span></td>
+          <td>ci-bot</td>
+          <td>2026-03-05</td>
+          <td><code>9d4e6f1</code></td>
+        </tr>
+        <tr>
+          <td>"MarketDataService reconnects on disconnect"</td>
+          <td>Reconnect logic exists but <code>maxRetries</code> is set to 0 in config (effectively disabled)</td>
+          <td><span class="tag tag-bad">code wrong</span></td>
+          <td>alex</td>
+          <td>2026-03-15</td>
+          <td><code>a3b5c7d</code></td>
+        </tr>
+        <tr>
+          <td>"Risk API requires <code>X-API-Key</code> header"</td>
+          <td>Risk API now uses Bearer token auth; code sends Bearer token; docs say API key</td>
+          <td><span class="tag tag-warn">doc stale</span></td>
+          <td>mike</td>
+          <td>2026-03-01</td>
+          <td><code>e2f4a6b</code></td>
+        </tr>
+        <tr>
+          <td>"Export supports CSV and PDF formats"</td>
+          <td>PDF export method exists but throws <code>NotImplementedError</code>; only CSV works</td>
+          <td><span class="tag tag-info">ambiguous</span></td>
+          <td>sarah</td>
+          <td>2026-02-20</td>
+          <td><code>7c8d9e0</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Drift Classification Flow</h3>
+    <div class="diagram">
+      <div class="diagram-title">Drift Detection &amp; Classification Pipeline</div>
+      <pre class="mermaid">
+flowchart TD
+    S[Source Change Detected] --> D{Doc mentions\nchanged symbol?}
+    D -->|no| OK[No drift]
+    D -->|yes| C{Compare doc claim\nvs code behavior}
+    C --> DS[Doc Stale\nDoc says old thing]
+    C --> CW[Code Wrong\nCode doesn't match spec]
+    C --> AM[Ambiguous\nUnclear which is correct]
+    DS --> AR[Auto-refresh\nif template available]
+    CW --> HR[Flag for\nhuman review]
+    AM --> HR
+    AR --> V{Validate\nrefreshed doc}
+    V -->|pass| DONE[Mark current]
+    V -->|fail| HR
+
+    style S fill:#e8e6f0,stroke:#6a6480
+    style OK fill:#e6f5f2,stroke:#1a7a6d
+    style DS fill:#fef3e2,stroke:#b8860b
+    style CW fill:#fde8e8,stroke:#b52a2a
+    style AM fill:#e8e6f0,stroke:#6a6480
+    style DONE fill:#e6f5f2,stroke:#1a7a6d
+    style HR fill:#fde8e8,stroke:#b52a2a
+      </pre>
+      <div class="diagram-caption">Source changes trigger drift detection. Classification determines whether auto-refresh is possible or human review is needed.</div>
+    </div>
+
+    <p>Of 7 drift items: 4 are doc-stale (auto-refreshable), 1 is code-wrong (needs a code fix), and 2 are ambiguous (need human decision).</p>
+  </div>
+
+  <!-- 4. CONVERSION QUALITY -->
+  <div class="section" id="conversion">
+    <h2>4. Conversion Quality</h2>
+    <div class="section-sub">Token budgets and line counts per documentation source</div>
+
+    <h3>Line Budget Compliance</h3>
+    <p>Target: each converted doc should be under 500 lines for efficient context window usage.</p>
+    <table>
+      <thead><tr><th>Source</th><th>Lines</th><th>Tokens (est.)</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><code>Angular Style Guide</code></td><td>342</td><td>~4,800</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td><code>Trade API Reference</code></td><td>487</td><td>~6,200</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td><code>Portfolio API Reference</code></td><td>423</td><td>~5,400</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td><code>Market Data API</code></td><td>612</td><td>~8,100</td><td><span class="tag tag-warn">over budget</span></td></tr>
+        <tr><td><code>AG Grid Enterprise Docs</code></td><td>891</td><td>~12,400</td><td><span class="tag tag-bad">needs trimming</span></td></tr>
+        <tr><td><code>Elevate Auth Guide</code></td><td>534</td><td>~7,000</td><td><span class="tag tag-warn">over budget</span></td></tr>
+        <tr><td><code>WebSocket Protocol Spec</code></td><td>178</td><td>~2,300</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td><code>Nx Workspace Guide</code></td><td>756</td><td>~9,800</td><td><span class="tag tag-bad">needs trimming</span></td></tr>
+        <tr><td><code>Deployment Runbook</code></td><td>289</td><td>~3,700</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td><code>Testing Strategy Guide</code></td><td>467</td><td>~6,100</td><td><span class="tag tag-ok">pass</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Token Count by Category</h3>
+    <table>
+      <thead><tr><th>Category</th><th>Sources</th><th>Total Lines</th><th>Total Tokens (est.)</th><th>Avg per Source</th></tr></thead>
+      <tbody>
+        <tr><td>API References (OpenAPI)</td><td>11</td><td>4,870</td><td>~63,200</td><td>~5,745</td></tr>
+        <tr><td>Framework Guides (url)</td><td>12</td><td>5,230</td><td>~68,000</td><td>~5,667</td></tr>
+        <tr><td>Internal Lib Docs (source-embedded)</td><td>14</td><td>3,180</td><td>~41,300</td><td>~2,950</td></tr>
+        <tr><td>Operational Docs (url)</td><td>10</td><td>3,420</td><td>~44,500</td><td>~4,450</td></tr>
+      </tbody>
+    </table>
+    <p>Total registry token footprint: ~217,000 tokens. 2 sources exceed the 500-line budget and should be split or trimmed to reduce context window consumption.</p>
+  </div>
+
+  <!-- 5. COVERAGE BY DOMAIN -->
+  <div class="section" id="coverage">
+    <h2>5. Coverage by Domain</h2>
+    <div class="section-sub">Documentation completeness across application domains</div>
+
+    <h3>Angular Framework Docs</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Components</span>
+      <div class="bar"><div class="fill green" style="width: 85%;"></div></div>
+      <span class="pct">85%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Services</span>
+      <div class="bar"><div class="fill green" style="width: 78%;"></div></div>
+      <span class="pct">78%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Routing</span>
+      <div class="bar"><div class="fill green" style="width: 90%;"></div></div>
+      <span class="pct">90%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">State management</span>
+      <div class="bar"><div class="fill amber" style="width: 55%;"></div></div>
+      <span class="pct">55%</span>
+    </div>
+
+    <h3>Internal Library Docs</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">shared-models</span>
+      <div class="bar"><div class="fill green" style="width: 72%;"></div></div>
+      <span class="pct">72%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">shared-ui</span>
+      <div class="bar"><div class="fill amber" style="width: 60%;"></div></div>
+      <span class="pct">60%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">data-access</span>
+      <div class="bar"><div class="fill red" style="width: 35%;"></div></div>
+      <span class="pct">35%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">elevate-common</span>
+      <div class="bar"><div class="fill red" style="width: 28%;"></div></div>
+      <span class="pct">28%</span>
+    </div>
+    <p>Internal library coverage averages 45%. The <code>data-access</code> and <code>elevate-common</code> libraries are the least documented, despite being imported by both applications.</p>
+
+    <h3>Testing Docs</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Unit test patterns</span>
+      <div class="bar"><div class="fill green" style="width: 80%;"></div></div>
+      <span class="pct">80%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">E2E test guide</span>
+      <div class="bar"><div class="fill red" style="width: 10%;"></div></div>
+      <span class="pct">10%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Mocking patterns</span>
+      <div class="bar"><div class="fill amber" style="width: 65%;"></div></div>
+      <span class="pct">65%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">CI test config</span>
+      <div class="bar"><div class="fill amber" style="width: 50%;"></div></div>
+      <span class="pct">50%</span>
+    </div>
+    <p>E2E testing documentation is nearly absent since the project only recently added Playwright. The testing strategy guide is stale (51 days) and references Jest exclusively.</p>
+
+    <h3>API Documentation</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Trade API</span>
+      <div class="bar"><div class="fill green" style="width: 95%;"></div></div>
+      <span class="pct">95%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Portfolio API</span>
+      <div class="bar"><div class="fill green" style="width: 88%;"></div></div>
+      <span class="pct">88%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Market Data API</span>
+      <div class="bar"><div class="fill amber" style="width: 62%;"></div></div>
+      <span class="pct">62%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Risk Engine API</span>
+      <div class="bar"><div class="fill red" style="width: 40%;"></div></div>
+      <span class="pct">40%</span>
+    </div>
+  </div>
+
+  <!-- 6. ACTIONS TAKEN -->
+  <div class="section" id="actions">
+    <h2>6. Actions Taken</h2>
+    <div class="section-sub">Changes made during this audit run</div>
+
+    <h3>Auto-Refreshed Sources</h3>
+    <table>
+      <thead><tr><th>Source</th><th>Action</th><th>Lines Changed</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td><code>data-access README</code></td><td>Pulled latest from source, regenerated</td><td>+34 / -12</td><td><span class="tag tag-ok">refreshed</span></td></tr>
+        <tr><td><code>HDS Token Reference</code></td><td>Pulled latest token list, added dark mode section</td><td>+48 / -8</td><td><span class="tag tag-ok">refreshed</span></td></tr>
+        <tr><td><code>CI/CD Pipeline Guide</code></td><td>Updated deploy steps, added Nx Cloud section</td><td>+22 / -15</td><td><span class="tag tag-ok">refreshed</span></td></tr>
+        <tr><td><code>Docker Compose Reference</code></td><td>Updated image versions, added health check docs</td><td>+18 / -6</td><td><span class="tag tag-ok">refreshed</span></td></tr>
+        <tr><td><code>Error Handling Patterns</code></td><td>Added ErrorBoundary component, Sentry config</td><td>+41 / -3</td><td><span class="tag tag-ok">refreshed</span></td></tr>
+        <tr><td><code>shared-models README</code></td><td>Added 2 new model interfaces</td><td>+12 / -0</td><td><span class="tag tag-ok">refreshed</span></td></tr>
+        <tr><td><code>Deployment Runbook</code></td><td>Updated staging deploy command syntax</td><td>+4 / -4</td><td><span class="tag tag-ok">refreshed</span></td></tr>
+        <tr><td><code>WebSocket Protocol Spec</code></td><td>Added heartbeat config section</td><td>+8 / -0</td><td><span class="tag tag-ok">refreshed</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Drift Items Resolved</h3>
+    <table>
+      <thead><tr><th>Drift Item</th><th>Resolution</th></tr></thead>
+      <tbody>
+        <tr><td>AuthInterceptor &rarr; functional API</td><td>Doc updated to show <code>withInterceptors([authFn])</code> pattern</td></tr>
+        <tr><td>Deploy command syntax</td><td>Doc updated with correct <code>nx run</code> syntax</td></tr>
+        <tr><td>Risk API auth header</td><td>Doc updated to Bearer token auth</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Flagged for Human Review</h3>
+    <table>
+      <thead><tr><th>Item</th><th>Reason</th><th>Suggested Reviewer</th></tr></thead>
+      <tbody>
+        <tr><td>Session timeout (15 min vs 30 min)</td><td>Intentional change or config error? Need product confirmation</td><td>mike / product-owner</td></tr>
+        <tr><td>MarketDataService reconnect disabled</td><td>Code bug &mdash; <code>maxRetries=0</code> disables reconnect. Needs code fix, not doc change</td><td>alex</td></tr>
+        <tr><td>PDF export stub</td><td>Method exists but throws NotImplementedError. Remove from docs or implement?</td><td>sarah / product-owner</td></tr>
+        <tr><td>AG Grid columnDefs API change</td><td>Elevate-grid wrapper changed API. Downstream docs in 3 places need review</td><td>sarah</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 7. RECOMMENDATIONS -->
+  <div class="section" id="recs">
+    <h2>7. Recommendations</h2>
+
+    <h3>Immediate</h3>
+    <div class="rec-list">
+      <div class="rec-item">
+        <div class="num">1</div>
+        <div class="body"><strong>Refresh remaining 3 stale sources manually.</strong> The Elevate Auth Guide, Elevate Grid Wrapper, and Risk Engine Integration have breaking changes that could not be auto-refreshed. Assign to the original authors for review.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">2</div>
+        <div class="body"><strong>Fix MarketDataService reconnect bug.</strong> Documentation correctly states reconnect should work, but <code>maxRetries=0</code> in config disables it. This is a code defect, not a doc issue. File a bug and fix the config.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">3</div>
+        <div class="body"><strong>Resolve ambiguous drift items.</strong> The session timeout change and PDF export stub need product owner input. Schedule a 15-minute triage with the team.</div>
+      </div>
+    </div>
+
+    <h3>Short-term</h3>
+    <div class="rec-list">
+      <div class="rec-item">
+        <div class="num">4</div>
+        <div class="body"><strong>Add docs for <code>data-access</code> and <code>elevate-common</code> libraries.</strong> Both are at &lt;35% coverage but are imported by every app. Generate initial docs with <code>@docs /docs-generate --scope=libs</code>.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">5</div>
+        <div class="body"><strong>Trim oversized docs.</strong> AG Grid Enterprise Docs (891 lines) and Nx Workspace Guide (756 lines) exceed the 500-line budget. Split into focused sub-docs or extract only relevant sections.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">6</div>
+        <div class="body"><strong>Write E2E testing documentation.</strong> Coverage is at 10% and the Testing Strategy Guide still references only Jest. Update to include Playwright patterns and CI integration.</div>
+      </div>
+    </div>
+
+    <h3>Medium-term</h3>
+    <div class="rec-list">
+      <div class="rec-item">
+        <div class="num">7</div>
+        <div class="body"><strong>Promote 4 draft sources to published.</strong> Monitoring & Alerting, Performance Benchmarks, Migration Guide, and Accessibility Audit Report are all in draft. Set target dates and assign owners.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">8</div>
+        <div class="body"><strong>Raise freshness target to 90%.</strong> Currently at 68%. With the auto-refresh pipeline working, set <code>max_stale_days=14</code> and run weekly audits to maintain freshness above 90%.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">9</div>
+        <div class="body"><strong>Add drift detection to CI.</strong> Run <code>@docs /docs-drift --ci</code> on every PR that modifies public API surfaces. Catch drift at the source instead of during periodic audits.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="report-footer">
+    Generated by ORCH &bull; @docs /docs-audit &bull; 2026-03-24 &bull; 7 sections, ~14K tokens
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#e8e6f0',
+        primaryTextColor: '#1a1620',
+        primaryBorderColor: '#8a84a0',
+        lineColor: '#6a6480',
+        secondaryColor: '#f0eef4',
+        tertiaryColor: '#f8f7fa',
+        fontFamily: 'Outfit, sans-serif',
+        fontSize: '13px',
+      }
+    });
+  </script>
+</body>
+</html>

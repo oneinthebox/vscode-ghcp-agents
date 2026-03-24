@@ -115,6 +115,8 @@ Use these for verification:
 - Internal library docs: `.orch/references/internal/`
 - Org coding standards (embedded in review rules)
 
+Consult `.orch/references/angular/v19/` for testing patterns, anti-patterns, and migration verification checklists. If references are not yet populated, operate from Angular best practices and the project's existing test patterns.
+
 ## Audit compliance
 
 - Declared tools: codebase, terminal, edit (test files only)

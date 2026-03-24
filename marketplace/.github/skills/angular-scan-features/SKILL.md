@@ -1,6 +1,9 @@
 ---
 name: angular-scan-features
 description: "Scan functional inventory: feature map, route-to-component mapping, and API surface"
+references: []
+allowed-tools:
+  - codebase
 ---
 
 ## Context
@@ -69,6 +72,36 @@ Produces a functional map of the application — what features exist, how they a
 
 ### Shared Components
 | Component | Used By Features | Usage Count |
+
+### Feature Map Diagram (Mermaid)
+Produce a diagram showing feature areas, their routes, and how they connect to backend APIs:
+```mermaid
+graph TD
+    subgraph Features["Feature Areas"]
+        F1["{feature1}\n{route-count} routes"]
+        F2["{feature2}\n{route-count} routes"]
+    end
+    subgraph APIs["Backend APIs"]
+        A1["{api1}\n{method} {path}"]
+        A2["{api2}\n{method} {path}"]
+    end
+    F1 --> A1
+    F2 --> A1
+    F2 --> A2
+```
+
+### User Journey (Mermaid sequence diagram per persona)
+For each distinct user persona detected (from route guards, role checks), produce a sequence diagram showing their primary flow:
+```mermaid
+sequenceDiagram
+    actor User as "{persona}"
+    participant App as "{feature}"
+    participant API as "{backend}"
+    User->>App: {primary action}
+    App->>API: {api call}
+    API-->>App: {response}
+    App-->>User: {result}
+```
 ```
 
 ## Validation

@@ -1,6 +1,9 @@
 ---
 name: angular-scan-docs
 description: "Scan README completeness, TSDoc coverage, code comment quality, and documentation format audit"
+references: []
+allowed-tools:
+  - codebase
 ---
 
 ## Context

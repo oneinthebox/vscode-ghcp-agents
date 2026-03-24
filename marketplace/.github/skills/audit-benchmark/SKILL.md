@@ -2,17 +2,22 @@
 name: audit-benchmark
 description: "Benchmark agent quality across models and approaches. Compare Claude/GPT/o4-mini on the same task, or ORCH agents vs raw prompts. Side-by-side report with composite scoring."
 references: []
+allowed-tools:
+  - codebase
+  - terminal
 ---
 
 ## Context
 
 Two benchmark modes: `--compare models` runs the same task across multiple LLM models to find the best performer; `--compare approaches` tests ORCH-orchestrated agents against raw prompts to quantify the orchestration value. Cross-product mode (`--compare both`) combines both dimensions. Results are saved to `.orch/audit/benchmarks/` for longitudinal tracking.
 
+Prerequisites: Requires `.orch/runs/` directory with session data. This directory is created automatically by ORCH audit hooks during agent sessions.
+
 ## Inputs
 
 - **task**: The skill or prompt to benchmark (e.g., `/review src/app/`, a migration step, a doc conversion)
 - **--compare {models|approaches|both}**: benchmark dimension
-- Optional: `--models {list}` — models to compare (default: claude-sonnet-4, gpt-4.1, o4-mini)
+- Optional: `--models {list}` — models to compare (default: claude-sonnet-4, gpt-4o, o4-mini)
 - Optional: `--runs {n}` — repetitions per configuration for statistical confidence (default: 3)
 - Optional: `--output {path}` — save report to specific location
 

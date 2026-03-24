@@ -2,6 +2,9 @@
 name: docs-drift
 description: "Compare reference documentation against codebase to detect doc-code mismatch. Classify drift as doc stale, code wrong, or ambiguous. Enrich findings with git history context."
 references: []
+allowed-tools:
+  - codebase
+  - terminal
 ---
 
 ## Context

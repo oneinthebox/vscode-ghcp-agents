@@ -1,6 +1,10 @@
 ---
 name: angular-scan-quality
 description: "Run lint, Lighthouse CLI, bundle size analysis, and accessibility audit"
+references: []
+allowed-tools:
+  - codebase
+  - terminal
 ---
 
 ## Context

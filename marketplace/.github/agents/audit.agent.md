@@ -68,8 +68,8 @@ All benchmark comparisons produce:
 | Metrics | `.orch/audit/metrics/daily/` | Aggregated daily/weekly rollups |
 | Session status | `.orch/audit/session-status.json` | Current session state (for /audit-context) |
 | Benchmarks | `.orch/audit/benchmarks/` | Model and approach comparison results |
-| Boundaries config | `.orch/config/boundaries.yaml` | Declared tools + scope per agent |
-| Adherence rules | `.orch/config/adherence-rules.yaml` | Rule definitions per domain |
+| Boundaries config | `.orch/audit/config/boundaries.yaml` | Declared tools + scope per agent |
+| Adherence rules | `.orch/audit/config/adherence-rules.yaml` | Rule definitions per domain |
 
 ## Automation mode
 
@@ -80,3 +80,10 @@ All audit skills are **read-only**. Run immediately — no plan approval, no pau
 - Declared tools: codebase (read audit data), terminal (run aggregation scripts)
 - Read-only on all audit data — never modify session records or violations
 - Your own sessions are also captured by hooks (audit audits itself)
+
+## Context health monitoring (MANDATORY)
+
+After every skill execution, check `.orch/audit/session-status.json`:
+- **good/fair**: Say nothing.
+- **declining**: "Quality declining. Finish current task, then start fresh session. Run /orch-context-compact."
+- **poor**: "Quality too low. Start new session. Run /orch-context-compact first."

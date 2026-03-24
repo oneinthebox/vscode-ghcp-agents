@@ -13,13 +13,14 @@ These rules are locked. No agent, skill, or configuration can override them.
 - **Never** run `npm publish`, `yarn publish`, or any package publishing command.
 - **Never** run `git reset --hard`.
 - **Never** run `kubectl delete namespace` or equivalent destructive infrastructure commands.
+- **Never** run `docker rm -f`, `docker system prune`, `DROP TABLE`, or `TRUNCATE TABLE`.
 - **Never** expose secrets, tokens, or credentials in output or logs.
 
 ## Confirmation (overridable by domain skills)
 
 - Ask the user before deleting any file.
 - Ask the user before running destructive git operations (rebase, reset, force-push).
-- Ask the user before modifying files outside the current task scope.
+- Ask the user before modifying files outside the agent's declared scope in `.orch/audit/config/boundaries.yaml`.
 - **Override**: If `auto_mode: true` in `.orch/config.yaml`, skip confirmations and execute end-to-end. Domain skills may also override confirmation behavior for their specific scope.
 
 ## Audit (non-overridable)
@@ -30,6 +31,8 @@ These rules are locked. Every agent must comply.
 - Always respect boundary checks defined in `.orch/audit/config/boundaries.yaml` — do not access tools or file scopes outside your declared boundaries.
 - All tool invocations are logged by audit hooks. Do not attempt to bypass or disable hooks.
 - Record token usage, timing, and outcome for every agent invocation.
+- Hook scripts use relative paths from project root. Ensure agents operate from the project root directory.
+- Agent handoffs should be logged to `.orch/runs/<run-id>/handoffs.log` with timestamp, source agent, target agent, and session state summary.
 
 ## Config
 
@@ -49,7 +52,7 @@ These rules are locked. Every agent must comply.
 
 - Read the `models:` section from `.orch/config.yaml` to determine which model to use for each role.
 - `coordinator`, `planner`, `engineer`, `verifier` each have a configured model.
-- Default to `claude-sonnet-4` if no model is specified.
+- Default to `claude-sonnet-4` if no model is specified. (These defaults match `.orch/config.yaml`. The config file is the authoritative source.)
 
 ## Resource Limits
 

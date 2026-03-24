@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Setup Report — Trade Management App</title>
+  <link rel="stylesheet" href="../deck-tokens.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--f-body); color: var(--fg-primary); background: var(--bg-page); line-height: 1.65; max-width: 960px; margin: 0 auto; padding: 48px 32px 80px; font-size: 15px; }
+    .report-header { border-bottom: 2px solid var(--fg-primary); padding-bottom: 20px; margin-bottom: 40px; }
+    .report-header .overline { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--fg-accent); margin-bottom: 8px; }
+    .report-header h1 { font-family: var(--f-display); font-size: 2rem; font-weight: 400; font-style: italic; line-height: 1.2; margin-bottom: 8px; }
+    .report-header .meta { font-size: 0.75rem; color: var(--fg-muted); font-family: var(--f-mono); }
+    .exec-summary { background: var(--bg-surface); padding: 24px; margin-bottom: 40px; border-left: 3px solid var(--fg-accent); }
+    .exec-summary h2 { font-family: var(--f-display); font-size: 1.15rem; margin-bottom: 12px; }
+    .exec-summary p { font-size: 0.85rem; color: var(--fg-secondary); margin-bottom: 8px; }
+    .stat-strip { display: flex; gap: 32px; padding: 16px 0; border-top: 1.5px solid var(--fg-primary); border-bottom: 1.5px solid var(--fg-primary); margin: 24px 0; flex-wrap: wrap; }
+    .stat-strip .stat .val { font-family: var(--f-display); font-size: 1.6rem; color: var(--fg-primary); line-height: 1; }
+    .stat-strip .stat .lbl { font-size: 0.65rem; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 2px; }
+    .stat-strip .stat.accent .val { color: var(--fg-accent); }
+    .stat-strip .stat.teal .val { color: var(--fg-teal); }
+    .stat-strip .stat.warn .val { color: oklch(0.55 0.15 85); }
+    .section { margin-bottom: 48px; }
+    .section h2 { font-family: var(--f-display); font-size: 1.35rem; font-weight: 400; margin-bottom: 4px; }
+    .section .section-sub { font-size: 0.75rem; color: var(--fg-muted); margin-bottom: 16px; }
+    .section h3 { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-accent); margin: 24px 0 8px; }
+    .section p { font-size: 0.85rem; color: var(--fg-secondary); margin-bottom: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin: 12px 0 20px; }
+    th { font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted); padding: 6px 12px; text-align: left; border-bottom: 1.5px solid var(--fg-primary); }
+    td { padding: 6px 12px; border-bottom: 0.5px solid oklch(0 0 0 / 0.08); color: var(--fg-primary); }
+    tr:last-child td { border-bottom: 1.5px solid var(--fg-primary); }
+    td code { font-family: var(--f-mono); font-size: 0.85em; color: var(--fg-accent); background: var(--bg-surface); padding: 1px 4px; border-radius: 2px; }
+    .tag { display: inline-block; font-size: 0.65rem; font-weight: 600; padding: 1px 6px; border-radius: 2px; }
+    .tag-ok { background: oklch(0.94 0.04 175); color: oklch(0.55 0.12 175); }
+    .tag-warn { background: oklch(0.94 0.04 85); color: oklch(0.45 0.12 85); }
+    .tag-bad { background: oklch(0.94 0.04 25); color: oklch(0.48 0.14 25); }
+    .tag-info { background: var(--brand-100); color: var(--brand-500); }
+    .progress { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+    .progress > span:first-child { font-size: 0.8rem; min-width: 120px; }
+    .progress .bar { flex: 1; height: 6px; background: var(--bg-warm); border-radius: 3px; overflow: hidden; }
+    .progress .bar .fill { height: 100%; border-radius: 3px; }
+    .progress .bar .fill.green { background: oklch(0.55 0.12 175); }
+    .progress .bar .fill.amber { background: oklch(0.6 0.15 85); }
+    .progress .bar .fill.red { background: oklch(0.55 0.18 25); }
+    .progress .pct { font-family: var(--f-mono); font-size: 0.75rem; color: var(--fg-muted); min-width: 36px; text-align: right; }
+    pre { background: var(--neutral-950); border-radius: 4px; padding: 16px 20px; margin: 12px 0; overflow-x: auto; }
+    pre code { font-family: var(--f-mono); font-size: 0.75rem; color: oklch(0.91 0.008 240); line-height: 1.7; }
+    .diagram { margin: 20px 0; padding: 20px; background: var(--bg-surface); border-radius: 4px; text-align: center; }
+    .diagram-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-accent); margin-bottom: 12px; text-align: left; }
+    .diagram-caption { font-size: 0.7rem; color: var(--fg-muted); margin-top: 8px; font-style: italic; text-align: left; }
+    .diagram pre.mermaid { background: transparent; padding: 0; margin: 0; }
+    .rec-list { margin: 12px 0; }
+    .rec-item { display: grid; grid-template-columns: 32px 1fr; gap: 8px; padding: 10px 0; border-bottom: 0.5px solid oklch(0 0 0 / 0.08); font-size: 0.82rem; }
+    .rec-item:last-child { border-bottom: none; }
+    .rec-item .num { font-family: var(--f-display); font-size: 1.1rem; color: var(--fg-accent); }
+    .rec-item .body { color: var(--fg-secondary); }
+    .rec-item strong { color: var(--fg-primary); }
+    .report-footer { border-top: 1.5px solid var(--fg-primary); padding-top: 16px; margin-top: 48px; font-size: 0.7rem; color: var(--fg-muted); font-family: var(--f-mono); }
+    @media print { body { max-width: 100%; padding: 24px; } .section { page-break-inside: avoid; } }
+  </style>
+</head>
+<body>
+
+  <div class="report-header">
+    <div class="overline">Local Setup Report &mdash; generated by @local</div>
+    <h1>Development Environment Setup</h1>
+    <div class="meta">Date: 2026-03-24 &bull; OS: macOS 15.3 (Darwin arm64) &bull; Shell: zsh &bull; Machine: MBP-M4-16GB</div>
+  </div>
+
+  <div class="exec-summary">
+    <h2>Executive Summary</h2>
+    <p>Local environment configured for the Trade Management Nx monorepo. Node.js, Angular CLI, and Nx installed. Docker containers running (PostgreSQL, Redis, localstack). One issue: Python 3 missing (needed for token estimation scripts). Two warnings: port 4200 in use, AG Grid license key not set.</p>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat teal"><div class="val">14</div><div class="lbl">Checks run</div></div>
+    <div class="stat teal"><div class="val">11</div><div class="lbl">Passed</div></div>
+    <div class="stat warn"><div class="val">2</div><div class="lbl">Warnings</div></div>
+    <div class="stat" style="color: oklch(0.55 0.18 25);"><div class="val">1</div><div class="lbl">Failed</div></div>
+  </div>
+
+  <!-- 1. PLATFORM -->
+  <div class="section">
+    <h2>1. Platform Detection</h2>
+    <div class="section-sub">Generated by /local-diagnose</div>
+    <table>
+      <thead><tr><th>Property</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Operating System</td><td>macOS 15.3 (Darwin 25.3.0)</td></tr>
+        <tr><td>Architecture</td><td>arm64 (Apple Silicon M4)</td></tr>
+        <tr><td>Shell</td><td>zsh 5.9</td></tr>
+        <tr><td>Memory</td><td>16 GB</td></tr>
+        <tr><td>Disk free</td><td>124 GB / 500 GB</td></tr>
+        <tr><td>Package managers</td><td>Homebrew 4.4.0, npm 10.8.0, nvm 0.40.1</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2. RUNTIMES -->
+  <div class="section">
+    <h2>2. Runtime Versions</h2>
+    <div class="section-sub">Generated by /local-setup-env</div>
+    <table>
+      <thead><tr><th>Tool</th><th>Required</th><th>Installed</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td><code>node</code></td><td>&ge; 18.19</td><td>22.12.0</td><td><span class="tag tag-ok">ok</span></td><td>&mdash;</td></tr>
+        <tr><td><code>npm</code></td><td>&ge; 10.0</td><td>10.8.0</td><td><span class="tag tag-ok">ok</span></td><td>&mdash;</td></tr>
+        <tr><td><code>ng</code> (Angular CLI)</td><td>&ge; 18.0</td><td>18.2.0</td><td><span class="tag tag-ok">ok</span></td><td>&mdash;</td></tr>
+        <tr><td><code>nx</code></td><td>&ge; 19.0</td><td>19.8.0</td><td><span class="tag tag-ok">ok</span></td><td>&mdash;</td></tr>
+        <tr><td><code>git</code></td><td>&ge; 2.30</td><td>2.47.0</td><td><span class="tag tag-ok">ok</span></td><td>&mdash;</td></tr>
+        <tr><td><code>jq</code></td><td>any</td><td>1.7.1</td><td><span class="tag tag-ok">ok</span></td><td>&mdash;</td></tr>
+        <tr><td><code>python3</code></td><td>&ge; 3.9</td><td>&mdash;</td><td><span class="tag tag-bad">missing</span></td><td><code>brew install python3</code></td></tr>
+        <tr><td><code>docker</code></td><td>&ge; 24.0</td><td>27.1.0</td><td><span class="tag tag-ok">ok</span></td><td>&mdash;</td></tr>
+        <tr><td><code>docker-compose</code></td><td>&ge; 2.20</td><td>2.29.0</td><td><span class="tag tag-ok">ok</span></td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Action required:</strong> Install Python 3 for ORCH audit token estimation scripts: <code>brew install python3</code></p>
+  </div>
+
+  <!-- 3. DEPENDENCIES -->
+  <div class="section">
+    <h2>3. Dependencies</h2>
+    <div class="section-sub">Generated by /local-setup-deps</div>
+    <table>
+      <thead><tr><th>Check</th><th>Result</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td><code>npm ci</code></td><td><span class="tag tag-ok">success</span></td><td>1,247 packages installed in 18.3s</td></tr>
+        <tr><td>Lockfile integrity</td><td><span class="tag tag-ok">verified</span></td><td>package-lock.json matches package.json</td></tr>
+        <tr><td>Vulnerability scan</td><td><span class="tag tag-ok">0 critical</span></td><td>2 moderate (dev-only), 0 high, 0 critical</td></tr>
+        <tr><td>Peer dependencies</td><td><span class="tag tag-ok">resolved</span></td><td>No unmet peer dependencies</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. DOCKER -->
+  <div class="section">
+    <h2>4. Docker & Containers</h2>
+    <div class="section-sub">Generated by /local-setup-docker</div>
+    <table>
+      <thead><tr><th>Container</th><th>Image</th><th>Port</th><th>Status</th><th>Health</th></tr></thead>
+      <tbody>
+        <tr><td>trade-db</td><td>postgres:16-alpine</td><td>5432</td><td><span class="tag tag-ok">running</span></td><td><span class="tag tag-ok">healthy</span></td></tr>
+        <tr><td>trade-cache</td><td>redis:7-alpine</td><td>6379</td><td><span class="tag tag-ok">running</span></td><td><span class="tag tag-ok">healthy</span></td></tr>
+        <tr><td>localstack</td><td>localstack/localstack:3.0</td><td>4566</td><td><span class="tag tag-ok">running</span></td><td><span class="tag tag-ok">healthy</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="diagram">
+      <div class="diagram-title">Container Topology</div>
+      <pre class="mermaid">
+graph LR
+    subgraph Docker["Docker Network: trade-net"]
+        DB[(PostgreSQL\n:5432)]
+        RD[(Redis\n:6379)]
+        LS[LocalStack\n:4566\nS3, SQS, SNS]
+    end
+    APP[Angular Dev Server\n:4200] -->|queries| DB
+    APP -->|cache| RD
+    APP -->|AWS mocks| LS
+
+    style Docker fill:#f0eef4,stroke:#8a84a0
+    style APP fill:#e8e6f0,stroke:#6a6480
+      </pre>
+      <div class="diagram-caption">3 containers on shared Docker network. Angular dev server connects to all three.</div>
+    </div>
+  </div>
+
+  <!-- 5. ENV VARS -->
+  <div class="section">
+    <h2>5. Environment Variables</h2>
+    <div class="section-sub">Generated by /local-setup-env</div>
+    <table>
+      <thead><tr><th>Variable</th><th>Source</th><th>Status</th><th>Value (masked)</th></tr></thead>
+      <tbody>
+        <tr><td><code>DATABASE_URL</code></td><td>.env</td><td><span class="tag tag-ok">set</span></td><td>postgres://dev:***@localhost:5432/trade</td></tr>
+        <tr><td><code>REDIS_URL</code></td><td>.env</td><td><span class="tag tag-ok">set</span></td><td>redis://localhost:6379</td></tr>
+        <tr><td><code>AWS_ENDPOINT</code></td><td>.env</td><td><span class="tag tag-ok">set</span></td><td>http://localhost:4566</td></tr>
+        <tr><td><code>API_BASE_URL</code></td><td>.env</td><td><span class="tag tag-ok">set</span></td><td>http://localhost:3000/api</td></tr>
+        <tr><td><code>AG_GRID_LICENSE</code></td><td>.env</td><td><span class="tag tag-warn">empty</span></td><td>(not set &mdash; watermark will show)</td></tr>
+        <tr><td><code>AUTH_CLIENT_ID</code></td><td>.env</td><td><span class="tag tag-ok">set</span></td><td>trade-app-dev-***</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Warning:</strong> <code>AG_GRID_LICENSE</code> is empty. AG Grid will render with a watermark. Ask your tech lead for the dev license key.</p>
+  </div>
+
+  <!-- 6. PORTS -->
+  <div class="section">
+    <h2>6. Port Availability</h2>
+    <div class="section-sub">Generated by /local-diagnose</div>
+    <table>
+      <thead><tr><th>Port</th><th>Used by</th><th>Status</th><th>Conflict</th></tr></thead>
+      <tbody>
+        <tr><td>3000</td><td>API server</td><td><span class="tag tag-ok">available</span></td><td>&mdash;</td></tr>
+        <tr><td>4200</td><td>Angular dev server (portfolio-app)</td><td><span class="tag tag-warn">in use</span></td><td>PID 42871: node (another ng serve)</td></tr>
+        <tr><td>4201</td><td>Angular dev server (trading-app)</td><td><span class="tag tag-ok">available</span></td><td>&mdash;</td></tr>
+        <tr><td>4566</td><td>LocalStack</td><td><span class="tag tag-ok">in use (expected)</span></td><td>Docker container</td></tr>
+        <tr><td>5432</td><td>PostgreSQL</td><td><span class="tag tag-ok">in use (expected)</span></td><td>Docker container</td></tr>
+        <tr><td>6379</td><td>Redis</td><td><span class="tag tag-ok">in use (expected)</span></td><td>Docker container</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Warning:</strong> Port 4200 is occupied by another process. Either stop it (<code>kill 42871</code>) or use <code>ng serve --port 4202</code>.</p>
+  </div>
+
+  <!-- 7. BUILD VERIFICATION -->
+  <div class="section">
+    <h2>7. Build & Test Verification</h2>
+    <div class="section-sub">Generated by /local-diagnose</div>
+    <table>
+      <thead><tr><th>Command</th><th>Result</th><th>Duration</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td><code>nx build portfolio-app</code></td><td><span class="tag tag-ok">success</span></td><td>34s</td><td>342 KB initial, 0 warnings</td></tr>
+        <tr><td><code>nx build trading-app</code></td><td><span class="tag tag-ok">success</span></td><td>28s</td><td>298 KB initial, 0 warnings</td></tr>
+        <tr><td><code>nx test --all</code></td><td><span class="tag tag-ok">247/247 pass</span></td><td>38s</td><td>0 failures, 73% coverage</td></tr>
+        <tr><td><code>nx lint --all</code></td><td><span class="tag tag-ok">pass</span></td><td>12s</td><td>12 warnings, 0 errors</td></tr>
+      </tbody>
+    </table>
+
+    <div class="progress">
+      <span>Build health</span>
+      <div class="bar"><div class="fill green" style="width: 100%;"></div></div>
+      <span class="pct">100%</span>
+    </div>
+    <div class="progress">
+      <span>Test pass rate</span>
+      <div class="bar"><div class="fill green" style="width: 100%;"></div></div>
+      <span class="pct">100%</span>
+    </div>
+  </div>
+
+  <!-- 8. DIAGNOSTICS -->
+  <div class="section">
+    <h2>8. Diagnostic Issues</h2>
+    <div class="section-sub">Generated by /local-diagnose</div>
+    <table>
+      <thead><tr><th>Issue</th><th>Severity</th><th>Impact</th><th>Remediation</th></tr></thead>
+      <tbody>
+        <tr><td>Python 3 not installed</td><td><span class="tag tag-bad">error</span></td><td>ORCH audit token estimation scripts will not run</td><td><code>brew install python3</code></td></tr>
+        <tr><td>Port 4200 occupied</td><td><span class="tag tag-warn">warning</span></td><td>Cannot start portfolio-app dev server on default port</td><td><code>kill 42871</code> or use <code>--port 4202</code></td></tr>
+        <tr><td>AG Grid license key missing</td><td><span class="tag tag-warn">warning</span></td><td>AG Grid renders with evaluation watermark</td><td>Set <code>AG_GRID_LICENSE</code> in <code>.env</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 9. QUICK START -->
+  <div class="section">
+    <h2>9. Quick Start</h2>
+    <div class="section-sub">Everything you need to start developing</div>
+
+    <h3>Start the backend (Docker)</h3>
+    <pre><code>docker-compose up -d
+# Verify: docker ps (3 containers running)</code></pre>
+
+    <h3>Start portfolio-app</h3>
+    <pre><code>nx serve portfolio-app
+# Opens at http://localhost:4200 (or 4202 if port conflict)</code></pre>
+
+    <h3>Start trading-app</h3>
+    <pre><code>nx serve trading-app
+# Opens at http://localhost:4201</code></pre>
+
+    <h3>Run tests</h3>
+    <pre><code>nx test --all                    # all unit tests
+nx test portfolio-app --watch    # watch mode for one app
+nx lint --all                    # lint check</code></pre>
+
+    <h3>ORCH commands</h3>
+    <pre><code>@angular recap this project      # full project recap
+@angular /angular-scan-quality   # run quality scan
+@audit /audit-usage this week    # usage report</code></pre>
+  </div>
+
+  <!-- 10. RECOMMENDATIONS -->
+  <div class="section">
+    <h2>10. Recommendations</h2>
+    <div class="rec-list">
+      <div class="rec-item">
+        <div class="num">1</div>
+        <div class="body"><strong>Install Python 3.</strong> Required for ORCH audit scripts. Run <code>brew install python3</code>, then verify with <code>python3 --version</code>.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">2</div>
+        <div class="body"><strong>Resolve port 4200 conflict.</strong> Kill the existing process (<code>kill 42871</code>) or configure a different port in <code>angular.json</code>.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">3</div>
+        <div class="body"><strong>Set AG Grid license key.</strong> Ask your tech lead for the dev license and add <code>AG_GRID_LICENSE=xxx</code> to your <code>.env</code> file.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">4</div>
+        <div class="body"><strong>Run project recap.</strong> Now that your environment is set up, run <code>@angular recap this project</code> to understand the codebase.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="report-footer">
+    Generated by ORCH &bull; @local /local-setup-* + /local-diagnose &bull; 2026-03-24 &bull; 14 checks, ~3K tokens
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#e8e6f0',
+        primaryTextColor: '#1a1620',
+        primaryBorderColor: '#8a84a0',
+        lineColor: '#6a6480',
+        secondaryColor: '#f0eef4',
+        tertiaryColor: '#f8f7fa',
+        fontFamily: 'Outfit, sans-serif',
+        fontSize: '13px',
+      }
+    });
+  </script>
+</body>
+</html>

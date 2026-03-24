@@ -2,6 +2,9 @@
 name: angular-test-lint
 description: "Run ng lint on the project, report issues grouped by severity and rule, and suggest auto-fixable corrections. Produces a structured lint report with actionable fix suggestions."
 references: []
+allowed-tools:
+  - codebase
+  - terminal
 ---
 
 ## Context

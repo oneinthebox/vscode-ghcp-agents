@@ -2,11 +2,15 @@
 name: audit-tokens
 description: "Report token consumption per agent, model, and skill. Provides cost visibility and budget tracking. Reads ORCH run records and token audit logs."
 references: []
+allowed-tools:
+  - codebase
 ---
 
 ## Context
 
 Provides visibility into token consumption across ORCH operations. Breaks down usage by agent, model, and skill to identify cost drivers, detect anomalies, and support budget planning. Reads from `.orch/runs/` for session-level data and `.orch/audit/tokens/` for detailed token logs.
+
+Prerequisites: Requires `.orch/runs/` directory with session data. This directory is created automatically by ORCH audit hooks during agent sessions.
 
 ## Inputs
 

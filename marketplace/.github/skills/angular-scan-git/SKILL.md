@@ -1,6 +1,10 @@
 ---
 name: angular-scan-git
 description: "Scan git history: changelog, release notes, commit patterns, contributors, and branch strategy"
+references: []
+allowed-tools:
+  - codebase
+  - terminal
 ---
 
 ## Context

@@ -3,6 +3,9 @@ name: angular-explain
 description: "C4 architecture walkthrough for Angular projects — interactive or generates PROJECT.md. Can invoke scan skills for deep analysis."
 references:
   - references/angular/v19/architecture-patterns.md
+allowed-tools:
+  - codebase
+  - terminal
 ---
 
 ## Context
@@ -21,7 +24,7 @@ A new developer needs to understand an Angular project fast. This skill produces
 1. **Read project files** — `package.json`, `angular.json` or `nx.json`, `tsconfig.json`, `README.md`.
 2. **Read Angular-specific config** — detect Angular version, standalone vs NgModule usage, signals adoption, SSR config, i18n setup.
 3. **Read `references/angular/v19/architecture-patterns.md`** for current best-practice patterns to compare against.
-4. **Check for existing scan output** — if recent `angular-scan-arch` or `angular-scan-features` results exist in `.orch/references/scans/`, use them. Otherwise, invoke those scans.
+4. **Check for existing scan output** — if recent `angular-scan-arch` or `angular-scan-features` results exist in `.orch/references/scans/`, use them. Otherwise, invoke those scans. Note: This directory is created at runtime by scan skills. If no scan data exists, run `/angular-scan-arch` first or skip deep analysis.
 5. **Read git history** — last 5 commits, recent contributors, active branches.
 6. **Compose C4 output**:
    - **Level 1 — System Context**: what the app is, what it interacts with (APIs, auth, external systems).

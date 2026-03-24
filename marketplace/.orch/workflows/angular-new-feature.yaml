@@ -1,0 +1,178 @@
+# ORCH Workflow: Angular New Feature
+# Read by the @angular coordinator when triage matches trigger keywords.
+
+name: angular-new-feature
+description: "Create a new Angular feature — component, service, route with full integration"
+trigger: "create|scaffold|generate|build|add feature|new component|new service"
+report:
+  template: create-report
+  title: "Feature Created — {{feature-name}}"
+  attribution: "@angular → @angular-planner → @angular-engineer → @angular-verifier"
+
+phases:
+  - name: Scan context (before)
+    id: scan-context-before
+    agent: planner
+    skill: /angular-scan-arch
+    args: --scope {{target-path}}
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - system-context-diagram       # C4 Level 1: what external systems exist
+      - container-diagram             # C4 Level 2: apps, services, databases, APIs
+      - before-component-count        # counts for impact summary diff
+      - before-service-count
+      - before-route-count
+      - before-test-count
+      - before-coverage
+      - existing-components
+      - existing-services
+      - existing-routes
+      - patterns-in-use
+    report-section: "System Context"
+    on-failure: continue
+
+  - name: Generate component
+    id: generate-component
+    agent: engineer
+    skill: /angular-generate-component
+    checkpoint: true
+    verify: false
+    approval: auto=safe
+    collect:
+      - files-created
+      - architecture-decisions
+      - diagrams
+    report-section: "What Was Created"
+    on-failure: stop
+
+  - name: Generate service
+    id: generate-service
+    agent: engineer
+    skill: /angular-generate-service
+    checkpoint: true
+    verify: false
+    approval: auto=safe
+    collect:
+      - files-created
+      - architecture-decisions
+      - diagrams
+    report-section: "What Was Created"
+    on-failure: stop
+
+  - name: Generate route
+    id: generate-route
+    agent: engineer
+    skill: /angular-generate-route
+    checkpoint: true
+    verify: false
+    approval: auto=safe
+    collect:
+      - files-created
+      - architecture-decisions
+      - diagrams
+    report-section: "What Was Created"
+    on-failure: continue
+
+  - name: Apply HDS design system
+    id: hds-apply
+    agent: engineer
+    skill: /angular-hds-generate
+    checkpoint: true
+    verify: false
+    approval: none
+    collect:
+      - tokens-applied
+      - components-wrapped
+    report-section: "Design System Compliance"
+    on-failure: continue
+
+  - name: Integrate elevate services
+    id: elevate-integrate
+    agent: engineer
+    skill: /angular-elevate-generate
+    args: --uses auto-detect
+    checkpoint: true
+    verify: false
+    approval: none
+    collect:
+      - sub-libs-integrated
+      - config-keys-used
+    report-section: "Elevate Integration"
+    on-failure: continue
+
+  - name: Generate tests
+    id: generate-tests
+    agent: verifier
+    skills:
+      - /angular-test-unit
+    checkpoint: true
+    verify: false
+    approval: none
+    collect:
+      - test-count
+      - test-coverage
+      - test-gaps
+    report-section: "Generated Tests"
+    on-failure: continue
+
+  - name: Final verification
+    id: final-verify
+    agent: verifier
+    skills:
+      - /angular-test-unit
+      - /angular-test-lint
+      - /angular-review
+      - /angular-hds-audit
+      - /angular-elevate-audit
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - build-status
+      - test-results
+      - lint-results
+      - hds-compliance
+      - elevate-compliance
+      - review-findings
+    report-section: "Verification"
+    on-failure: report-as-partial
+
+  - name: Post-scan (after)
+    id: scan-context-after
+    agent: planner
+    skill: /angular-scan-arch
+    args: --scope {{target-path}} --counts-only
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - after-component-count
+      - after-service-count
+      - after-route-count
+      - after-test-count
+      - after-coverage
+      - component-position-diagram    # C4 Level 3: where new component fits (highlighted)
+    report-section: "Impact Summary"
+    on-failure: continue
+
+post-workflow:
+  report:
+    sections:
+      - "System Context"
+      - "Impact Summary"
+      - "What Was Created"
+      - "Architecture Decisions"
+      - "Diagrams"
+      - "Code Highlights"
+      - "Generated Tests"
+      - "Design System Compliance"
+      - "Elevate Integration"
+      - "Verification"
+      - "Next Steps"
+  git:
+    message: "feat: add {{feature-name}}"
+    tag: null
+  notify:
+    status-bar: "Feature created — {{files-count}} files, build ✓, tests ✓"

@@ -2,6 +2,8 @@
 name: docs-status
 description: "Dashboard of all documentation sources in the ORCH registry. Shows versions, freshness, staleness warnings, and conversion status. Read-only view of .orch/registry.yaml."
 references: []
+allowed-tools:
+  - codebase
 ---
 
 ## Context

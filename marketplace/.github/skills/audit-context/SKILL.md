@@ -2,11 +2,15 @@
 name: audit-context
 description: "In-session health check. Detect context rot, measure session quality, and generate compact handoff summaries for seamless session continuity."
 references: []
+allowed-tools:
+  - codebase
 ---
 
 ## Context
 
 Monitors the current session's health in real time. Detects context rot (declining output quality as context window fills), measures adherence and productivity metrics, and generates token-efficient handoff summaries when a fresh session is needed. Designed to be invoked mid-session when quality feels off, or proactively at regular intervals.
+
+Prerequisites: Requires `.orch/runs/` directory with session data. This directory is created automatically by ORCH audit hooks during agent sessions.
 
 ## Inputs
 

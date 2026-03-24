@@ -64,6 +64,11 @@ graph TB
             AngVerifier["@angular-verifier<br/>review & validation skills"]
         end
 
+        subgraph LocalAgent["@local — Environment Setup"]
+            Local["@local Agent<br/>local-setup, diagnose"]
+            LocalSkills["Local Skills<br/>/local-setup-env, /local-setup-docker,<br/>/local-setup-deps, /local-diagnose"]
+        end
+
         subgraph Orchestration["@orch — Orchestrator"]
             MasterAgent["@orch Agent<br/>Triage + handoff"]
             Preflight["@orch-preflight<br/>Pre-flight checks"]
@@ -83,7 +88,9 @@ graph TB
 
     AuditFW -->|wraps all operations| DocAgent
     AuditFW -->|wraps all operations| AngularDomain
+    AuditFW -->|wraps all operations| LocalAgent
     AuditFW -->|wraps all operations| Governance
+    Local --> LocalSkills
     Docs --> DocSkills
     DocSkills --> Registry
     DocSkills --> SharedRefs
@@ -96,6 +103,7 @@ graph TB
     MasterAgent -->|pre-flight| Preflight
     MasterAgent -.->|handoffs to| DocAgent
     MasterAgent -.->|handoffs to| AngularDomain
+    MasterAgent -.->|handoffs to| LocalAgent
     MasterAgent -.->|handoffs to| AuditAgent
 ```
 
@@ -285,6 +293,7 @@ vscode-ghcp-agents/
 │   │   │   ├── audit.agent.md                   # Audit & observability agent
 │   │   │   ├── doc-convert-worker.agent.md      # Internal doc conversion worker (sub-agent)
 │   │   │   ├── docs.agent.md                    # Reference supply chain agent
+│   │   │   ├── local.agent.md                   # Local environment setup agent
 │   │   │   ├── migrate-worker.agent.md          # Internal migration worker (sub-agent under @angular-engineer)
 │   │   │   ├── orch.agent.md                    # Master orchestrator
 │   │   │   └── orch-preflight.agent.md          # Pre-flight checks sub-agent
@@ -333,6 +342,14 @@ vscode-ghcp-agents/
 │   │   │   ├── docs-refresh/                    # @docs: re-convert stale sources
 │   │   │   │   └── SKILL.md
 │   │   │   ├── docs-status/                     # @docs: registry health dashboard
+│   │   │   │   └── SKILL.md
+│   │   │   ├── local-setup-env/                 # @local: environment setup
+│   │   │   │   └── SKILL.md
+│   │   │   ├── local-setup-docker/              # @local: Docker + localstack
+│   │   │   │   └── SKILL.md
+│   │   │   ├── local-setup-deps/                # @local: dependency installation
+│   │   │   │   └── SKILL.md
+│   │   │   ├── local-diagnose/                  # @local: environment diagnostics
 │   │   │   │   └── SKILL.md
 │   │   │   ├── present-dashboard/               # @orch shared: metrics dashboard
 │   │   │   │   └── SKILL.md
@@ -396,10 +413,6 @@ vscode-ghcp-agents/
 │   └── orch-status-extension/                   # VS Code status bar extension
 │       ├── package.json
 │       └── extension.js
-│
-├── samples/
-│   ├── angular-app/                             # Sample Angular app for testing
-│   └── nx-angular-app/                          # Sample Nx Angular workspace for testing
 │
 ├── cli/                                         # CLI tooling
 │
@@ -562,6 +575,23 @@ agents:
       - ".orch/references/**"
       - ".orch/registry.yaml"
     blocked_commands: []
+
+  local:
+    allowed_tools:
+      - codebase
+      - terminal
+    allowed_scope:
+      - ".orch/config.yaml"
+      - "docker-compose*.yml"
+      - "Dockerfile*"
+      - ".env*"
+      - "package.json"
+      - "pom.xml"
+      - "requirements*.txt"
+      - "pyproject.toml"
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"
 ```
 
 ### 4.5 Adherence Rules

@@ -2,11 +2,15 @@
 name: audit-drift
 description: "Detect behavioral quality trends over time. Track adherence score regression, output quality degradation, and session health patterns across agents and skills."
 references: []
+allowed-tools:
+  - codebase
 ---
 
 ## Context
 
 Monitors agent behavioral quality over time to detect regression. Tracks adherence scores, output quality metrics, and session health trends. Raises alerts when an agent's quality is declining, enabling proactive intervention before users notice degraded output.
+
+Prerequisites: Requires `.orch/runs/` directory with session data. This directory is created automatically by ORCH audit hooks during agent sessions.
 
 ## Inputs
 

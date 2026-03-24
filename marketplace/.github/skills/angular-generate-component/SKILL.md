@@ -51,18 +51,85 @@ Generates a single Angular component following current v19 best practices: stand
 ```markdown
 ## Component Generated — {ComponentName}
 
-| File | Path |
-|------|------|
-| Component | `src/app/features/{feature}/{name}.component.ts` |
-| Template | `src/app/features/{feature}/{name}.component.html` |
-| Styles | `src/app/features/{feature}/{name}.component.scss` |
-| Test | `src/app/features/{feature}/{name}.component.spec.ts` |
+### Files Created
+| File | Path | Purpose |
+|------|------|---------|
+| Component | `src/app/features/{feature}/{name}.component.ts` | Standalone, OnPush, signals |
+| Template | `src/app/features/{feature}/{name}.component.html` | @if/@for, data-testid |
+| Styles | `src/app/features/{feature}/{name}.component.scss` | HDS tokens, :host block |
+| Test | `src/app/features/{feature}/{name}.component.spec.ts` | TestBed, mocked services |
 
 Build: {pass|fail}
 Tests: {pass|fail} ({count} specs)
 
+### Architecture Decisions
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Component type | Standalone | Angular 19 default. No NgModule overhead. Tree-shakeable. |
+| Change detection | OnPush | Reduces unnecessary checks. Works with signals and async pipe. |
+| Dependency injection | inject() | Functional style. No constructor boilerplate. Easier to test. |
+| State management | {signals or observable} | {rationale based on use case — signals for local state, observable for streams} |
+| Template syntax | @if/@for | Angular 19 control flow. Better performance than *ngIf/*ngFor. |
+| Styling | HDS tokens | Org design system. Theme-aware. No hardcoded values. |
+
+### Diagrams
+
+#### Where This Fits (C4 Level 3 — Component in Container)
+```mermaid
+graph TD
+    subgraph App["{AppName}"]
+        subgraph Feature["{FeatureArea}"]
+            NEW["{ComponentName}\n★ NEW"]
+            EXIST1["{ExistingSibling1}"]
+        end
+        subgraph SharedServices["Services"]
+            S1["{ServiceName}"]
+        end
+    end
+    subgraph External["External Systems"]
+        API["{API endpoint}"]
+    end
+    NEW --> S1
+    EXIST1 --> S1
+    S1 --> API
+```
+Note: Show the NEW component's position relative to existing components and services.
+
+#### Component Data Flow
+```mermaid
+graph TD
+    subgraph Component["{ComponentName}"]
+        C[Component\nOnPush + signals]
+    end
+    subgraph Services["Injected Services"]
+        S1[{ServiceName}\ninject()]
+    end
+    subgraph External["External"]
+        API[{API endpoint}]
+    end
+    C --> S1
+    S1 --> API
+```
+
+#### User Interaction
+```mermaid
+sequenceDiagram
+    actor User
+    participant C as {ComponentName}
+    participant S as {ServiceName}
+    participant API as {API}
+    User->>C: {primary user action}
+    C->>S: {service call}
+    S->>API: {HTTP method} {endpoint}
+    API-->>S: {response}
+    S-->>C: {state update}
+    C-->>User: {UI feedback}
+```
+
 ### Recommended next steps
 - Add the component to a route or parent template.
+- Run `/angular-hds-audit` to verify design system compliance.
+- Run `/angular-elevate-audit` if platform services were integrated.
 - Run `/angular-docs-generate` if additional documentation is needed.
 ```
 

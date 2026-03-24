@@ -1,0 +1,199 @@
+# ORCH Workflow: Angular Migration
+# Read by the @angular coordinator when triage matches trigger keywords.
+# Each phase is executed sequentially with optional pre/post checks, checkpoints, and verification.
+
+name: angular-migration
+description: "Upgrade Angular across major versions with pattern migrations"
+trigger: "upgrade|migrate|update angular"
+report:
+  template: migrate-report
+  title: "Angular {{from}} → {{to}} Upgrade"
+  attribution: "@angular → @angular-planner → @angular-engineer → @angular-verifier"
+
+phases:
+  - name: Scan dependencies
+    id: scan-deps
+    agent: planner
+    skill: /angular-scan-deps
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - before-versions
+    report-section: "Before vs After"
+    on-failure: stop
+
+  - name: Compatibility check
+    id: compat
+    agent: planner
+    skill: /angular-compatibility
+    checkpoint: false
+    verify: false
+    approval: auto=safe
+    collect:
+      - upgrade-path
+      - phase-plan
+    report-section: "Phase Timeline"
+    on-failure: stop
+
+  - name: Upgrade TypeScript
+    id: upgrade-ts
+    agent: engineer
+    skill: /angular-migrate-version
+    args: --scope typescript-only
+    checkpoint: true
+    verify: true
+    approval: auto=safe
+    collect:
+      - files-changed
+      - duration
+      - build-status
+      - test-status
+    report-section: "Phase Details"
+    on-failure: pause
+
+  - name: Upgrade Angular core
+    id: upgrade-angular
+    agent: engineer
+    skill: /angular-migrate-version
+    args: --scope angular-core
+    checkpoint: true
+    verify: true
+    approval: auto=safe
+    collect:
+      - files-changed
+      - duration
+      - build-status
+      - test-status
+    report-section: "Phase Details"
+    on-failure: rollback-to-checkpoint
+
+  - name: Standalone migration
+    id: standalone
+    agent: engineer
+    skill: /angular-migrate-standalone
+    pre-check:
+      skill: /angular-scan-arch
+      args: --counts-only
+      capture: before-patterns
+    post-check:
+      skill: /angular-scan-arch
+      args: --counts-only
+      capture: after-patterns
+    checkpoint: true
+    verify: true
+    approval: auto=safe
+    collect:
+      - files-changed
+      - duration
+      - pattern-delta
+    report-section: "Phase Details"
+    on-failure: rollback-to-checkpoint
+
+  - name: Control flow migration
+    id: control-flow
+    agent: engineer
+    skill: /angular-migrate-control-flow
+    pre-check:
+      skill: /angular-scan-arch
+      args: --counts-only
+      capture: before-patterns
+    post-check:
+      skill: /angular-scan-arch
+      args: --counts-only
+      capture: after-patterns
+    checkpoint: true
+    verify: true
+    approval: auto=safe
+    collect:
+      - files-changed
+      - duration
+      - pattern-delta
+    report-section: "Phase Details"
+    on-failure: rollback-to-checkpoint
+
+  - name: Signals migration
+    id: signals
+    agent: engineer
+    skill: /angular-migrate-signals
+    pre-check:
+      skill: /angular-scan-arch
+      args: --counts-only
+      capture: before-patterns
+    post-check:
+      skill: /angular-scan-arch
+      args: --counts-only
+      capture: after-patterns
+    checkpoint: true
+    verify: true
+    approval: auto=safe
+    collect:
+      - files-changed
+      - duration
+      - pattern-delta
+    report-section: "Phase Details"
+    on-failure: rollback-to-checkpoint
+
+  - name: Third-party compatibility
+    id: third-party
+    agent: engineer
+    skill: /angular-migrate-version
+    args: --scope third-party
+    checkpoint: true
+    verify: true
+    approval: auto=safe
+    collect:
+      - files-changed
+      - duration
+    report-section: "Phase Details"
+    on-failure: pause
+
+  - name: Final verification
+    id: final-verify
+    agent: verifier
+    skills:
+      - /angular-test-unit
+      - /angular-test-e2e
+      - /angular-test-lint
+      - /angular-review
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - build-status
+      - test-results
+      - lint-results
+      - adherence-score
+      - review-findings
+    report-section: "Verification Results"
+    on-failure: report-as-partial
+
+  - name: Post-scan
+    id: post-scan
+    agent: planner
+    skill: /angular-scan-deps
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - after-versions
+      - pattern-counts
+    report-section: "Compatibility Changes"
+    on-failure: continue
+
+post-workflow:
+  report:
+    sections:
+      - "Before vs After"
+      - "Phase Timeline"
+      - "Phase Details"
+      - "Verification Results"
+      - "Compatibility Changes"
+      - "Risk Items"
+      - "Git History"
+      - "Recommendations"
+  git:
+    message: "migrate: Angular {{from}} → {{to}} complete"
+    tag: "migrate/angular-{{to}}-{{date}}"
+  notify:
+    status-bar: "Migration complete — {{phases-passed}}/{{phases-total}} phases"

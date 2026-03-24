@@ -3,6 +3,8 @@ name: angular-compatibility
 description: "Version compatibility matrix and upgrade path planning for the Angular ecosystem"
 references:
   - references/angular/v19/compatibility-matrix.md
+allowed-tools:
+  - codebase
 ---
 
 ## Context
@@ -75,6 +77,16 @@ Generates and queries the Angular ecosystem compatibility matrix — which versi
 
 ### Issues Found
 | Package | Issue | Resolution |
+
+### Upgrade Path Diagram (Mermaid)
+Produce a visual upgrade path showing sequential steps and dependencies:
+```mermaid
+graph LR
+    S1["{step1}\n{lib} {from} to {to}"] --> S2["{step2}\n{lib} {from} to {to}"]
+    S2 --> S3["{step3}\n{lib} {from} to {to}"]
+    S3 --> V["Verify\nbuild + test"]
+```
+Show dependency arrows between steps (e.g., TypeScript must upgrade before Angular). Color-code by risk: green=low, amber=medium, red=high.
 ```
 
 ## Validation

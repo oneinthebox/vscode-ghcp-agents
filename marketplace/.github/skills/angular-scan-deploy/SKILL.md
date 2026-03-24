@@ -1,6 +1,9 @@
 ---
 name: angular-scan-deploy
 description: "Scan CI/CD pipelines, release strategy, environments, and deployment configuration"
+references: []
+allowed-tools:
+  - codebase
 ---
 
 ## Context
@@ -73,6 +76,34 @@ Reads CI/CD configuration files, deployment configs, and environment setup to pr
 
 ### Build Optimization
 | Optimization | Enabled? | Config |
+
+### CI/CD Pipeline Flow (Mermaid diagram)
+Produce a pipeline flow diagram showing stages and environment promotion:
+```mermaid
+graph LR
+    subgraph CI["CI Pipeline"]
+        I["Install"] --> L["Lint"]
+        L --> T["Test"]
+        T --> B["Build"]
+    end
+    subgraph CD["Deployment"]
+        B --> DEV["Dev\n{trigger}"]
+        DEV --> STG["Staging\n{trigger}"]
+        STG --> PROD["Production\n{trigger}"]
+    end
+```
+Adapt to actual pipeline: add caching nodes if present, parallel steps if configured, approval gates where applicable.
+
+### Environment Topology (Mermaid diagram if docker-compose or k8s found)
+If containerized deployment is detected, produce a container topology diagram:
+```mermaid
+graph TD
+    subgraph Cluster["Environment"]
+        APP["App Container"] --> DB[("Database")]
+        APP --> CACHE[("Cache")]
+        APP --> MQ["Message Queue"]
+    end
+```
 ```
 
 ## Validation

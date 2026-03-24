@@ -2,11 +2,15 @@
 name: audit-compliance
 description: "Report boundary violations, adherence scores, and tool/scope violation logs. Reads the ORCH violations ledger to surface agents operating outside their defined boundaries."
 references: []
+allowed-tools:
+  - codebase
 ---
 
 ## Context
 
 Monitors agent compliance with defined boundaries. Every ORCH agent has declared tool permissions, file scope, and behavioral rules. This skill reads the violations ledger to report on boundary breaches, calculate adherence scores, and identify agents or skills that need tighter guardrails.
+
+Prerequisites: Requires `.orch/runs/` directory with session data. This directory is created automatically by ORCH audit hooks during agent sessions.
 
 ## Inputs
 

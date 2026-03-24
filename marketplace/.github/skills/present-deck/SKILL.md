@@ -2,6 +2,10 @@
 name: present-deck
 description: "Convert any markdown to a branded reveal.js HTML slide deck or PPTX. Bundled reveal.js (no CDN), HDS themed via deck-tokens.css. Logo, cover, and theme overridable from .orch/config.yaml."
 references: []
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context

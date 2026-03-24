@@ -2,6 +2,10 @@
 name: docs-refresh
 description: "Re-fetch and re-convert stale documentation sources. Identifies sources past their freshness threshold and updates them from their original URLs. Keeps the registry current."
 references: []
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context

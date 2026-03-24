@@ -12,6 +12,8 @@ allowed-tools: Bash(ng:*) Bash(npx:*) Read Edit
 
 Generates TSDoc documentation for undocumented public APIs in Angular components, services, directives, pipes, and utility files. Unlike boilerplate generators that repeat the function name, this skill reads the implementation to understand what the code does and produces meaningful documentation that helps future developers.
 
+This skill operates from function signatures and bodies. No external reference docs required.
+
 Critical rule: TypeScript provides types. TSDoc documents intent. Never use JSDoc `{type}` syntax in TypeScript.
 
 ## Inputs

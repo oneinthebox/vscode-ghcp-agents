@@ -2,6 +2,8 @@
 name: angular-docs-audit
 description: "Audit TSDoc coverage across Angular source files. Finds undocumented public APIs, detects wrong-format docs, and produces a coverage report with gaps and fix suggestions."
 references: []
+allowed-tools:
+  - codebase
 ---
 
 ## Context

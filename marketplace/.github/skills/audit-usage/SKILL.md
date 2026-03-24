@@ -2,11 +2,15 @@
 name: audit-usage
 description: "Report agent and skill usage: who used which agents, how often, session counts by date range. Reads ORCH run records to produce adoption and activity metrics."
 references: []
+allowed-tools:
+  - codebase
 ---
 
 ## Context
 
 Produces usage analytics from ORCH session records. Answers questions like: which agents are most used, which skills are popular, who are the active users, and how usage trends over time. Reads `.orch/runs/` directory for session data.
+
+Prerequisites: Requires `.orch/runs/` directory with session data. This directory is created automatically by ORCH audit hooks during agent sessions.
 
 ## Inputs
 

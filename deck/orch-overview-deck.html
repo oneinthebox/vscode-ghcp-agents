@@ -661,14 +661,15 @@ references:
       <!-- 8 — vertical stack: intro + what orch installs -->
       <section>
         <section>
-          <header><h2>Introducing ORCH</h2><p>Enterprise agents, skills, and audit &mdash; one command.</p></header>
+          <header><h2>Introducing <span class="accent-text">ORCH</span>ESTRA</h2><p>Enterprise agents, skills, and audit &mdash; one command.</p></header>
           <div class="body">
             <pre><code>npm install -g @orch/cli
 orch init
-orch doctor</code></pre>
+orch doctor
+orch reset</code></pre>
             <div class="split split-2">
-              <div><h3>What it creates</h3><ul><li>Role-based agents tailored to your stack</li><li>27+ granular skills per domain</li><li>Audit hooks on every lifecycle event</li><li>Token-efficient references from your dependencies</li><li>Configurable behavior &mdash; auto or manual gates</li></ul></div>
-              <div><h3>What stays in your hands</h3><ul><li>Which agents are installed</li><li>What tools each agent can access</li><li>Auto mode or approval at every step</li><li>Retry limits, token budgets, model selection</li><li><code>orch reset</code> removes everything cleanly</li></ul></div>
+              <div><h3>What it creates</h3><ul><li>Role-based agents tailored to your stack</li><li>50 granular skills across domains, audit, docs, and local setup</li><li>Audit hooks on every lifecycle event</li><li>Styled reports &mdash; recap, migration, docs, benchmarking</li><li>Model and approach benchmarking out of the box</li></ul></div>
+              <div><h3>What stays in your hands</h3><ul><li>Which agents are installed</li><li>What tools each agent can access</li><li>Auto mode or approval at every step</li><li>Model selection backed by benchmark data</li><li>Clean removal with one command when needed</li></ul></div>
             </div>
           </div>
         </section>
@@ -685,7 +686,7 @@ orch doctor</code></pre>
     docs.agent.md               # reference supply chain
     audit.agent.md              # observability
   skills/
-    angular-scan-deps/SKILL.md  # 27+ granular skills
+    angular-scan-deps/SKILL.md  # 50 granular skills
     angular-migrate-standalone/SKILL.md
     ...
   hooks/
@@ -787,7 +788,7 @@ orch doctor</code></pre>
             <tr><td>Verifier</td><td><code>/angular-test-unit</code></td><td>Generate Jest tests per org conventions</td></tr>
             <tr><td>Verifier</td><td><code>/angular-review</code></td><td>Review against anti-pattern checklist</td></tr>
           </tbody></table>
-          <p style="font-size: var(--fs-caption); color: var(--fg-muted); text-align: center;">27+ Angular skills. Each declares reference dependencies &mdash; only loads what it needs.</p>
+          <p style="font-size: var(--fs-caption); color: var(--fg-muted); text-align: center;">33 Angular skills + 17 shared (audit, docs, local, presentation). Each declares reference dependencies &mdash; only loads what it needs.</p>
         </div>
       </section>
 
@@ -795,44 +796,104 @@ orch doctor</code></pre>
       <section class="section-slide">
         <div class="bar"></div>
         <h2>In <span class="highlight-text">practice</span></h2>
-        <p>A real Angular migration and a full project recap.</p>
+        <p>Declarative workflows. One command. Full audit trail.</p>
       </section>
 
-      <!-- 12 -->
+      <!-- 12 — Migration with workflow sub-slides -->
       <section>
-        <header><h2>Upgrade Angular 17 &rarr; 19</h2><p>One command. Full upgrade. Verified at every step.</p></header>
-        <div class="body">
-          <pre><code>@angular upgrade this app from Angular 17 to 19</code></pre>
-          <div class="flow">
-            <div class="flow-step">1. Scan<small>deps, arch</small></div><div class="flow-arr">&rarr;</div>
-            <div class="flow-step">2. Plan<small>8 phases</small></div><div class="flow-arr">&rarr;</div>
-            <div class="flow-step">3. Approve<small>or --auto</small></div><div class="flow-arr">&rarr;</div>
-            <div class="flow-step">4. Execute<small>per phase</small></div><div class="flow-arr">&rarr;</div>
-            <div class="flow-step">5. Verify<small>build+test</small></div><div class="flow-arr">&rarr;</div>
-            <div class="flow-step done">6. Report</div>
+        <section>
+          <header><h2>Upgrade Angular 17 &rarr; 19</h2><p>One command. Workflow-driven. Verified at every phase.</p></header>
+          <div class="body">
+            <pre><code>@angular upgrade this app from Angular 17 to 19</code></pre>
+            <div class="flow">
+              <div class="flow-step">1. Scan<small>deps, arch</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step">2. Plan<small>10 phases</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step">3. Approve<small>or --auto</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step">4. Execute<small>phase by phase</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step">5. Verify<small>after each phase</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step done">6. Report</div>
+            </div>
+            <div class="split split-2">
+              <div><h3>Automated phases</h3><ul><li>TypeScript 5.2 &rarr; 5.5</li><li>Angular 17 &rarr; 18 &rarr; 19 via ng update</li><li>NgModules &rarr; standalone (ts-morph)</li><li>*ngIf &rarr; @if, *ngFor &rarr; @for</li><li>Signals migration + git checkpoint each phase</li></ul></div>
+              <div><h3>Deliverables</h3><ul><li>Build + test verified after every phase</li><li>Rollback-safe &mdash; git checkpoint per phase</li><li>Before/after pattern counts per phase</li><li>Risk detection (deprecated APIs, manual fixes)</li><li>Migration report with diagrams + recommendations</li></ul></div>
+            </div>
           </div>
-          <div class="split split-2">
-            <div><h3>Automated phases</h3><ul><li>TypeScript 5.2 &rarr; 5.5</li><li>Angular 17 &rarr; 18 &rarr; 19 via <code>ng update</code></li><li>NgModules &rarr; standalone (ts-morph)</li><li>*ngIf &rarr; @if, *ngFor &rarr; @for</li><li>Signals migration + git checkpoint each phase</li></ul></div>
-            <div><h3>Deliverables</h3><ul><li>Build + test verified at every step</li><li>Rollback-safe &mdash; one revert per phase</li><li>Audit: 8 phases, 187 files, 84K tokens, 96% adherence</li><li>Branch ready for PR</li><li>Migration report with before/after metrics</li></ul></div>
+        </section>
+        <section>
+          <header><h2>Workflow-Driven Execution</h2><p>Workflows are declarative YAML. The coordinator reads and executes.</p></header>
+          <div class="body">
+            <pre><code># .orch/workflows/angular-migration.yaml
+phases:
+  - name: Standalone migration
+    agent: engineer
+    skill: /angular-migrate-standalone
+    pre-check:
+      skill: /angular-scan-arch
+      args: --counts-only
+      capture: before-patterns
+    post-check:
+      skill: /angular-scan-arch
+      args: --counts-only
+      capture: after-patterns
+    checkpoint: true
+    verify: true
+    on-failure: rollback-to-checkpoint
+    collect: [files-changed, pattern-delta, duration]</code></pre>
+            <p>Each phase declares: which agent runs it, pre/post checks for deltas, whether to checkpoint and verify, what to collect for the report, and what to do on failure.</p>
           </div>
-        </div>
+        </section>
+        <section>
+          <header><h2>Phase-by-Phase Execution</h2><p>The coordinator drives each phase through a consistent loop.</p></header>
+          <div class="body">
+            <div class="flow">
+              <div class="flow-step">Pre-check<small>capture before</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step">Execute<small>invoke skill</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step">Post-check<small>capture after</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step">Checkpoint<small>git commit</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step">Verify<small>build + test</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step done">Collect<small>store outputs</small></div>
+            </div>
+            <div class="split split-2" style="margin-top: var(--sp-4);">
+              <div><h3>On success</h3><ul><li>Outputs stored in .orch/runs/</li><li>Status bar updates: "Phase 4/10 ✓"</li><li>Next phase begins automatically (or waits for approval)</li></ul></div>
+              <div><h3>On failure</h3><ul><li><strong>stop</strong> &mdash; abort workflow, report what completed</li><li><strong>pause</strong> &mdash; ask human to decide</li><li><strong>rollback</strong> &mdash; git revert to last checkpoint</li><li><strong>continue</strong> &mdash; skip phase, log failure</li></ul></div>
+            </div>
+          </div>
+        </section>
       </section>
 
-      <!-- 13 -->
+      <!-- 13 — Recap with workflow sub-slide -->
       <section>
-        <header><h2>Project Recap</h2><p>New to a codebase? One command. Complete picture.</p></header>
-        <div class="body">
-          <pre><code>@angular recap this project</code></pre>
-          <table><thead><tr><th>Scan</th><th>What you learn</th></tr></thead><tbody>
-            <tr><td><code>/angular-scan-deps</code></td><td>Every dependency, version currency, upgrade benefits</td></tr>
-            <tr><td><code>/angular-scan-arch</code></td><td>Module graph, component tree, route map</td></tr>
-            <tr><td><code>/angular-scan-quality</code></td><td>Lint, Lighthouse, bundle size, a11y rating</td></tr>
-            <tr><td><code>/angular-scan-tests</code></td><td>Coverage %, unit/e2e/smoke counts, gap analysis</td></tr>
-            <tr><td><code>/angular-scan-deploy</code></td><td>CI/CD pipelines, release strategy, environments</td></tr>
-            <tr><td><code>/angular-scan-git</code></td><td>Commit patterns, contributors, changelogs</td></tr>
-          </tbody></table>
-          <p style="font-size: var(--fs-caption); color: var(--fg-secondary); text-align: center;">Output: <code>PROJECT-RECAP.md</code> &mdash; present it with <code>/present-deck</code></p>
-        </div>
+        <section>
+          <header><h2>Project Recap</h2><p>New to a codebase? One command. Complete picture.</p></header>
+          <div class="body">
+            <pre><code>@angular recap this project</code></pre>
+            <table><thead><tr><th>Scan</th><th>What you learn</th></tr></thead><tbody>
+              <tr><td><code>/angular-scan-deps</code></td><td>Every dependency, version currency, upgrade benefits</td></tr>
+              <tr><td><code>/angular-scan-arch</code></td><td>Module graph, component tree, route map</td></tr>
+              <tr><td><code>/angular-scan-quality</code></td><td>Lint, Lighthouse, bundle size, a11y rating</td></tr>
+              <tr><td><code>/angular-scan-tests</code></td><td>Coverage %, unit/e2e/smoke counts, gap analysis</td></tr>
+              <tr><td><code>/angular-scan-deploy</code></td><td>CI/CD pipelines, release strategy, environments</td></tr>
+              <tr><td><code>/angular-scan-git</code></td><td>Commit patterns, contributors, changelogs</td></tr>
+            </tbody></table>
+            <p style="font-size: var(--fs-caption); color: var(--fg-secondary); text-align: left;">Output: <code>PROJECT-RECAP.md</code> or styled HTML report via <code>/present-report</code></p>
+          </div>
+        </section>
+        <section>
+          <header><h2>Recap Report</h2><p>12 sections with diagrams, progress bars, and recommendations.</p></header>
+          <div class="body">
+            <table><thead><tr><th>Section</th><th>Content</th></tr></thead><tbody>
+              <tr><td>Dependencies</td><td>Versions, outdated, upgrade benefits, compatibility matrix</td></tr>
+              <tr><td>Architecture</td><td>Library graph, layered design, Nx boundaries (Mermaid diagrams)</td></tr>
+              <tr><td>Quality</td><td>Lint score, Lighthouse, bundle size, a11y rating (progress bars)</td></tr>
+              <tr><td>Tests</td><td>Unit/e2e/smoke counts, coverage gaps, risk files</td></tr>
+              <tr><td>Security</td><td>Auth provider, roles, preferences, authorization flow diagram</td></tr>
+              <tr><td>Features</td><td>Functional inventory, non-functional metrics (FCP, TTI)</td></tr>
+              <tr><td>System Design</td><td>HLD context diagram, LLD component diagram</td></tr>
+              <tr><td>UX &amp; Design System</td><td>HDS adoption %, component library, state management</td></tr>
+              <tr><td>Recommendations</td><td>Prioritized actions linked to specific ORCH skills</td></tr>
+            </tbody></table>
+          </div>
+        </section>
       </section>
 
       <!-- 14 -->
@@ -851,7 +912,7 @@ orch doctor</code></pre>
             <div>
               <div style="font-size: var(--fs-tiny); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin-bottom: var(--sp-2);">Domain-specific &mdash; each with planner + engineer + verifier</div>
               <div class="agent-grid">
-                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@angular</div><div class="role">TypeScript / Angular</div><div class="desc">27 skills: scan, generate, migrate, test, review, refactor, docs.</div></div>
+                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@angular</div><div class="role">TypeScript / Angular</div><div class="desc">33 skills: scan, generate, migrate, test, review, refactor, HDS, elevate.</div></div>
                 <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@springboot</div><div class="role">Java / Spring Boot</div><div class="desc">Same pattern. REST endpoints, JPA, security, testing.</div></div>
                 <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@fastapi</div><div class="role">Python / FastAPI</div><div class="desc">Same pattern. Async, Pydantic, dependency injection.</div></div>
               </div>

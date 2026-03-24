@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{TITLE}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════
+       ORCH Report Template
+       ═══════════════════════════════════════
+       Design tokens are inlined from deck-tokens.css.
+       To customize: override the :root variables below.
+       This template is used by /present-report to render
+       any markdown report as a styled HTML page.
+       ═══════════════════════════════════════ */
+
+    :root {
+      /* ── Color Primitives (oklch, hue 240 = deep blue) ── */
+      --neutral-50:  oklch(0.98 0.005 240);
+      --neutral-100: oklch(0.96 0.006 240);
+      --neutral-200: oklch(0.91 0.008 240);
+      --neutral-300: oklch(0.85 0.008 240);
+      --neutral-400: oklch(0.68 0.01  240);
+      --neutral-500: oklch(0.55 0.01  240);
+      --neutral-600: oklch(0.45 0.012 240);
+      --neutral-700: oklch(0.35 0.012 240);
+      --neutral-800: oklch(0.25 0.01  240);
+      --neutral-900: oklch(0.15 0.008 240);
+      --neutral-950: oklch(0.10 0.006 240);
+      --brand-100: oklch(0.94 0.03 240);
+      --brand-500: oklch(0.48 0.14 240);
+      --brand-600: oklch(0.40 0.12 240);
+      --teal-100: oklch(0.94 0.04 175);
+      --teal-500: oklch(0.55 0.12 175);
+      --amber-100: oklch(0.94 0.04 85);
+      --amber-500: oklch(0.45 0.12 85);
+      --red-100: oklch(0.94 0.04 25);
+      --red-500: oklch(0.48 0.14 25);
+
+      /* ── Semantic ── */
+      --fg-primary:   var(--neutral-900);
+      --fg-secondary: var(--neutral-600);
+      --fg-muted:     var(--neutral-400);
+      --fg-faint:     var(--neutral-300);
+      --fg-accent:    var(--brand-500);
+      --fg-teal:      var(--teal-500);
+      --fg-inverse:   var(--neutral-50);
+      --bg-page:      var(--neutral-50);
+      --bg-surface:   var(--neutral-100);
+      --bg-warm:      var(--neutral-200);
+      --bg-inset:     var(--neutral-950);
+      --border-default: oklch(0 0 0 / 0.08);
+
+      /* ── Typography ── */
+      --f-display: 'Newsreader', Georgia, serif;
+      --f-body:    'Outfit', -apple-system, sans-serif;
+      --f-mono:    'IBM Plex Mono', 'Menlo', monospace;
+    }
+
+    /* ═══ RESET ═══ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ═══ BODY ═══ */
+    body {
+      font-family: var(--f-body);
+      color: var(--fg-primary);
+      background: var(--bg-page);
+      line-height: 1.65;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+      font-size: 15px;
+    }
+
+    /* ═══ REPORT HEADER ═══ */
+    /* Use: <div class="report-header">
+              <div class="overline">{{OVERLINE}}</div>
+              <h1>{{TITLE}}</h1>
+              <div class="meta">{{META}}</div>
+            </div> */
+    .report-header {
+      border-bottom: 2px solid var(--fg-primary);
+      padding-bottom: 20px;
+      margin-bottom: 40px;
+    }
+    .report-header .overline {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--fg-accent);
+      margin-bottom: 8px;
+    }
+    .report-header h1 {
+      font-family: var(--f-display);
+      font-size: 2rem;
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .report-header .meta {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      font-family: var(--f-mono);
+    }
+
+    /* ═══ EXECUTIVE SUMMARY ═══ */
+    /* Use: <div class="exec-summary"><h2>...</h2><p>...</p></div> */
+    .exec-summary {
+      background: var(--bg-surface);
+      padding: 24px;
+      margin-bottom: 40px;
+      border-left: 3px solid var(--fg-accent);
+    }
+    .exec-summary h2 {
+      font-family: var(--f-display);
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+    }
+    .exec-summary p {
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* ═══ STAT STRIP ═══ */
+    /* Use: <div class="stat-strip">
+              <div class="stat accent"><div class="val">90%</div><div class="lbl">Coverage</div></div>
+            </div> */
+    .stat-strip {
+      display: flex;
+      gap: 32px;
+      padding: 16px 0;
+      border-top: 1.5px solid var(--fg-primary);
+      border-bottom: 1.5px solid var(--fg-primary);
+      margin: 24px 0;
+      flex-wrap: wrap;
+    }
+    .stat-strip .stat .val {
+      font-family: var(--f-display);
+      font-size: 1.6rem;
+      color: var(--fg-primary);
+      line-height: 1;
+    }
+    .stat-strip .stat .lbl {
+      font-size: 0.65rem;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .stat-strip .stat.accent .val { color: var(--fg-accent); }
+    .stat-strip .stat.teal .val { color: var(--fg-teal); }
+    .stat-strip .stat.warn .val { color: var(--amber-500); }
+
+    /* ═══ TABLE OF CONTENTS ═══ */
+    /* Use: <div class="toc"><h2>Contents</h2><ol><li><a href="#id">...</a></li></ol></div> */
+    .toc { margin-bottom: 40px; }
+    .toc h2 { font-family: var(--f-display); font-size: 1.15rem; margin-bottom: 12px; }
+    .toc ol { padding-left: 1.5em; font-size: 0.85rem; color: var(--fg-secondary); }
+    .toc li { margin-bottom: 4px; }
+    .toc a { color: var(--fg-accent); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ═══ SECTIONS ═══ */
+    /* Use: <div class="section" id="name">
+              <h2>Title</h2>
+              <div class="section-sub">Generated by /skill-name</div>
+              <h3>Subsection</h3>
+              <p>Body text</p>
+            </div> */
+    .section { margin-bottom: 48px; }
+    .section h2 {
+      font-family: var(--f-display);
+      font-size: 1.35rem;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .section .section-sub {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      margin-bottom: 16px;
+    }
+    .section h3 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-accent);
+      margin: 24px 0 8px;
+    }
+    .section p {
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* ═══ TABLES ═══ */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      margin: 12px 0 20px;
+    }
+    th {
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--fg-muted);
+      padding: 6px 12px;
+      text-align: left;
+      border-bottom: 1.5px solid var(--fg-primary);
+    }
+    td {
+      padding: 6px 12px;
+      border-bottom: 0.5px solid var(--border-default);
+      color: var(--fg-primary);
+    }
+    tr:last-child td { border-bottom: 1.5px solid var(--fg-primary); }
+    td code {
+      font-family: var(--f-mono);
+      font-size: 0.85em;
+      color: var(--fg-accent);
+      background: var(--bg-surface);
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    /* ═══ STATUS TAGS ═══ */
+    /* Use: <span class="tag tag-ok">current</span> */
+    .tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+    .tag-ok   { background: var(--teal-100); color: var(--teal-500); }
+    .tag-warn { background: var(--amber-100); color: var(--amber-500); }
+    .tag-bad  { background: var(--red-100); color: var(--red-500); }
+    .tag-info { background: var(--brand-100); color: var(--brand-500); }
+
+    /* ═══ PROGRESS BARS ═══ */
+    /* Use: <div class="progress">
+              <span>Label</span>
+              <div class="bar"><div class="fill green" style="width: 73%;"></div></div>
+              <span class="pct">73%</span>
+            </div> */
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+    }
+    .progress > span:first-child {
+      font-size: 0.8rem;
+      min-width: 100px;
+    }
+    .progress .bar {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-warm);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress .bar .fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+    .progress .bar .fill.green { background: var(--teal-500); }
+    .progress .bar .fill.amber { background: var(--amber-500); }
+    .progress .bar .fill.red   { background: var(--red-500); }
+    .progress .pct {
+      font-family: var(--f-mono);
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* ═══ CODE BLOCKS ═══ */
+    pre {
+      background: var(--bg-inset);
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    pre code {
+      font-family: var(--f-mono);
+      font-size: 0.75rem;
+      color: var(--neutral-200);
+      line-height: 1.7;
+    }
+
+    /* ═══ RECOMMENDATION LIST ═══ */
+    /* Use: <div class="rec-list">
+              <div class="rec-item">
+                <div class="num">1</div>
+                <div class="body"><strong>Title.</strong> Description.</div>
+              </div>
+            </div> */
+    .rec-list { margin: 12px 0; }
+    .rec-item {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 0.5px solid var(--border-default);
+      font-size: 0.82rem;
+    }
+    .rec-item:last-child { border-bottom: none; }
+    .rec-item .num {
+      font-family: var(--f-display);
+      font-size: 1.1rem;
+      color: var(--fg-accent);
+    }
+    .rec-item .body { color: var(--fg-secondary); }
+    .rec-item strong { color: var(--fg-primary); }
+
+    /* ═══ FOOTER ═══ */
+    .report-footer {
+      border-top: 1.5px solid var(--fg-primary);
+      padding-top: 16px;
+      margin-top: 48px;
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+      font-family: var(--f-mono);
+    }
+
+    /* ═══ DIAGRAMS (Mermaid) ═══ */
+    /* Use: <div class="diagram">
+              <div class="diagram-title">Component Dependency Graph</div>
+              <pre class="mermaid">graph TD; A-->B;</pre>
+              <div class="diagram-caption">Generated from Nx graph analysis</div>
+            </div> */
+    .diagram {
+      margin: 20px 0;
+      padding: 20px;
+      background: var(--bg-surface);
+      border-radius: 4px;
+      text-align: center;
+    }
+    .diagram-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-accent);
+      margin-bottom: 12px;
+      text-align: left;
+    }
+    .diagram-caption {
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+      margin-top: 8px;
+      font-style: italic;
+      text-align: left;
+    }
+    .diagram pre.mermaid {
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      text-align: center;
+    }
+    .diagram .mermaid svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* ═══ PRINT STYLES ═══ */
+    @media print {
+      body { max-width: 100%; padding: 24px; font-size: 12px; }
+      .report-header { page-break-after: avoid; }
+      .section { page-break-inside: avoid; }
+      .stat-strip { page-break-inside: avoid; }
+      pre { white-space: pre-wrap; font-size: 10px; }
+      .tag { border: 0.5px solid currentColor; }
+      a { color: var(--fg-primary); text-decoration: none; }
+    }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 640px) {
+      body { padding: 24px 16px 48px; }
+      .stat-strip { gap: 16px; }
+      .stat-strip .stat .val { font-size: 1.2rem; }
+      table { font-size: 0.7rem; }
+      th, td { padding: 4px 8px; }
+    }
+  </style>
+</head>
+<body>
+  {{CONTENT}}
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#e8e6f0',
+        primaryTextColor: '#1a1620',
+        primaryBorderColor: '#8a84a0',
+        lineColor: '#6a6480',
+        secondaryColor: '#f0eef4',
+        tertiaryColor: '#f8f7fa',
+        fontFamily: 'Outfit, sans-serif',
+        fontSize: '13px',
+      }
+    });
+  </script>
+</body>
+</html>

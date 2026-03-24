@@ -1,6 +1,10 @@
 ---
 name: angular-scan-tests
 description: "Inventory tests: unit, e2e, and smoke counts, coverage percentage, and gap analysis"
+references: []
+allowed-tools:
+  - codebase
+  - terminal
 ---
 
 ## Context

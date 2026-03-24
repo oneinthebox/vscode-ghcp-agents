@@ -33,7 +33,8 @@ const AGENT_PACKAGES: Record<string, {
       'angular-refactor', 'angular-docs-generate', 'angular-docs-repair',
       'angular-test-unit', 'angular-test-e2e', 'angular-test-lint',
       'angular-review', 'angular-docs-audit',
-      'hds', 'elevate',
+      'angular-hds-audit', 'angular-hds-apply', 'angular-hds-generate',
+      'angular-elevate-audit', 'angular-elevate-apply', 'angular-elevate-generate',
     ],
     instructions: [],
     semanticAdapters: ['typescript'],
@@ -57,7 +58,16 @@ const AGENT_PACKAGES: Record<string, {
   },
   orch: {
     agents: ['orch.agent.md', 'orch-preflight.agent.md'],
-    skills: ['present-deck', 'present-dashboard'],
+    skills: ['present-report', 'present-deck', 'present-dashboard'],
+    instructions: [],
+    semanticAdapters: [],
+  },
+  local: {
+    agents: ['local.agent.md'],
+    skills: [
+      'local-setup-env', 'local-setup-docker',
+      'local-setup-deps', 'local-diagnose',
+    ],
     instructions: [],
     semanticAdapters: [],
   },

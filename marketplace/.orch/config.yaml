@@ -3,25 +3,67 @@
 # Edit this file to customize ORCH behavior for your project.
 
 workflow:
+  # Maximum number of retries for failed operations before giving up.
   max_retries: 3
-  auto_mode: false
-  permission_level: allow    # allow | allow-with-permissions | auto
+
+  # Automation level controlling how much human approval is required.
+  # Valid values:
+  #   step-by-step  — show plan, wait for approval at every step
+  #   safe (default) — read-only skills run immediately, write skills show plan then execute
+  #   all            — execute everything end-to-end without asking
+  auto_mode: safe          # step-by-step | safe | all
+
+  # Permission level for tool access during execution.
+  # Valid values:
+  #   allow                — use only explicitly allowed tools per agent
+  #   allow-with-permissions — allowed tools plus user-approved extras
+  #   auto                 — agent selects tools automatically (least restrictive)
+  permission_level: allow  # allow | allow-with-permissions | auto
 
 preflight:
+  # Validate that all reference file paths in skill frontmatter resolve to real files.
   check_references: true
+
+  # Number of days after which a reference doc is considered stale and flagged.
   max_stale_days: 30
+
+  # Run a baseline build (ng build / nx build) before starting any migration or refactor.
   check_build_baseline: true
+
+  # Require a clean git working tree (no uncommitted changes) before write operations.
   check_git_clean: true
+
+  # Automatically re-fetch stale reference docs before skills that depend on them.
   auto_refresh_docs: true
 
 models:
+  # LLM model used by the master orchestrator for routing and pre-flight.
   coordinator: claude-sonnet-4
+
+  # LLM model used by planner agents for analysis, scanning, and plan generation.
   planner: claude-sonnet-4
+
+  # LLM model used by engineer agents for code generation, migration, and refactoring.
   engineer: claude-sonnet-4
+
+  # LLM model used by verifier agents for build/test verification and review.
   verifier: claude-sonnet-4
 
 presentation:
+  # Path to logo SVG. Default is a placeholder — replace with your org's logo
   logo_path: ./assets/placeholder-logo.svg
+
+  # Background color for cover slides in generated decks (CSS color value).
   cover_background: "#0a0e17"
+
+  # Path to custom HDS theme CSS file (e.g., .orch/references/internal/hds/theme.css). null = use defaults
   hds_theme: null
+
+  # Default output format for presentation skills.
+  # Valid values: html | pptx
   default_format: html
+
+audit:
+  log_retention_days: 90     # How long to keep .orch/runs/ data
+  verbosity: normal          # minimal | normal | verbose
+  export_format: json        # json | csv (for enterprise observability export)

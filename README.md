@@ -43,13 +43,14 @@ ORCH is built on a layered architecture where **audit is the foundation**, not a
 │  @springboot: planner → engineer → verifier (future)    │
 │  @fastapi: planner → engineer → verifier (future)       │
 ├─────────────────────────────────────────────────────────┤
-│              Domain Skills (granular)                    │
+│              Domain Skills (granular, incl. CI/CD)       │
 │  /angular-scan-*  /angular-generate-*  /angular-test-*  │
-│  /angular-migrate-*  /angular-review  /angular-refactor │
+│  /angular-migrate-*  /angular-ci-*  /angular-cd-*       │
 ├─────────────────────────────────────────────────────────┤
 │                   Agents                                 │
 │  @orch (orchestrator)  @docs (reference supply chain)   │
-│  @audit (observability)  + @orch-preflight              │
+│  @audit (observability)  @local (env setup)             │
+│  + @orch-preflight                                      │
 ├─────────────────────────────────────────────────────────┤
 │                   Core Layer                             │
 │  Reference Pipeline (/docs-fetch /docs-refresh)         │
@@ -73,8 +74,8 @@ ORCH is built on a layered architecture where **audit is the foundation**, not a
 | **Skills** | Invoked on demand via `/slash-commands`. Task-focused. | `/spring-rest-endpoint` scaffolds a full controller + service + tests |
 | **Agents** | Selected per session. Persona with tool access. | `@backend-springboot` reviews PRs with Spring Security expertise |
 | **Hooks** | Triggered at lifecycle events. Deterministic. | Block commits containing hardcoded secrets |
-| **Action Skills** | Generic workflows that work with any domain agent. | @angular + /generate = Angular component; @springboot + /generate = REST endpoint |
-| **Overrides** | Temporary team customizations with 90-day expiry. Escape hatch, not permanent. | Trading desk replaces component template, opens ORCH-142 to absorb into central |
+| **Action Skills** | Generic workflows that work with any domain agent. | @angular + /angular-generate-component = Angular component; @springboot + /springboot-generate-endpoint = REST endpoint |
+| **Config Cascade** | Three-level rules: global (`copilot-instructions.md`) → domain (skills) → runtime (`config.yaml`). | Global safety is non-overridable; domain skills can relax confirmation rules for specific tasks |
 | **Validation** | Post-operation checks. Automated quality gate. | Build pass, test pass, pattern adherence score |
 | **Reporting** | On-demand dashboards. Usage, tokens, compliance, drift. | Weekly audit report showing adoption, violations, model performance |
 | **Notifications** | Status bar (glanceable) + interrupt-only toasts for decisions/errors/quality. | Status bar shows `ORCH ✓ 67%` for bounded tasks; toast fires only when agent needs input, something broke, or quality degraded |
@@ -88,8 +89,16 @@ ORCH is built on a layered architecture where **audit is the foundation**, not a
 | `frontend-ts-angular` | TypeScript, Angular | **Implemented** | Component architecture, RxJS patterns, state management, testing standards |
 | `backend-java-springboot` | Java, Spring Boot | Future | REST API design, dependency injection, JPA patterns, security configuration |
 | `backend-python-fastapi` | Python, FastAPI | Future | Async patterns, Pydantic models, dependency injection, API documentation |
-| `operations-ci-glue` | CI/CD, GitHub Actions | Future | Pipeline authoring, build optimization, artifact management, quality gates |
-| `operations-cd-dps` | Deployment, Infrastructure | Future | Deployment strategies, environment promotion, rollback procedures, observability |
+
+> **CI/CD is domain-specific.** Each domain agent includes its own CI/CD skills (e.g., `/angular-ci-pipeline`, `/angular-cd-deploy`, `/springboot-ci-pipeline`, `/springboot-cd-deploy`). There are no separate @ci or @cd agents — how you build and deploy an Angular app differs fundamentally from Spring Boot or FastAPI.
+
+### Shared Agents
+
+| Agent | Purpose |
+|-------|---------|
+| `@docs` | Reference supply chain — fetch, convert, refresh, drift-check documentation |
+| `@audit` | Observability — usage, tokens, compliance, drift, benchmarking |
+| `@local` | Local environment setup — install dependencies, configure Docker, localstack, diagnose issues |
 
 ---
 
@@ -103,7 +112,8 @@ ORCH is built on a layered architecture where **audit is the foundation**, not a
 - Build VS Code status bar extension for glanceable progress + interrupt-only notifications
 
 ### Phase 1 — Expand
-- Build remaining 4 domain customization sets
+- Build remaining 2 domain customization sets (Spring Boot, FastAPI) — each with domain-specific CI/CD skills
+- Build @local shared agent for local environment setup
 - Add governance hooks (secrets scanning, prompt auditing, tool-use gating)
 - Add model benchmarking across skills
 - Iterate based on pilot feedback + audit data
@@ -130,7 +140,7 @@ ORCH is built on a layered architecture where **audit is the foundation**, not a
 8. **Token efficiency matters** — all reference material is markdown-first, aggressively curated for LLM consumption
 9. **Enterprise-grade governance** — every agent's tool access is explicitly declared, enforced, and audited
 10. **Notifications respect attention** — status bar for glanceable state, toasts only when user action is required. Never interrupt for something the user can see in chat
-11. **Overrides are temporary** — 90-day expiry, must have a tracking issue to absorb into central. Escape hatch, not a feature
+11. **Configuration cascades** — global rules (`copilot-instructions.md`) → domain rules (in skills) → runtime settings (`.orch/config.yaml`). Safety rules are non-overridable.
 12. **Skills are domain-specific and granular** — /angular-test-unit, not /test. Each skill does one thing for one domain.
 13. **Agents are role-based** — planner (why/what), engineer (how/where), verifier (checks). Coordinators own the loop.
 

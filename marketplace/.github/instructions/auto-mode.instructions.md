@@ -16,7 +16,7 @@ Unless the user explicitly specifies otherwise, use `auto=safe` mode:
    - Low-confidence decisions (ambiguous API mappings, unknown compatibility)
    - Security-sensitive areas (auth, credentials, environment config)
 4. **Never pause for**:
-   - Read-only operations (scan, proof, drift, review, status, explain, version-matrix)
+   - Read-only operations (angular-scan-*, docs-drift, angular-review, docs-status, explain, version-matrix)
    - High-confidence mechanical transforms (standalone, control-flow, inject)
    - File creation (scaffolding, test generation, doc conversion)
    - Verification steps (build, test, lint — just run and report)
@@ -24,21 +24,21 @@ Unless the user explicitly specifies otherwise, use `auto=safe` mode:
 ### Read-only skills — always run immediately
 
 These skills are read-only and have no risk. **Never** show a plan or ask for approval. Just run and return results:
-- `/proof` — codebase scan (all levels, one pass)
-- `/drift` — doc-code mismatch detection
-- `/review` — code review
-- `/packs status` — registry dashboard
+- `/angular-scan-*` — codebase scan (all levels, one pass)
+- `/docs-drift` — doc-code mismatch detection
+- `/angular-review` — code review
+- `/docs-status` — registry dashboard
 - `/version-matrix` — compatibility check
 - `/explain` — project walkthrough
 
 ### Write skills — plan approval required (auto=safe)
 
 These skills modify files. Show the plan, get one approval, then execute without pausing:
-- `/migrate` — code migration
-- `/generate` — scaffold new files
-- `/refactor` — restructure code
-- `/code-comment generate` — add/modify code docs
-- `/test` — write test files
+- `/angular-migrate-*` — code migration
+- `/angular-generate-*` — scaffold new files
+- `/angular-refactor` — restructure code
+- `/angular-docs-*` — add/modify code docs
+- `/angular-test-*` — write test files
 
 ### Mode levels
 
@@ -59,17 +59,17 @@ The user can override per-invocation:
 
 | Skill | `step-by-step` | `auto=safe` | `auto=all` |
 |-------|---------------|-------------|-----------|
-| `/proof` | Run full scan, report at end | **Run immediately, no approval** | Same |
-| `/drift` | Run full analysis, report | **Run immediately, no approval** | Same |
-| `/review` | Show each issue, ask to continue | **Run full review, show report** | Same |
-| `/packs status` | Show status | **Run immediately** | Same |
+| `/angular-scan-*` | Run full scan, report at end | **Run immediately, no approval** | Same |
+| `/docs-drift` | Run full analysis, report | **Run immediately, no approval** | Same |
+| `/angular-review` | Show each issue, ask to continue | **Run full review, show report** | Same |
+| `/docs-status` | Show status | **Run immediately** | Same |
 | `/version-matrix` | Show matrix | **Run immediately** | Same |
 | `/explain` | Show walkthrough | **Run immediately** | Same |
-| `/migrate` | Pause per phase | Pause for plan + failures only | Only stop on build/test failures |
-| `/generate` | Show template before creating | Show plan, then create files | Create files silently |
-| `/refactor` | Show each change before applying | Show plan, apply all, verify build | Apply all, skip verification |
-| `/code-comment generate` | Pause per file | Show plan, generate all | Generate all, best-effort |
-| `/test` | Show each test before writing | Show plan, write all tests, run them | Write all, skip run |
+| `/angular-migrate-*` | Pause per phase | Pause for plan + failures only | Only stop on build/test failures |
+| `/angular-generate-*` | Show template before creating | Show plan, then create files | Create files silently |
+| `/angular-refactor` | Show each change before applying | Show plan, apply all, verify build | Apply all, skip verification |
+| `/angular-docs-*` | Pause per file | Show plan, generate all | Generate all, best-effort |
+| `/angular-test-*` | Show each test before writing | Show plan, write all tests, run them | Write all, skip run |
 
 ### Post-execution summary
 

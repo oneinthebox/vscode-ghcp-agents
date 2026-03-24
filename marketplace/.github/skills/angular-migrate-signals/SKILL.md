@@ -85,6 +85,33 @@ Migrates Angular applications from RxJS-heavy and decorator-based patterns to th
 Observables retained (intentionally): {n} (HTTP, WebSocket, etc.)
 Build: {pass|fail}
 Tests: {pass}/{total} passing
+
+### State Management Change (Mermaid — single diagram showing transformation)
+Produce ONE diagram showing removed, changed, and retained in the same view:
+```mermaid
+graph LR
+    BS["BehaviorSubject\n✘ REMOVED"] -.->|replaced by| SIG["signal()\n★ NEW"]
+    SUB["subscribe()\n✘ REMOVED"] -.->|replaced by| EFF["effect()\n★ NEW"]
+    AP["async pipe\n✘ REMOVED"] -.->|replaced by| CALL["signal() call\n★ NEW"]
+    TU["takeUntil/destroy$\n✘ REMOVED"] -.->|not needed| AUTO["auto-cleanup\n★ BUILT-IN"]
+    OBS["HTTP Observable\nKEPT"] --> TS["toSignal()\n★ BRIDGE"]
+    WS["WebSocket Observable\nKEPT"] --> TS
+    SIG --> COMP["computed()\n★ NEW"]
+
+    style BS fill:#fee2e2,stroke:#ef4444,stroke-dasharray: 5 5
+    style SUB fill:#fee2e2,stroke:#ef4444,stroke-dasharray: 5 5
+    style AP fill:#fee2e2,stroke:#ef4444,stroke-dasharray: 5 5
+    style TU fill:#fee2e2,stroke:#ef4444,stroke-dasharray: 5 5
+    style SIG fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style EFF fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style CALL fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style COMP fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style TS fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style AUTO fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style OBS fill:#f8f7fa,stroke:#b5b0ab
+    style WS fill:#f8f7fa,stroke:#b5b0ab
+```
+Legend: Red dashed = removed. Blue solid = new. Gray = retained (HTTP/WebSocket stay as Observables).
 ```
 
 ## Validation

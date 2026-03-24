@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Migration Report — Angular 17 → 19 Upgrade</title>
+  <link rel="stylesheet" href="../deck-tokens.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--f-body);
+      color: var(--fg-primary);
+      background: var(--bg-page);
+      line-height: 1.65;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+
+    /* ── Header ── */
+    .report-header {
+      border-bottom: 2px solid var(--fg-primary);
+      padding-bottom: 20px;
+      margin-bottom: 40px;
+    }
+    .report-header .overline {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--fg-accent);
+      margin-bottom: 8px;
+    }
+    .report-header h1 {
+      font-family: var(--f-display);
+      font-size: 2rem;
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .report-header .meta {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      font-family: var(--f-mono);
+    }
+
+    /* ── Executive Summary ── */
+    .exec-summary {
+      background: var(--bg-surface);
+      padding: 24px;
+      margin-bottom: 40px;
+      border-left: 3px solid var(--fg-accent);
+    }
+    .exec-summary h2 {
+      font-family: var(--f-display);
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+    }
+    .exec-summary p {
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+      margin-bottom: 8px;
+    }
+
+    .stat-strip {
+      display: flex;
+      gap: 32px;
+      padding: 16px 0;
+      border-top: 1.5px solid var(--fg-primary);
+      border-bottom: 1.5px solid var(--fg-primary);
+      margin: 24px 0;
+    }
+    .stat-strip .stat .val {
+      font-family: var(--f-display);
+      font-size: 1.6rem;
+      color: var(--fg-primary);
+      line-height: 1;
+    }
+    .stat-strip .stat .lbl {
+      font-size: 0.65rem;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .stat-strip .stat.accent .val { color: var(--fg-accent); }
+    .stat-strip .stat.teal .val { color: var(--fg-teal); }
+    .stat-strip .stat.warn .val { color: oklch(0.55 0.15 85); }
+
+    /* ── TOC ── */
+    .toc {
+      margin-bottom: 40px;
+    }
+    .toc h2 {
+      font-family: var(--f-display);
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+    }
+    .toc ol {
+      padding-left: 1.5em;
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+    }
+    .toc li {
+      margin-bottom: 4px;
+    }
+    .toc a {
+      color: var(--fg-accent);
+      text-decoration: none;
+    }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Sections ── */
+    .section {
+      margin-bottom: 48px;
+    }
+    .section h2 {
+      font-family: var(--f-display);
+      font-size: 1.35rem;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .section .section-sub {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      margin-bottom: 16px;
+    }
+    .section h3 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-accent);
+      margin: 24px 0 8px;
+    }
+    .section p {
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      margin: 12px 0 20px;
+    }
+    th {
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--fg-muted);
+      padding: 6px 12px;
+      text-align: left;
+      border-bottom: 1.5px solid var(--fg-primary);
+    }
+    td {
+      padding: 6px 12px;
+      border-bottom: 0.5px solid var(--border-default);
+      color: var(--fg-primary);
+    }
+    tr:last-child td { border-bottom: 1.5px solid var(--fg-primary); }
+    td code {
+      font-family: var(--f-mono);
+      font-size: 0.85em;
+      color: var(--fg-accent);
+      background: var(--bg-surface);
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    /* ── Tags ── */
+    .tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+    .tag-ok { background: var(--teal-100); color: var(--teal-500); }
+    .tag-warn { background: oklch(0.94 0.04 85); color: oklch(0.45 0.12 85); }
+    .tag-bad { background: oklch(0.94 0.04 25); color: oklch(0.48 0.14 25); }
+    .tag-info { background: var(--brand-100); color: var(--brand-500); }
+
+    /* ── Diagrams ── */
+    .diagram {
+      margin: 20px 0;
+      padding: 20px;
+      background: var(--bg-surface);
+      border-radius: 4px;
+      text-align: center;
+    }
+    .diagram-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-accent);
+      margin-bottom: 12px;
+      text-align: left;
+    }
+    .diagram-caption {
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+      margin-top: 8px;
+      font-style: italic;
+      text-align: left;
+    }
+    .diagram pre.mermaid {
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      text-align: center;
+    }
+
+    /* ── Code ── */
+    pre {
+      background: var(--neutral-950);
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    pre code {
+      font-family: var(--f-mono);
+      font-size: 0.75rem;
+      color: var(--neutral-200);
+      line-height: 1.7;
+    }
+
+    /* ── Progress bar ── */
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+    }
+    .progress .bar {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-warm);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress .bar .fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+    .progress .bar .fill.green { background: var(--teal-500); }
+    .progress .bar .fill.amber { background: oklch(0.6 0.15 85); }
+    .progress .bar .fill.red { background: oklch(0.55 0.18 25); }
+    .progress .pct {
+      font-family: var(--f-mono);
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* ── Recommendation cards ── */
+    .rec-list { margin: 12px 0; }
+    .rec-item {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 0.5px solid var(--border-default);
+      font-size: 0.82rem;
+    }
+    .rec-item:last-child { border-bottom: none; }
+    .rec-item .num {
+      font-family: var(--f-display);
+      font-size: 1.1rem;
+      color: var(--fg-accent);
+    }
+    .rec-item .body { color: var(--fg-secondary); }
+    .rec-item strong { color: var(--fg-primary); }
+
+    /* ── Footer ── */
+    .report-footer {
+      border-top: 1.5px solid var(--fg-primary);
+      padding-top: 16px;
+      margin-top: 48px;
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+      font-family: var(--f-mono);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="report-header">
+    <div class="overline">Migration Report &mdash; generated by @angular-planner &rarr; @angular-engineer &rarr; @angular-verifier</div>
+    <h1>Angular 17 &rarr; 19 Upgrade</h1>
+    <div class="meta">Completed: 2026-03-24 &bull; Branch: migrate/angular-17-to-19 &bull; Duration: 4m 23s &bull; 8 phases</div>
+  </div>
+
+  <!-- EXECUTIVE SUMMARY -->
+  <div class="exec-summary">
+    <h2>Executive Summary</h2>
+    <p>Successfully upgraded the Trade Management Application from Angular 17.3.0 to Angular 19.1.0 across 8 automated phases. The migration included TypeScript 5.2 &rarr; 5.5, standalone component conversion (removing all NgModules), control flow syntax migration (*ngIf/*ngFor &rarr; @if/@for), and initial signals adoption. All 247 unit tests pass. Build succeeds with zero errors and 3 warnings (all non-blocking).</p>
+    <p>187 files were modified across 2 applications and 3 shared libraries. PrimeNG and AG Grid were updated to Angular 19-compatible versions. Adherence score: 96% (remaining 4% is BehaviorSubject-to-signal conversion deferred to follow-up).</p>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat accent"><div class="val">8/8</div><div class="lbl">Phases completed</div></div>
+    <div class="stat"><div class="val">187</div><div class="lbl">Files changed</div></div>
+    <div class="stat teal"><div class="val">247/247</div><div class="lbl">Tests passing</div></div>
+    <div class="stat"><div class="val">4m 23s</div><div class="lbl">Total duration</div></div>
+    <div class="stat warn"><div class="val">96%</div><div class="lbl">Adherence score</div></div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#before-after">Before vs After</a></li>
+      <li><a href="#timeline">Phase Timeline</a></li>
+      <li><a href="#phases">Phase Details</a></li>
+      <li><a href="#verification">Verification Results</a></li>
+      <li><a href="#compat">Compatibility Changes</a></li>
+      <li><a href="#risks">Risk Items</a></li>
+      <li><a href="#git">Git History</a></li>
+      <li><a href="#recs">Recommendations</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. BEFORE VS AFTER -->
+  <div class="section" id="before-after">
+    <h2>1. Before vs After</h2>
+    <div class="section-sub">Side-by-side comparison of the codebase before and after migration</div>
+
+    <h3>Framework &amp; Tooling</h3>
+    <table>
+      <thead><tr><th>Aspect</th><th>Before</th><th>After</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td>Angular</td><td>17.3.0</td><td>19.1.0</td><td><span class="tag tag-ok">+2 major</span></td></tr>
+        <tr><td>TypeScript</td><td>5.2.2</td><td>5.5.4</td><td><span class="tag tag-ok">+3 minor</span></td></tr>
+        <tr><td>Node.js (minimum)</td><td>18.13+</td><td>18.19+</td><td><span class="tag tag-info">patch bump</span></td></tr>
+        <tr><td>RxJS</td><td>7.8.1</td><td>7.8.1</td><td><span class="tag tag-info">unchanged</span></td></tr>
+        <tr><td>Zone.js</td><td>0.14.2</td><td>0.15.0</td><td><span class="tag tag-ok">+1 minor</span></td></tr>
+        <tr><td>Angular CLI</td><td>17.3.0</td><td>19.1.0</td><td><span class="tag tag-ok">+2 major</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Code Patterns</h3>
+    <table>
+      <thead><tr><th>Pattern</th><th>Before</th><th>After</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td>Component style</td><td>NgModule-based (23 modules)</td><td>100% standalone</td><td><span class="tag tag-ok">migrated</span></td></tr>
+        <tr><td>Template control flow</td><td><code>*ngIf</code>, <code>*ngFor</code>, <code>*ngSwitch</code></td><td><code>@if</code>, <code>@for</code>, <code>@switch</code></td><td><span class="tag tag-ok">migrated</span></td></tr>
+        <tr><td>Dependency injection</td><td>Constructor injection</td><td><code>inject()</code> function</td><td><span class="tag tag-ok">migrated</span></td></tr>
+        <tr><td>State management</td><td>BehaviorSubject everywhere</td><td>Signals (72%) + BehaviorSubject (28%)</td><td><span class="tag tag-warn">partial</span></td></tr>
+        <tr><td>Change detection</td><td>Default (most components)</td><td>OnPush (all components)</td><td><span class="tag tag-ok">migrated</span></td></tr>
+        <tr><td>Lazy loading</td><td><code>loadChildren</code> with NgModule</td><td><code>loadComponent</code> standalone</td><td><span class="tag tag-ok">migrated</span></td></tr>
+        <tr><td>Test framework</td><td>Jest 29.7</td><td>Jest 29.7</td><td><span class="tag tag-info">unchanged</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Pattern Count Comparison</h3>
+    <div class="diagram">
+      <div class="diagram-title">Before vs After &mdash; Pattern Counts</div>
+      <pre class="mermaid">
+graph LR
+    subgraph Before["Before (Angular 17)"]
+        B1["NgModules: 23"]
+        B2["*ngIf: 142"]
+        B3["*ngFor: 87"]
+        B4["constructor DI: 198"]
+        B5["BehaviorSubject: 34"]
+        B6["Default CD: 156"]
+    end
+    subgraph After["After (Angular 19)"]
+        A1["NgModules: 0"]
+        A2["@if: 142"]
+        A3["@for: 87"]
+        A4["inject: 198"]
+        A5["signal: 24 + BehaviorSubject: 10"]
+        A6["OnPush CD: 198"]
+    end
+
+    B1 -.->|removed| A1
+    B2 -.->|converted| A2
+    B3 -.->|converted| A3
+    B4 -.->|converted| A4
+    B5 -.->|partial| A5
+    B6 -.->|converted| A6
+
+    style Before fill:#fef3e2,stroke:#b8860b
+    style After fill:#e6f5f2,stroke:#1a7a6d
+      </pre>
+      <div class="diagram-caption">All structural directives and NgModules fully converted. 24 of 34 BehaviorSubjects migrated to signals; 10 deferred (complex stream operators).</div>
+    </div>
+  </div>
+
+  <!-- 2. PHASE TIMELINE -->
+  <div class="section" id="timeline">
+    <h2>2. Phase Timeline</h2>
+    <div class="section-sub">8 phases executed sequentially with git checkpoint after each</div>
+
+    <h3>Phase Summary</h3>
+    <table>
+      <thead><tr><th>#</th><th>Phase</th><th>Duration</th><th>Files</th><th>Build</th><th>Tests</th><th>Git Tag</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>TypeScript 5.2 &rarr; 5.5</td><td>18s</td><td>4</td><td><span class="tag tag-ok">pass</span></td><td><span class="tag tag-ok">247/247</span></td><td><code>migrate/phase-1-ts</code></td></tr>
+        <tr><td>2</td><td>Angular 17 &rarr; 18</td><td>32s</td><td>12</td><td><span class="tag tag-ok">pass</span></td><td><span class="tag tag-ok">247/247</span></td><td><code>migrate/phase-2-ng18</code></td></tr>
+        <tr><td>3</td><td>Angular 18 &rarr; 19</td><td>28s</td><td>14</td><td><span class="tag tag-ok">pass</span></td><td><span class="tag tag-ok">247/247</span></td><td><code>migrate/phase-3-ng19</code></td></tr>
+        <tr><td>4</td><td>Standalone migration</td><td>47s</td><td>68</td><td><span class="tag tag-ok">pass</span></td><td><span class="tag tag-ok">247/247</span></td><td><code>migrate/phase-4-standalone</code></td></tr>
+        <tr><td>5</td><td>Control flow (@if/@for)</td><td>38s</td><td>54</td><td><span class="tag tag-ok">pass</span></td><td><span class="tag tag-ok">247/247</span></td><td><code>migrate/phase-5-control-flow</code></td></tr>
+        <tr><td>6</td><td>Signals migration</td><td>52s</td><td>41</td><td><span class="tag tag-ok">pass</span></td><td><span class="tag tag-ok">247/247</span></td><td><code>migrate/phase-6-signals</code></td></tr>
+        <tr><td>7</td><td>PrimeNG/AG Grid compat</td><td>24s</td><td>8</td><td><span class="tag tag-ok">pass</span></td><td><span class="tag tag-ok">247/247</span></td><td><code>migrate/phase-7-libs</code></td></tr>
+        <tr><td>8</td><td>Final verification + cleanup</td><td>24s</td><td>11</td><td><span class="tag tag-ok">pass</span></td><td><span class="tag tag-ok">247/247</span></td><td><code>migrate/phase-8-final</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Phase Progression</h3>
+    <div class="diagram">
+      <div class="diagram-title">Migration Phase Timeline</div>
+      <pre class="mermaid">
+gantt
+    title Migration Phases (total: 4m 23s)
+    dateFormat ss
+    axisFormat %S s
+
+    section TypeScript
+    Phase 1 - TS 5.2 to 5.5        :done, p1, 00, 18s
+
+    section Angular Version
+    Phase 2 - Angular 17 to 18      :done, p2, after p1, 32s
+    Phase 3 - Angular 18 to 19      :done, p3, after p2, 28s
+
+    section Code Patterns
+    Phase 4 - Standalone migration   :done, p4, after p3, 47s
+    Phase 5 - Control flow           :done, p5, after p4, 38s
+    Phase 6 - Signals                :done, p6, after p5, 52s
+
+    section Libraries
+    Phase 7 - PrimeNG/AG Grid       :done, p7, after p6, 24s
+
+    section Verification
+    Phase 8 - Final cleanup          :done, p8, after p7, 24s
+      </pre>
+      <div class="diagram-caption">Phases 4 (standalone) and 6 (signals) were the longest due to the number of files affected. All phases completed with green builds.</div>
+    </div>
+  </div>
+
+  <!-- 3. PHASE DETAILS -->
+  <div class="section" id="phases">
+    <h2>3. Phase Details</h2>
+    <div class="section-sub">What changed in each phase, key files modified, and issues encountered</div>
+
+    <h3>Phase 1: TypeScript 5.2 &rarr; 5.5</h3>
+    <p>Updated <code>typescript</code> from 5.2.2 to 5.5.4. Updated <code>tsconfig.json</code> to enable <code>isolatedDeclarations</code> (new in TS 5.5). Fixed 2 type inference issues in generic service methods where TS 5.5 is stricter about inferred return types.</p>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td><code>package.json</code></td><td>typescript: "5.2.2" &rarr; "5.5.4"</td></tr>
+        <tr><td><code>tsconfig.base.json</code></td><td>Added <code>isolatedDeclarations: true</code></td></tr>
+        <tr><td><code>data-access/http-base.service.ts</code></td><td>Added explicit return type to generic <code>get&lt;T&gt;()</code> method</td></tr>
+        <tr><td><code>shared-models/api-response.model.ts</code></td><td>Fixed conditional type inference for paginated response</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Phase 2: Angular 17 &rarr; 18</h3>
+    <p>Ran <code>ng update @angular/core@18 @angular/cli@18</code>. Updated 12 framework packages. Angular 18 introduced stable signals API and improved SSR support. No breaking changes encountered &mdash; all 247 tests passed immediately after update.</p>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td><code>package.json</code></td><td>12 @angular/* packages: 17.3.x &rarr; 18.2.0</td></tr>
+        <tr><td><code>angular.json</code></td><td>Updated builder versions, enabled new build cache option</td></tr>
+        <tr><td><code>package-lock.json</code></td><td>Dependency tree resolution (peer deps updated)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Phase 3: Angular 18 &rarr; 19</h3>
+    <p>Ran <code>ng update @angular/core@19 @angular/cli@19</code>. Angular 19 makes standalone the default (no <code>standalone: true</code> needed), introduces <code>resource()</code> API, and stabilizes <code>input()</code>/<code>output()</code>/<code>model()</code> signal APIs. Updated zone.js to 0.15.0 for compatibility.</p>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td><code>package.json</code></td><td>12 @angular/* packages: 18.2.0 &rarr; 19.1.0, zone.js: 0.14.2 &rarr; 0.15.0</td></tr>
+        <tr><td><code>angular.json</code></td><td>Updated to application builder (esbuild-based), removed deprecated Webpack options</td></tr>
+        <tr><td><code>main.ts</code></td><td>Updated <code>bootstrapApplication</code> to use new provider syntax</td></tr>
+        <tr><td><code>app.config.ts</code></td><td>Switched to <code>provideRouter</code> with <code>withComponentInputBinding()</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Phase 4: Standalone Migration</h3>
+    <p>Converted all 23 NgModules to standalone components using <code>ts-morph</code> AST transformation. Each component received its own imports array. All <code>@NgModule</code> declarations were removed. Routing modules replaced with standalone route configs using <code>loadComponent</code>. This was the most file-intensive phase (68 files).</p>
+    <table>
+      <thead><tr><th>File Pattern</th><th>Count</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td><code>*.module.ts</code> (deleted)</td><td>23</td><td>All NgModule files removed after extracting imports to components</td></tr>
+        <tr><td><code>*.component.ts</code></td><td>38</td><td>Added <code>imports: [...]</code> array, moved deps from module</td></tr>
+        <tr><td><code>*-routing.module.ts</code> (deleted)</td><td>7</td><td>Converted to <code>*.routes.ts</code> with <code>loadComponent</code></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Issue encountered:</strong> 3 components had circular imports through their NgModule. Resolved by extracting shared models to a separate file and using <code>import type</code> for interfaces.</p>
+
+    <h3>Phase 5: Control Flow (@if/@for)</h3>
+    <p>Migrated all structural directive syntax to Angular's built-in control flow. Ran the Angular schematic <code>ng generate @angular/core:control-flow</code> which handled 89% of conversions automatically. Remaining 11% (14 templates) required manual adjustment for complex <code>*ngIf...else</code> patterns with multiple template refs.</p>
+    <table>
+      <thead><tr><th>Conversion</th><th>Count</th><th>Automated</th></tr></thead>
+      <tbody>
+        <tr><td><code>*ngIf</code> &rarr; <code>@if</code></td><td>142</td><td><span class="tag tag-ok">128 auto</span> + 14 manual</td></tr>
+        <tr><td><code>*ngFor</code> &rarr; <code>@for</code></td><td>87</td><td><span class="tag tag-ok">87 auto</span></td></tr>
+        <tr><td><code>*ngSwitch</code> &rarr; <code>@switch</code></td><td>12</td><td><span class="tag tag-ok">12 auto</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Issue encountered:</strong> <code>@for</code> requires a <code>track</code> expression. Added <code>track item.id</code> for all entity loops. For 5 loops without stable IDs, used <code>track $index</code> with a code comment noting this should be improved.</p>
+
+    <h3>Phase 6: Signals Migration</h3>
+    <p>Converted component state from BehaviorSubject to Angular Signals where applicable. Used <code>signal()</code> for local state, <code>computed()</code> for derived state, and <code>effect()</code> for side effects. Converted <code>@Input()</code> to <code>input()</code> and <code>@Output()</code> to <code>output()</code> where straightforward.</p>
+    <table>
+      <thead><tr><th>Conversion</th><th>Count</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>BehaviorSubject &rarr; <code>signal()</code></td><td>24 of 34</td><td><span class="tag tag-ok">converted</span></td></tr>
+        <tr><td>Derived observables &rarr; <code>computed()</code></td><td>18</td><td><span class="tag tag-ok">converted</span></td></tr>
+        <tr><td><code>@Input()</code> &rarr; <code>input()</code></td><td>44 of 88</td><td><span class="tag tag-warn">50% done</span></td></tr>
+        <tr><td><code>@Output()</code> &rarr; <code>output()</code></td><td>22 of 41</td><td><span class="tag tag-warn">54% done</span></td></tr>
+        <tr><td>BehaviorSubject (deferred)</td><td>10</td><td><span class="tag tag-warn">complex stream ops</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Deferred:</strong> 10 BehaviorSubjects in the trading-app services use complex RxJS operators (switchMap, debounceTime, combineLatest with error recovery). These require careful manual refactoring and were left as-is with a <code>// TODO: migrate to signal</code> comment.</p>
+
+    <h3>Phase 7: PrimeNG / AG Grid Compatibility</h3>
+    <p>Updated third-party UI libraries to versions compatible with Angular 19. AG Grid 32.3.0 &rarr; 33.1.0 (new module-based API). PrimeNG 17.x &rarr; 18.0.0 (standalone components, new theming API).</p>
+    <table>
+      <thead><tr><th>Library</th><th>Before</th><th>After</th><th>Breaking changes</th></tr></thead>
+      <tbody>
+        <tr><td>ag-grid-angular</td><td>32.3.0</td><td>33.1.0</td><td>New <code>ModuleRegistry</code> API; replaced <code>agGridModule</code> imports with individual feature modules</td></tr>
+        <tr><td>ag-grid-enterprise</td><td>32.3.0</td><td>33.1.0</td><td>License key format changed; updated in <code>environment.ts</code></td></tr>
+        <tr><td>primeng</td><td>17.18.0</td><td>18.0.0</td><td>Standalone components (no more PrimeNG modules), new <code>providePrimeNG()</code> config</td></tr>
+        <tr><td>@yourorg/elevate-common/grid</td><td>2.6.0</td><td>2.8.0</td><td>Updated AG Grid peer dependency; no API changes</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Issue encountered:</strong> AG Grid 33 removed <code>gridApi.setRowData()</code>. Replaced with reactive <code>[rowData]</code> input binding in 5 grid components.</p>
+
+    <h3>Phase 8: Final Verification + Cleanup</h3>
+    <p>Removed dead code, unused imports, and deprecated patterns. Ran full lint, build, and test suite. Fixed 3 lint warnings (unused imports left behind by module removal). Verified bundle size did not regress.</p>
+    <table>
+      <thead><tr><th>Cleanup task</th><th>Count</th></tr></thead>
+      <tbody>
+        <tr><td>Unused imports removed</td><td>47</td></tr>
+        <tr><td>Dead NgModule references cleaned</td><td>23</td></tr>
+        <tr><td>Deprecated API usage removed</td><td>6</td></tr>
+        <tr><td><code>standalone: true</code> removed (default in v19)</td><td>198</td></tr>
+        <tr><td>Lint warnings fixed</td><td>3</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. VERIFICATION RESULTS -->
+  <div class="section" id="verification">
+    <h2>4. Verification Results</h2>
+    <div class="section-sub">Build, test, lint, and adherence score breakdown</div>
+
+    <h3>Build</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 100px;">Build status</span>
+      <div class="bar"><div class="fill green" style="width: 100%;"></div></div>
+      <span class="pct">pass</span>
+    </div>
+    <table>
+      <thead><tr><th>App</th><th>Build time</th><th>Bundle (initial)</th><th>Bundle (lazy)</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>portfolio-app</td><td>2.8s</td><td>318 KB (-24 KB)</td><td>172 KB (-15 KB)</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td>trading-app</td><td>2.4s</td><td>276 KB (-22 KB)</td><td>143 KB (-13 KB)</td><td><span class="tag tag-ok">pass</span></td></tr>
+      </tbody>
+    </table>
+    <p>Bundle sizes decreased ~7% due to standalone tree-shaking and the new esbuild-based application builder in Angular 19.</p>
+
+    <h3>Tests</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 100px;">Test suite</span>
+      <div class="bar"><div class="fill green" style="width: 100%;"></div></div>
+      <span class="pct">247/247</span>
+    </div>
+    <p>All 247 unit tests pass. No test modifications were needed &mdash; the migration preserved all public APIs and component contracts. Test execution time improved from 38s to 34s due to standalone component test setup being faster than TestBed with NgModules.</p>
+
+    <h3>Lint</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 100px;">Lint score</span>
+      <div class="bar"><div class="fill green" style="width: 97%;"></div></div>
+      <span class="pct">97%</span>
+    </div>
+    <p>3 warnings remaining: 2 unused type imports (safe to remove), 1 deprecated RxJS operator usage in a deferred BehaviorSubject migration. Zero errors.</p>
+
+    <h3>Adherence Score Breakdown</h3>
+    <table>
+      <thead><tr><th>Criteria</th><th>Weight</th><th>Score</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Build passes (zero errors)</td><td>20%</td><td>20/20</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td>All tests pass</td><td>20%</td><td>20/20</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td>Standalone adoption (100%)</td><td>15%</td><td>15/15</td><td><span class="tag tag-ok">100%</span></td></tr>
+        <tr><td>Control flow migration</td><td>15%</td><td>15/15</td><td><span class="tag tag-ok">100%</span></td></tr>
+        <tr><td>Signals adoption</td><td>15%</td><td>11/15</td><td><span class="tag tag-warn">72%</span></td></tr>
+        <tr><td>inject() adoption</td><td>10%</td><td>10/10</td><td><span class="tag tag-ok">100%</span></td></tr>
+        <tr><td>Lint clean</td><td>5%</td><td>5/5</td><td><span class="tag tag-ok">97%</span></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Total: 96/100.</strong> The 4-point gap is from incomplete signals adoption (10 deferred BehaviorSubjects requiring manual refactoring of complex RxJS streams).</p>
+  </div>
+
+  <!-- 5. COMPATIBILITY CHANGES -->
+  <div class="section" id="compat">
+    <h2>5. Compatibility Changes</h2>
+    <div class="section-sub">Library versions before and after migration</div>
+
+    <h3>Full Dependency Matrix</h3>
+    <table>
+      <thead><tr><th>Package</th><th>Before</th><th>After</th><th>Change type</th></tr></thead>
+      <tbody>
+        <tr><td><code>@angular/core</code></td><td>17.3.0</td><td>19.1.0</td><td><span class="tag tag-info">major</span></td></tr>
+        <tr><td><code>@angular/cli</code></td><td>17.3.0</td><td>19.1.0</td><td><span class="tag tag-info">major</span></td></tr>
+        <tr><td><code>@angular/router</code></td><td>17.3.0</td><td>19.1.0</td><td><span class="tag tag-info">major</span></td></tr>
+        <tr><td><code>@angular/forms</code></td><td>17.3.0</td><td>19.1.0</td><td><span class="tag tag-info">major</span></td></tr>
+        <tr><td><code>@angular/cdk</code></td><td>17.3.0</td><td>19.1.0</td><td><span class="tag tag-info">major</span></td></tr>
+        <tr><td><code>typescript</code></td><td>5.2.2</td><td>5.5.4</td><td><span class="tag tag-info">minor</span></td></tr>
+        <tr><td><code>zone.js</code></td><td>0.14.2</td><td>0.15.0</td><td><span class="tag tag-info">minor</span></td></tr>
+        <tr><td><code>rxjs</code></td><td>7.8.1</td><td>7.8.1</td><td><span class="tag tag-ok">unchanged</span></td></tr>
+        <tr><td><code>ag-grid-angular</code></td><td>32.3.0</td><td>33.1.0</td><td><span class="tag tag-info">major</span></td></tr>
+        <tr><td><code>ag-grid-enterprise</code></td><td>32.3.0</td><td>33.1.0</td><td><span class="tag tag-info">major</span></td></tr>
+        <tr><td><code>primeng</code></td><td>17.18.0</td><td>18.0.0</td><td><span class="tag tag-info">major</span></td></tr>
+        <tr><td><code>@yourorg/elevate</code></td><td>4.1.0</td><td>4.2.0</td><td><span class="tag tag-ok">minor</span></td></tr>
+        <tr><td><code>@yourorg/elevate-common</code></td><td>2.6.0</td><td>2.8.0</td><td><span class="tag tag-ok">minor</span></td></tr>
+        <tr><td><code>@yourorg/hds</code></td><td>2.3.0</td><td>2.3.0</td><td><span class="tag tag-ok">unchanged</span></td></tr>
+        <tr><td><code>jest</code></td><td>29.7.0</td><td>29.7.0</td><td><span class="tag tag-ok">unchanged</span></td></tr>
+        <tr><td><code>jest-preset-angular</code></td><td>14.0.0</td><td>14.4.0</td><td><span class="tag tag-ok">patch</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Node.js Compatibility</h3>
+    <p>Angular 19 requires Node.js 18.19+ or 20.11+. The current CI uses Node 20.11.0, which is compatible. Local development environments should verify their Node version with <code>node -v</code>.</p>
+  </div>
+
+  <!-- 6. RISK ITEMS -->
+  <div class="section" id="risks">
+    <h2>6. Risk Items</h2>
+    <div class="section-sub">Manual fixes needed, deprecated APIs, known issues</div>
+
+    <h3>Open Issues</h3>
+    <table>
+      <thead><tr><th>Issue</th><th>Severity</th><th>Impact</th><th>Recommendation</th></tr></thead>
+      <tbody>
+        <tr><td>10 BehaviorSubjects not migrated to signals</td><td><span class="tag tag-warn">medium</span></td><td>Trading-app services still use legacy pattern. Functional but not idiomatic Angular 19.</td><td>Schedule follow-up migration sprint. Use <code>toSignal()</code> as intermediate bridge.</td></tr>
+        <tr><td>5 <code>@for</code> loops using <code>track $index</code></td><td><span class="tag tag-warn">medium</span></td><td>Performance risk if list items are reordered or filtered. Angular cannot efficiently diff without stable keys.</td><td>Add unique ID to data models or use a computed key expression.</td></tr>
+        <tr><td>AG Grid <code>getRowData()</code> deprecated</td><td><span class="tag tag-warn">low</span></td><td>2 utility functions still call <code>gridApi.getRowData()</code>. Deprecated in v33, will be removed in v34.</td><td>Replace with <code>gridApi.getRenderedNodes()</code> or reactive row data binding.</td></tr>
+        <tr><td>PrimeNG theme migration incomplete</td><td><span class="tag tag-warn">low</span></td><td>PrimeNG 18 uses a new theming API (<code>providePrimeNG()</code>). HDS theme adapter not yet updated.</td><td>Update <code>@yourorg/elevate-common/primeng-theme</code> to v18 adapter.</td></tr>
+        <tr><td>44 remaining <code>@Input()</code> decorators</td><td><span class="tag tag-info">info</span></td><td>Functional but not using new <code>input()</code> signal API. No runtime impact.</td><td>Migrate incrementally. Low priority since decorator syntax is still supported.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Deprecated APIs Still in Use</h3>
+    <table>
+      <thead><tr><th>API</th><th>Deprecated since</th><th>Replacement</th><th>Occurrences</th></tr></thead>
+      <tbody>
+        <tr><td><code>ComponentFixture.detectChanges()</code> in some tests</td><td>Angular 19 (soft)</td><td><code>fixture.autoDetectChanges()</code></td><td>12</td></tr>
+        <tr><td><code>async()</code> test helper</td><td>Angular 17</td><td><code>waitForAsync()</code></td><td>0 (already migrated)</td></tr>
+        <tr><td><code>RouterTestingModule</code></td><td>Angular 18</td><td><code>provideRouter()</code> in test</td><td>8</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 7. GIT HISTORY -->
+  <div class="section" id="git">
+    <h2>7. Git History</h2>
+    <div class="section-sub">Commits created during migration</div>
+
+    <h3>Branch Info</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Branch name</td><td><code>migrate/angular-17-to-19</code></td></tr>
+        <tr><td>Base branch</td><td><code>develop</code></td></tr>
+        <tr><td>Total commits</td><td>8</td></tr>
+        <tr><td>Total files changed</td><td>187</td></tr>
+        <tr><td>Lines added</td><td>2,847</td></tr>
+        <tr><td>Lines removed</td><td>3,412</td></tr>
+        <tr><td>Net change</td><td>-565 lines (code reduction from removing NgModules)</td></tr>
+        <tr><td>PR-ready</td><td><span class="tag tag-ok">yes</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Commit Log</h3>
+    <pre><code>f8a1b2c  chore: phase 8 — final verification, cleanup unused imports    (24s ago)
+d3e4f5a  feat: phase 7 — update AG Grid 33.1.0, PrimeNG 18.0.0         (48s ago)
+b6c7d8e  refactor: phase 6 — migrate 24 BehaviorSubjects to signals    (1m ago)
+a9b0c1d  refactor: phase 5 — convert *ngIf/*ngFor to @if/@for           (2m ago)
+e2f3a4b  refactor: phase 4 — standalone migration, remove 23 NgModules  (2m ago)
+c5d6e7f  chore: phase 3 — upgrade Angular 18 → 19                       (3m ago)
+a8b9c0d  chore: phase 2 — upgrade Angular 17 → 18                       (3m ago)
+f1a2b3c  chore: phase 1 — upgrade TypeScript 5.2 → 5.5                  (4m ago)</code></pre>
+
+    <h3>Git Tags Created</h3>
+    <pre><code>migrate/phase-1-ts           → f1a2b3c  (TypeScript 5.5)
+migrate/phase-2-ng18         → a8b9c0d  (Angular 18)
+migrate/phase-3-ng19         → c5d6e7f  (Angular 19)
+migrate/phase-4-standalone   → e2f3a4b  (Standalone)
+migrate/phase-5-control-flow → a9b0c1d  (Control flow)
+migrate/phase-6-signals      → b6c7d8e  (Signals)
+migrate/phase-7-libs         → d3e4f5a  (AG Grid + PrimeNG)
+migrate/phase-8-final        → f8a1b2c  (Final)</code></pre>
+    <p>Each tag serves as a rollback checkpoint. If any downstream issue is found, the migration can be partially reverted to any phase boundary.</p>
+  </div>
+
+  <!-- 8. RECOMMENDATIONS -->
+  <div class="section" id="recs">
+    <h2>8. Recommendations</h2>
+
+    <h3>Immediate (This Week)</h3>
+    <div class="rec-list">
+      <div class="rec-item">
+        <div class="num">1</div>
+        <div class="body"><strong>Run E2E tests before merging.</strong> All unit tests pass, but E2E tests (if they exist in a separate repo or CI pipeline) should be run against the <code>migrate/angular-17-to-19</code> branch to verify no visual or interaction regressions.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">2</div>
+        <div class="body"><strong>Merge to develop and monitor.</strong> The branch is PR-ready. After merge, monitor error tracking (Sentry/Datadog) for 48 hours to catch any runtime issues not covered by unit tests.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">3</div>
+        <div class="body"><strong>Update CI Node.js version.</strong> Ensure CI runners use Node.js 20.11+ (Angular 19 minimum). Check <code>.github/workflows/*.yml</code> and <code>Dockerfile</code> base images.</div>
+      </div>
+    </div>
+
+    <h3>Short-term (Next Sprint)</h3>
+    <div class="rec-list">
+      <div class="rec-item">
+        <div class="num">4</div>
+        <div class="body"><strong>Complete signals migration.</strong> Migrate the remaining 10 BehaviorSubjects in trading-app services. Start with <code>PriceStreamService</code> (simplest stream) and work toward <code>TradingService</code> (most complex). Use <code>toSignal()</code> as a bridge during transition.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">5</div>
+        <div class="body"><strong>Fix <code>track $index</code> loops.</strong> Replace the 5 <code>@for</code> loops using <code>track $index</code> with stable ID-based tracking. Add <code>id</code> field to the relevant data models if missing.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">6</div>
+        <div class="body"><strong>Update PrimeNG theme adapter.</strong> The <code>@yourorg/elevate-common/primeng-theme</code> package needs a v18 adapter for PrimeNG's new <code>providePrimeNG()</code> theming API. Coordinate with the elevate team.</div>
+      </div>
+    </div>
+
+    <h3>Medium-term (Next Month)</h3>
+    <div class="rec-list">
+      <div class="rec-item">
+        <div class="num">7</div>
+        <div class="body"><strong>Migrate remaining <code>@Input()</code>/<code>@Output()</code> to signal-based.</strong> 44 inputs and 19 outputs still use decorator syntax. Low priority since decorators are still supported, but signal inputs enable better change detection and type safety.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">8</div>
+        <div class="body"><strong>Replace <code>RouterTestingModule</code> in tests.</strong> 8 test files still import <code>RouterTestingModule</code> (deprecated in Angular 18). Replace with <code>provideRouter([])</code> in test providers.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">9</div>
+        <div class="body"><strong>Explore zoneless change detection.</strong> Angular 19 offers experimental zoneless mode. Once signals migration is complete, evaluate removing zone.js for further performance gains (~15% reduction in initial bundle).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="report-footer">
+    Generated by ORCH &bull; @angular-planner &rarr; @angular-engineer &rarr; @angular-verifier &bull; 2026-03-24 &bull; 8 sections, ~22K tokens &bull; migrate/angular-17-to-19 &bull; PR-ready
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#e8e6f0',
+        primaryTextColor: '#1a1620',
+        primaryBorderColor: '#8a84a0',
+        lineColor: '#6a6480',
+        secondaryColor: '#f0eef4',
+        tertiaryColor: '#f8f7fa',
+        fontFamily: 'Outfit, sans-serif',
+        fontSize: '13px',
+      }
+    });
+  </script>
+</body>
+</html>

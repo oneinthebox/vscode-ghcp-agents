@@ -90,6 +90,30 @@ Tool: ts-morph (type-aware, formatting-preserving)
 - `migrate/checkpoint-standalone-trade`
 - `migrate/checkpoint-standalone-portfolio`
 - `migrate/checkpoint-standalone-app`
+
+### Architecture Change (Mermaid — single diagram showing transformation)
+Produce ONE diagram showing removed, changed, and new in the same view:
+```mermaid
+graph TD
+    AM["AppModule\n✘ REMOVED"] -.->|replaced by| BA["bootstrapApplication()\n★ NEW"]
+    SM["SharedModule\n✘ REMOVED"] -.->|components freed| SC["{n} standalone shared\n★ CHANGED"]
+    TM["TradeModule\n✘ REMOVED"] -.->|lazy route| TC["{n} standalone trade\n★ CHANGED"]
+    PM["PortfolioModule\n✘ REMOVED"] -.->|lazy route| PC["{n} standalone portfolio\n★ CHANGED"]
+    BA --> R["AppRoutes"]
+    R -->|lazy| TC
+    R -->|lazy| PC
+    R --> SC
+
+    style AM fill:#fee2e2,stroke:#ef4444,stroke-dasharray: 5 5
+    style SM fill:#fee2e2,stroke:#ef4444,stroke-dasharray: 5 5
+    style TM fill:#fee2e2,stroke:#ef4444,stroke-dasharray: 5 5
+    style PM fill:#fee2e2,stroke:#ef4444,stroke-dasharray: 5 5
+    style BA fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style SC fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style TC fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style PC fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+```
+Legend: Red dashed = removed. Blue solid = new/changed. Arrows show what replaced what.
 ```
 
 ## Validation

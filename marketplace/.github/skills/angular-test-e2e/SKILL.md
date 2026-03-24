@@ -3,6 +3,10 @@ name: angular-test-e2e
 description: "Generate Playwright end-to-end tests for Angular apps. Page object pattern, data-testid selectors, fixtures for auth and test data. Produces tests that run headless or headed."
 references:
   - references/angular/v19/playwright-guide.md
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context

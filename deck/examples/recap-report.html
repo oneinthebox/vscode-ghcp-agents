@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Recap — Trade Management App</title>
+  <link rel="stylesheet" href="../deck-tokens.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Outfit:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--f-body);
+      color: var(--fg-primary);
+      background: var(--bg-page);
+      line-height: 1.65;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+
+    /* ── Header ── */
+    .report-header {
+      border-bottom: 2px solid var(--fg-primary);
+      padding-bottom: 20px;
+      margin-bottom: 40px;
+    }
+    .report-header .overline {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--fg-accent);
+      margin-bottom: 8px;
+    }
+    .report-header h1 {
+      font-family: var(--f-display);
+      font-size: 2rem;
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .report-header .meta {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      font-family: var(--f-mono);
+    }
+
+    /* ── Executive Summary ── */
+    .exec-summary {
+      background: var(--bg-surface);
+      padding: 24px;
+      margin-bottom: 40px;
+      border-left: 3px solid var(--fg-accent);
+    }
+    .exec-summary h2 {
+      font-family: var(--f-display);
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+    }
+    .exec-summary p {
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+      margin-bottom: 8px;
+    }
+
+    .stat-strip {
+      display: flex;
+      gap: 32px;
+      padding: 16px 0;
+      border-top: 1.5px solid var(--fg-primary);
+      border-bottom: 1.5px solid var(--fg-primary);
+      margin: 24px 0;
+    }
+    .stat-strip .stat .val {
+      font-family: var(--f-display);
+      font-size: 1.6rem;
+      color: var(--fg-primary);
+      line-height: 1;
+    }
+    .stat-strip .stat .lbl {
+      font-size: 0.65rem;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .stat-strip .stat.accent .val { color: var(--fg-accent); }
+    .stat-strip .stat.teal .val { color: var(--fg-teal); }
+    .stat-strip .stat.warn .val { color: oklch(0.55 0.15 85); }
+
+    /* ── TOC ── */
+    .toc {
+      margin-bottom: 40px;
+    }
+    .toc h2 {
+      font-family: var(--f-display);
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+    }
+    .toc ol {
+      padding-left: 1.5em;
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+    }
+    .toc li {
+      margin-bottom: 4px;
+    }
+    .toc a {
+      color: var(--fg-accent);
+      text-decoration: none;
+    }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ── Sections ── */
+    .section {
+      margin-bottom: 48px;
+    }
+    .section h2 {
+      font-family: var(--f-display);
+      font-size: 1.35rem;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .section .section-sub {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      margin-bottom: 16px;
+    }
+    .section h3 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-accent);
+      margin: 24px 0 8px;
+    }
+    .section p {
+      font-size: 0.85rem;
+      color: var(--fg-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      margin: 12px 0 20px;
+    }
+    th {
+      font-weight: 600;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--fg-muted);
+      padding: 6px 12px;
+      text-align: left;
+      border-bottom: 1.5px solid var(--fg-primary);
+    }
+    td {
+      padding: 6px 12px;
+      border-bottom: 0.5px solid var(--border-default);
+      color: var(--fg-primary);
+    }
+    tr:last-child td { border-bottom: 1.5px solid var(--fg-primary); }
+    td code {
+      font-family: var(--f-mono);
+      font-size: 0.85em;
+      color: var(--fg-accent);
+      background: var(--bg-surface);
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    /* ── Tags ── */
+    .tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+    .tag-ok { background: var(--teal-100); color: var(--teal-500); }
+    .tag-warn { background: oklch(0.94 0.04 85); color: oklch(0.45 0.12 85); }
+    .tag-bad { background: oklch(0.94 0.04 25); color: oklch(0.48 0.14 25); }
+    .tag-info { background: var(--brand-100); color: var(--brand-500); }
+
+    /* ── Diagrams ── */
+    .diagram {
+      margin: 20px 0;
+      padding: 20px;
+      background: var(--bg-surface);
+      border-radius: 4px;
+      text-align: center;
+    }
+    .diagram-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-accent);
+      margin-bottom: 12px;
+      text-align: left;
+    }
+    .diagram-caption {
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+      margin-top: 8px;
+      font-style: italic;
+      text-align: left;
+    }
+    .diagram pre.mermaid {
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      text-align: center;
+    }
+
+    /* ── Code ── */
+    pre {
+      background: var(--neutral-950);
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    pre code {
+      font-family: var(--f-mono);
+      font-size: 0.75rem;
+      color: var(--neutral-200);
+      line-height: 1.7;
+    }
+
+    /* ── Progress bar ── */
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+    }
+    .progress .bar {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-warm);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress .bar .fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+    .progress .bar .fill.green { background: var(--teal-500); }
+    .progress .bar .fill.amber { background: oklch(0.6 0.15 85); }
+    .progress .bar .fill.red { background: oklch(0.55 0.18 25); }
+    .progress .pct {
+      font-family: var(--f-mono);
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* ── Recommendation cards ── */
+    .rec-list { margin: 12px 0; }
+    .rec-item {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 0.5px solid var(--border-default);
+      font-size: 0.82rem;
+    }
+    .rec-item:last-child { border-bottom: none; }
+    .rec-item .num {
+      font-family: var(--f-display);
+      font-size: 1.1rem;
+      color: var(--fg-accent);
+    }
+    .rec-item .body { color: var(--fg-secondary); }
+    .rec-item strong { color: var(--fg-primary); }
+
+    /* ── Footer ── */
+    .report-footer {
+      border-top: 1.5px solid var(--fg-primary);
+      padding-top: 16px;
+      margin-top: 48px;
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+      font-family: var(--f-mono);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="report-header">
+    <div class="overline">Project Recap &mdash; generated by @angular /angular-scan-*</div>
+    <h1>Trade Management Application</h1>
+    <div class="meta">Scanned: 2026-03-24 &bull; Branch: develop &bull; Angular 18.2.0 &bull; Nx 19.8.0</div>
+  </div>
+
+  <!-- EXECUTIVE SUMMARY -->
+  <div class="exec-summary">
+    <h2>Executive Summary</h2>
+    <p>Nx monorepo with 2 applications (portfolio-app, trading-app) and 3 shared libraries. Angular 18.2.0 with partial standalone adoption. Test coverage is adequate for unit tests but missing e2e. Several dependencies are outdated with known upgrade paths. CI pipeline exists but lacks caching optimization.</p>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat accent"><div class="val">198</div><div class="lbl">Components</div></div>
+    <div class="stat"><div class="val">342</div><div class="lbl">TypeScript files</div></div>
+    <div class="stat teal"><div class="val">73%</div><div class="lbl">Test coverage</div></div>
+    <div class="stat warn"><div class="val">14</div><div class="lbl">Outdated deps</div></div>
+    <div class="stat"><div class="val">2</div><div class="lbl">Apps</div></div>
+    <div class="stat"><div class="val">3</div><div class="lbl">Shared libs</div></div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#deps">Dependencies & Compatibility</a></li>
+      <li><a href="#context">System Context (C4 Level 1)</a></li>
+      <li><a href="#containers">System Containers (C4 Level 2)</a></li>
+      <li><a href="#arch">Architecture & Components (C4 Level 3)</a></li>
+      <li><a href="#security">Security & Authentication</a></li>
+      <li><a href="#features">Functional & Non-Functional Features</a></li>
+      <li><a href="#ux">UX, Design System & Component Library</a></li>
+      <li><a href="#quality">Code Quality & Performance</a></li>
+      <li><a href="#tests">Test Coverage & Gaps</a></li>
+      <li><a href="#deploy">Deployment & CI/CD</a></li>
+      <li><a href="#git">Git History & Changelog</a></li>
+      <li><a href="#docs">Documentation Status</a></li>
+      <li><a href="#recs">Recommendations</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. DEPENDENCIES -->
+  <div class="section" id="deps">
+    <h2>1. Dependencies & Compatibility</h2>
+    <div class="section-sub">Generated by /angular-scan-deps</div>
+
+    <h3>Framework & Build</h3>
+    <table>
+      <thead><tr><th>Package</th><th>Current</th><th>Latest</th><th>Status</th><th>Upgrade benefit</th></tr></thead>
+      <tbody>
+        <tr><td><code>@angular/core</code></td><td>18.2.0</td><td>19.1.0</td><td><span class="tag tag-warn">1 major behind</span></td><td>Signals stable, resource API, improved SSR</td></tr>
+        <tr><td><code>typescript</code></td><td>5.5.4</td><td>5.7.2</td><td><span class="tag tag-warn">minor behind</span></td><td>Isolated declarations, better inference</td></tr>
+        <tr><td><code>rxjs</code></td><td>7.8.1</td><td>7.8.1</td><td><span class="tag tag-ok">current</span></td><td>&mdash;</td></tr>
+        <tr><td><code>nx</code></td><td>19.8.0</td><td>20.3.0</td><td><span class="tag tag-warn">1 major behind</span></td><td>Improved caching, Rust-based task runner</td></tr>
+        <tr><td><code>ag-grid-angular</code></td><td>32.3.0</td><td>33.1.0</td><td><span class="tag tag-warn">1 major behind</span></td><td>New column API, improved tree data</td></tr>
+        <tr><td><code>zone.js</code></td><td>0.14.10</td><td>0.15.0</td><td><span class="tag tag-ok">current</span></td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Compatibility Matrix</h3>
+    <table>
+      <thead><tr><th>Upgrade path</th><th>Angular</th><th>TypeScript</th><th>Node</th><th>Nx</th><th>Risk</th></tr></thead>
+      <tbody>
+        <tr><td>Current</td><td>18.2</td><td>5.5</td><td>18+</td><td>19.8</td><td>&mdash;</td></tr>
+        <tr><td>Target: Angular 19</td><td>19.1</td><td>5.6+</td><td>18.19+</td><td>20.x</td><td><span class="tag tag-warn">medium</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Upgrade Path</h3>
+    <div class="diagram">
+      <div class="diagram-title">Recommended Upgrade Sequence</div>
+      <pre class="mermaid">
+graph LR
+    TS["TypeScript\n5.5 to 5.6"] --> A18["Angular\n18 to 19"]
+    A18 --> NX["Nx\n19 to 20"]
+    NX --> AG["AG Grid\n32 to 33"]
+    AG --> V["Verify\nbuild + test"]
+      </pre>
+      <div class="diagram-caption">Sequential upgrade: TypeScript first (prerequisite), then Angular, then Nx, then third-party. Verify after each step.</div>
+    </div>
+
+    <p>14 of 23 dependencies are outdated. 3 have major version upgrades available. No known security vulnerabilities.</p>
+  </div>
+
+  <!-- 2. SYSTEM CONTEXT (C4 Level 1) -->
+  <div class="section" id="context">
+    <h2>2. System Context (C4 Level 1)</h2>
+    <div class="section-sub">Generated by /angular-scan-arch + /angular-explain</div>
+
+    <h3>High-Level Design (C4 — Context)</h3>
+    <div class="diagram">
+      <div class="diagram-title">System Context Diagram</div>
+      <pre class="mermaid">
+graph TD
+    T[Trader] -->|places orders| TA[Trading App]
+    PM[Portfolio Manager] -->|reviews positions| PA[Portfolio App]
+    TA -->|REST + WebSocket| TG[Trade Gateway API]
+    TA -->|WebSocket| MF[Market Data Feed]
+    PA -->|REST| PG[Portfolio API]
+    PA -->|REST| RK[Risk Engine]
+    TG --> OMS[Order Management System]
+    PG --> DW[Data Warehouse]
+
+    style TA fill:#e8e6f0,stroke:#6a6480
+    style PA fill:#e8e6f0,stroke:#6a6480
+    style TG fill:#f8f7fa,stroke:#b5b0ab
+    style MF fill:#f8f7fa,stroke:#b5b0ab
+    style PG fill:#f8f7fa,stroke:#b5b0ab
+    style RK fill:#f8f7fa,stroke:#b5b0ab
+      </pre>
+      <div class="diagram-caption">Two frontend apps communicating with 4 backend services. Real-time data via WebSocket.</div>
+    </div>
+  </div>
+
+  <!-- 3. SYSTEM CONTAINERS (C4 Level 2) -->
+  <div class="section" id="containers">
+    <h2>3. System Containers (C4 Level 2)</h2>
+    <div class="section-sub">Generated by /angular-scan-arch — inferred from package.json, proxy, docker-compose, API patterns</div>
+
+    <div class="diagram">
+      <div class="diagram-title">Container Diagram</div>
+      <pre class="mermaid">
+graph TD
+    subgraph Frontend["Frontend (Nx Monorepo)"]
+        PA["portfolio-app\nAngular 18\n:4200"]
+        TA["trading-app\nAngular 18\n:4201"]
+        SU["shared-ui\nlib"]
+        DA["data-access\nlib"]
+        SM["shared-models\nlib"]
+    end
+    subgraph Backend["Backend Services"]
+        TG["Trade Gateway\nREST :3000"]
+        MF["Market Data Feed\nWebSocket :3001"]
+        PG["Portfolio API\nREST :3002"]
+    end
+    subgraph Data["Data Stores"]
+        DB[("PostgreSQL\n:5432")]
+        RD[("Redis\n:6379")]
+    end
+    subgraph External["External"]
+        SSO["SSO / Identity Provider"]
+        EX["Exchange Data Feed"]
+    end
+    PA --> DA
+    PA --> SU
+    TA --> DA
+    TA --> SU
+    DA --> SM
+    SU --> SM
+    DA --> TG
+    DA --> MF
+    DA --> PG
+    TG --> DB
+    TG --> RD
+    MF --> RD
+    MF --> EX
+    PA --> SSO
+    TA --> SSO
+      </pre>
+      <div class="diagram-caption">Nx monorepo with 2 apps + 3 shared libs. 3 backend services. PostgreSQL + Redis. External: SSO + exchange feed.</div>
+    </div>
+
+    <h3>Container Summary</h3>
+    <table>
+      <thead><tr><th>Container</th><th>Technology</th><th>Port</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>portfolio-app</td><td>Angular 18, Nx</td><td>4200</td><td>Portfolio dashboards, holdings, allocation</td></tr>
+        <tr><td>trading-app</td><td>Angular 18, Nx</td><td>4201</td><td>Trade blotter, order entry, market data</td></tr>
+        <tr><td>shared-ui</td><td>Angular lib</td><td>—</td><td>Header, DataCard, NumberFormat pipe</td></tr>
+        <tr><td>data-access</td><td>Angular lib</td><td>—</td><td>PortfolioService, TradingService, MarketDataService</td></tr>
+        <tr><td>shared-models</td><td>TypeScript lib</td><td>—</td><td>Portfolio, Trade, MarketData interfaces</td></tr>
+        <tr><td>Trade Gateway</td><td>REST API</td><td>3000</td><td>Order management, trade execution</td></tr>
+        <tr><td>Market Data Feed</td><td>WebSocket</td><td>3001</td><td>Real-time price streaming from exchange</td></tr>
+        <tr><td>Portfolio API</td><td>REST API</td><td>3002</td><td>Portfolio calculations, holdings, allocation</td></tr>
+        <tr><td>PostgreSQL</td><td>Database</td><td>5432</td><td>Persistent storage for trades, portfolios</td></tr>
+        <tr><td>Redis</td><td>Cache</td><td>6379</td><td>Price cache, session cache</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. ARCHITECTURE & COMPONENTS (C4 Level 3) -->
+  <div class="section" id="arch">
+    <h2>4. Architecture & Components (C4 Level 3)</h2>
+    <div class="section-sub">Generated by /angular-scan-arch</div>
+
+    <h3>Applications</h3>
+    <table>
+      <thead><tr><th>App</th><th>Type</th><th>Components</th><th>Routes</th><th>Services</th></tr></thead>
+      <tbody>
+        <tr><td><code>portfolio-app</code></td><td>Standalone Angular 18</td><td>87</td><td>12</td><td>23</td></tr>
+        <tr><td><code>trading-app</code></td><td>Standalone Angular 18</td><td>64</td><td>8</td><td>18</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Shared Libraries</h3>
+    <table>
+      <thead><tr><th>Library</th><th>Purpose</th><th>Exports</th><th>Depends on</th></tr></thead>
+      <tbody>
+        <tr><td><code>shared-models</code></td><td>TypeScript interfaces</td><td>14 models</td><td>&mdash;</td></tr>
+        <tr><td><code>shared-ui</code></td><td>Reusable components</td><td>22 components</td><td>shared-models</td></tr>
+        <tr><td><code>data-access</code></td><td>HTTP services, state</td><td>8 services</td><td>shared-models</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Module Boundaries (Nx)</h3>
+    <table>
+      <thead><tr><th>Scope</th><th>Can depend on</th><th>Violations</th></tr></thead>
+      <tbody>
+        <tr><td><code>scope:portfolio-app</code></td><td>scope:shared</td><td><span class="tag tag-ok">0</span></td></tr>
+        <tr><td><code>scope:trading-app</code></td><td>scope:shared</td><td><span class="tag tag-ok">0</span></td></tr>
+        <tr><td><code>scope:shared</code></td><td>scope:shared</td><td><span class="tag tag-ok">0</span></td></tr>
+      </tbody>
+    </table>
+    <p>Clean dependency graph. No circular dependencies. No boundary violations.</p>
+
+    <h3>Library Dependency Graph</h3>
+    <div class="diagram">
+      <div class="diagram-title">Nx Library Dependencies</div>
+      <pre class="mermaid">
+graph TD
+    PA[portfolio-app] --> SU[shared-ui]
+    PA --> DA[data-access]
+    TA[trading-app] --> SU
+    TA --> DA
+    SU --> SM[shared-models]
+    DA --> SM
+
+    style PA fill:#e8e6f0,stroke:#6a6480
+    style TA fill:#e8e6f0,stroke:#6a6480
+    style SU fill:#f0eef4,stroke:#8a84a0
+    style DA fill:#f0eef4,stroke:#8a84a0
+    style SM fill:#f8f7fa,stroke:#b5b0ab
+      </pre>
+      <div class="diagram-caption">Generated from nx graph. Apps depend on shared libs. No circular dependencies detected.</div>
+    </div>
+
+    <h3>Layered Architecture</h3>
+    <div class="diagram">
+      <div class="diagram-title">Application Layer Structure</div>
+      <pre class="mermaid">
+graph TD
+    subgraph UI["UI Layer"]
+        C1[Dashboard Component]
+        C2[Trade Blotter]
+        C3[Order Entry]
+        C4[Holdings Grid]
+    end
+    subgraph Services["Service Layer"]
+        S1[PortfolioService]
+        S2[TradingService]
+        S3[MarketDataService]
+    end
+    subgraph Data["Data Access Layer"]
+        D1[HTTP Client]
+        D2[WebSocket Client]
+        D3[Cache Service]
+    end
+    subgraph External["External APIs"]
+        E1[Trade API]
+        E2[Market Data Feed]
+        E3[Portfolio API]
+    end
+
+    C1 --> S1
+    C2 --> S2
+    C2 --> S3
+    C3 --> S2
+    C4 --> S1
+    S1 --> D1
+    S2 --> D1
+    S2 --> D2
+    S3 --> D2
+    S3 --> D3
+    D1 --> E1
+    D1 --> E3
+    D2 --> E2
+
+    style UI fill:#e8e6f0,stroke:#6a6480
+    style Services fill:#f0eef4,stroke:#8a84a0
+    style Data fill:#f8f7fa,stroke:#b5b0ab
+    style External fill:#fff,stroke:#ccc
+      </pre>
+      <div class="diagram-caption">4-layer architecture: UI → Services → Data Access → External APIs</div>
+    </div>
+
+    <h3>User Flow: Place a Trade</h3>
+    <div class="diagram">
+      <div class="diagram-title">Sequence Diagram &mdash; Trade Execution</div>
+      <pre class="mermaid">
+sequenceDiagram
+    actor Trader
+    participant OE as Order Entry
+    participant TS as TradingService
+    participant MD as MarketDataService
+    participant API as Trade API
+
+    Trader->>OE: Select instrument, enter quantity
+    OE->>MD: Get current price
+    MD-->>OE: Price: $142.50
+    OE->>Trader: Show order preview
+    Trader->>OE: Confirm order
+    OE->>TS: Submit order
+    TS->>API: POST /orders
+    API-->>TS: Order ID: TRD-4821
+    TS-->>OE: Order confirmed
+    OE->>Trader: Show confirmation + Order ID
+    Note over TS,API: WebSocket pushes live status updates
+      </pre>
+      <div class="diagram-caption">Typical trade flow from user action to API confirmation. WebSocket provides real-time updates.</div>
+    </div>
+
+    <h3>User Flow: Portfolio Review</h3>
+    <div class="diagram">
+      <div class="diagram-title">Sequence Diagram &mdash; Portfolio Manager</div>
+      <pre class="mermaid">
+sequenceDiagram
+    actor PM as Portfolio Manager
+    participant DB as Dashboard
+    participant PS as PortfolioService
+    participant HG as Holdings Grid
+    participant AL as Allocation Chart
+
+    PM->>DB: Open dashboard
+    DB->>PS: Get portfolio summary
+    PS-->>DB: Total value, P&L, allocation %
+    DB->>PM: Show KPIs + charts
+    PM->>HG: Drill into holdings
+    HG->>PS: Get detailed positions
+    PS-->>HG: 47 positions with live prices
+    HG->>PM: Show sortable, filterable grid
+    PM->>AL: View allocation breakdown
+    AL->>PS: Get sector allocation
+    PS-->>AL: 8 sectors with weights
+    AL->>PM: Show pie chart + rebalance suggestions
+      </pre>
+      <div class="diagram-caption">Portfolio manager flow: dashboard overview → drill into holdings → allocation analysis</div>
+    </div>
+
+    <h3>Low-Level Design (C4 — Component: Trading App)</h3>
+    <div class="diagram">
+      <div class="diagram-title">Trading App Internal Components</div>
+      <pre class="mermaid">
+graph TD
+    subgraph Routes["Route Layer"]
+        R1[/trading/blotter]
+        R2[/trading/order]
+        R3[/trading/market-data]
+    end
+    subgraph Components["Component Layer"]
+        BC[BlotterComponent\nAG Grid + real-time]
+        OC[OrderEntryComponent\nReactive forms + validation]
+        MC[MarketDataComponent\nPrice ticker + charts]
+    end
+    subgraph Services["Service Layer"]
+        TS2[TradingService\ninject() + RxJS]
+        MS[MarketDataService\nWebSocket + reconnect]
+    end
+    subgraph State["State Management"]
+        OS[OrderState\nsignals]
+        PS2[PriceState\nBehaviorSubject]
+    end
+
+    R1 --> BC
+    R2 --> OC
+    R3 --> MC
+    BC --> TS2
+    OC --> TS2
+    MC --> MS
+    TS2 --> OS
+    MS --> PS2
+    BC --> PS2
+
+    style Routes fill:#e8e6f0,stroke:#6a6480
+    style Components fill:#f0eef4,stroke:#8a84a0
+    style Services fill:#f8f7fa,stroke:#b5b0ab
+    style State fill:#fff,stroke:#ccc
+      </pre>
+      <div class="diagram-caption">3 routes, 3 components, 2 services, 2 state containers. Mixed signals + BehaviorSubject (migration candidate).</div>
+    </div>
+
+    <h3>Technology Stack</h3>
+    <table>
+      <thead><tr><th>Layer</th><th>Technology</th><th>Version</th><th>How it's used</th></tr></thead>
+      <tbody>
+        <tr><td>Framework</td><td>Angular</td><td>18.2.0</td><td>Component architecture, routing, DI, reactive forms</td></tr>
+        <tr><td>Build</td><td>Nx</td><td>19.8.0</td><td>Monorepo management, task runner, module boundaries</td></tr>
+        <tr><td>Language</td><td>TypeScript</td><td>5.5.4</td><td>Strict mode, no 'any' (enforced by lint)</td></tr>
+        <tr><td>State</td><td>RxJS + Signals</td><td>7.8.1</td><td>Services use BehaviorSubject; migrating to signals</td></tr>
+        <tr><td>Data Grid</td><td>AG Grid</td><td>32.3.0</td><td>Trade blotter, holdings grid, position tables</td></tr>
+        <tr><td>Charts</td><td>Plotly</td><td>2.30.0</td><td>Allocation pie chart, P&L line chart</td></tr>
+        <tr><td>UI</td><td>Bootstrap</td><td>5.3.3</td><td>Layout grid, utilities (migrating to HDS)</td></tr>
+        <tr><td>Real-time</td><td>WebSocket (native)</td><td>&mdash;</td><td>Market data feed, order status updates</td></tr>
+        <tr><td>Testing</td><td>Jest</td><td>29.7.0</td><td>Unit tests (247 specs)</td></tr>
+        <tr><td>Design System</td><td>@yourorg/hds</td><td>2.3.0</td><td>Partial adoption — tokens in 40% of components</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 5. SECURITY & AUTH -->
+  <div class="section" id="security">
+    <h2>5. Security & Authentication</h2>
+    <div class="section-sub">Generated by /angular-scan-features + /angular-elevate-audit</div>
+
+    <h3>Authentication</h3>
+    <table>
+      <thead><tr><th>Aspect</th><th>Implementation</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Auth provider</td><td>@yourorg/elevate/auth (SSO via OIDC)</td><td><span class="tag tag-ok">integrated</span></td></tr>
+        <tr><td>Token storage</td><td>HttpOnly cookies (elevate-managed)</td><td><span class="tag tag-ok">secure</span></td></tr>
+        <tr><td>Session timeout</td><td>30 min idle, 8 hr absolute</td><td><span class="tag tag-ok">configured</span></td></tr>
+        <tr><td>Refresh strategy</td><td>Silent refresh via iframe</td><td><span class="tag tag-ok">active</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Authorization Roles</h3>
+    <table>
+      <thead><tr><th>Role</th><th>Permissions</th><th>Routes</th></tr></thead>
+      <tbody>
+        <tr><td><code>trader</code></td><td>Place orders, view blotter, view P&L</td><td>/trading/*, /blotter/*</td></tr>
+        <tr><td><code>portfolio-manager</code></td><td>View all portfolios, rebalance, export</td><td>/portfolio/*, /allocation/*</td></tr>
+        <tr><td><code>risk-analyst</code></td><td>View risk metrics, read-only positions</td><td>/risk/*, /portfolio/* (read)</td></tr>
+        <tr><td><code>admin</code></td><td>All permissions + user management</td><td>/**</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Authorization Flow</h3>
+    <div class="diagram">
+      <div class="diagram-title">Route Guard &amp; Permission Check</div>
+      <pre class="mermaid">
+flowchart TD
+    R[Route Request] --> AG{ElevateAuthGuard}
+    AG -->|not authenticated| L[Redirect to Login]
+    AG -->|authenticated| RG{RoleGuard}
+    RG -->|role allowed| P[Render Page]
+    RG -->|role denied| F[403 Forbidden]
+    L --> SSO[SSO Login Page]
+    SSO --> T[Token Issued]
+    T --> R
+      </pre>
+      <div class="diagram-caption">Every route passes through auth guard then role guard. Unauthenticated users redirected to SSO.</div>
+    </div>
+
+    <h3>User Preferences</h3>
+    <table>
+      <thead><tr><th>Preference</th><th>Storage</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td>Theme</td><td>@yourorg/elevate/preferences</td><td>light</td></tr>
+        <tr><td>Grid density</td><td>@yourorg/elevate/preferences</td><td>comfortable</td></tr>
+        <tr><td>Default portfolio</td><td>@yourorg/elevate/preferences</td><td>last viewed</td></tr>
+        <tr><td>Notification sound</td><td>@yourorg/elevate/preferences</td><td>enabled</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6. FEATURES -->
+  <div class="section" id="features">
+    <h2>6. Functional & Non-Functional Features</h2>
+    <div class="section-sub">Generated by /angular-scan-features</div>
+
+    <h3>Functional Features</h3>
+    <table>
+      <thead><tr><th>Feature</th><th>App</th><th>Status</th><th>Components</th></tr></thead>
+      <tbody>
+        <tr><td>Real-time trade blotter</td><td>trading-app</td><td><span class="tag tag-ok">live</span></td><td>blotter, order-entry</td></tr>
+        <tr><td>Order entry with validation</td><td>trading-app</td><td><span class="tag tag-ok">live</span></td><td>order-entry, order-confirm</td></tr>
+        <tr><td>Market data streaming</td><td>trading-app</td><td><span class="tag tag-ok">live</span></td><td>market-data, price-ticker</td></tr>
+        <tr><td>Portfolio dashboard</td><td>portfolio-app</td><td><span class="tag tag-ok">live</span></td><td>dashboard, kpi-cards</td></tr>
+        <tr><td>Holdings grid with drill-down</td><td>portfolio-app</td><td><span class="tag tag-ok">live</span></td><td>holdings, position-detail</td></tr>
+        <tr><td>Allocation analysis</td><td>portfolio-app</td><td><span class="tag tag-ok">live</span></td><td>allocation, pie-chart</td></tr>
+        <tr><td>Export to CSV/PDF</td><td>both</td><td><span class="tag tag-warn">partial</span></td><td>export-service (CSV only, PDF missing)</td></tr>
+        <tr><td>Alerts & notifications</td><td>both</td><td><span class="tag tag-bad">not started</span></td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Non-Functional Characteristics</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Target</th><th>Actual</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>First Contentful Paint</td><td>< 1.5s</td><td>1.2s</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td>Time to Interactive</td><td>< 3s</td><td>2.4s</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td>WebSocket latency</td><td>< 100ms</td><td>~45ms</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td>Bundle size (initial)</td><td>< 500KB</td><td>342KB</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td>Accessibility (WCAG)</td><td>AA</td><td>Partial</td><td><span class="tag tag-warn">72/100</span></td></tr>
+        <tr><td>Browser support</td><td>Chrome, Edge, Firefox</td><td>Tested</td><td><span class="tag tag-ok">pass</span></td></tr>
+        <tr><td>Concurrent users</td><td>500+</td><td>Not load tested</td><td><span class="tag tag-bad">untested</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 7. UX, DESIGN SYSTEM & COMPONENTS -->
+  <div class="section" id="ux">
+    <h2>7. UX, Design System & Component Library</h2>
+    <div class="section-sub">Generated by /angular-scan-arch + /angular-hds-audit + /angular-elevate-audit</div>
+
+    <h3>Design System</h3>
+    <table>
+      <thead><tr><th>Aspect</th><th>Current</th><th>Target</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Design system</td><td>@yourorg/hds 2.3.0</td><td>@yourorg/hds 2.3.0</td><td><span class="tag tag-warn">40% adopted</span></td></tr>
+        <tr><td>Color tokens</td><td>Mixed: 60% HDS tokens, 40% hardcoded hex</td><td>100% HDS tokens</td><td><span class="tag tag-warn">partial</span></td></tr>
+        <tr><td>Spacing tokens</td><td>Mixed: Bootstrap grid + raw px</td><td>100% HDS spacing scale</td><td><span class="tag tag-bad">low adoption</span></td></tr>
+        <tr><td>Typography tokens</td><td>HDS type scale in 70% of components</td><td>100%</td><td><span class="tag tag-warn">partial</span></td></tr>
+        <tr><td>Theming (light/dark)</td><td>Light only</td><td>Light + dark via HDS theme switch</td><td><span class="tag tag-bad">not implemented</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Component Libraries Detected</h3>
+    <table>
+      <thead><tr><th>Library</th><th>Current version</th><th>Latest</th><th>HDS wrapped?</th><th>Components used</th></tr></thead>
+      <tbody>
+        <tr><td>AG Grid</td><td>32.3.0</td><td>33.1.0</td><td><span class="tag tag-warn">partial</span></td><td>BlotterGrid, HoldingsGrid, AllocationTable (3 of 5 grids wrapped)</td></tr>
+        <tr><td>Plotly.js</td><td>2.30.0</td><td>2.35.0</td><td><span class="tag tag-bad">no</span></td><td>AllocationPieChart, PLLineChart (raw Plotly, no HDS wrapper)</td></tr>
+        <tr><td>Bootstrap</td><td>5.3.3</td><td>5.3.3</td><td><span class="tag tag-info">migrating away</span></td><td>Grid layout, utilities only (no Bootstrap components)</td></tr>
+        <tr><td>PrimeNG</td><td>&mdash;</td><td>18.0.0</td><td>&mdash;</td><td><span class="tag tag-info">not installed</span> (recommended for form controls)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Detected UI Components</h3>
+    <table>
+      <thead><tr><th>Component</th><th>Type</th><th>Library</th><th>HDS compliant</th><th>Location</th></tr></thead>
+      <tbody>
+        <tr><td>BlotterGrid</td><td>Data grid</td><td>AG Grid + elevate-grid</td><td><span class="tag tag-ok">yes</span></td><td>trading-app</td></tr>
+        <tr><td>HoldingsGrid</td><td>Data grid</td><td>AG Grid + elevate-grid</td><td><span class="tag tag-ok">yes</span></td><td>portfolio-app</td></tr>
+        <tr><td>OrderEntryForm</td><td>Form</td><td>Angular Reactive Forms</td><td><span class="tag tag-warn">partial</span></td><td>trading-app</td></tr>
+        <tr><td>AllocationPieChart</td><td>Chart</td><td>Raw Plotly</td><td><span class="tag tag-bad">no</span></td><td>portfolio-app</td></tr>
+        <tr><td>PLLineChart</td><td>Chart</td><td>Raw Plotly</td><td><span class="tag tag-bad">no</span></td><td>portfolio-app</td></tr>
+        <tr><td>PriceTicker</td><td>Custom</td><td>Custom component</td><td><span class="tag tag-warn">partial</span></td><td>shared-ui</td></tr>
+        <tr><td>KPICards</td><td>Display</td><td>Custom + HDS tokens</td><td><span class="tag tag-ok">yes</span></td><td>shared-ui</td></tr>
+        <tr><td>HeaderNav</td><td>Navigation</td><td>Custom + Bootstrap</td><td><span class="tag tag-bad">no</span></td><td>shared-ui</td></tr>
+        <tr><td>DataCard</td><td>Card</td><td>Custom + HDS tokens</td><td><span class="tag tag-ok">yes</span></td><td>shared-ui</td></tr>
+        <tr><td>ConfirmDialog</td><td>Modal</td><td>Custom</td><td><span class="tag tag-bad">no</span></td><td>shared-ui (should use elevate-dialog)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Recommended Component Stack</h3>
+    <table>
+      <thead><tr><th>Category</th><th>Recommended</th><th>Version</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Data grid</td><td>AG Grid + @yourorg/elevate-common/grid</td><td>33.1.0</td><td>Enterprise grid with HDS theming, default column configs</td></tr>
+        <tr><td>Charts</td><td>Plotly + @yourorg/elevate-common/chart</td><td>2.35.0</td><td>Plotly for flexibility, elevate wrapper for HDS theming</td></tr>
+        <tr><td>Forms</td><td>PrimeNG + HDS theme</td><td>18.0.0</td><td>Rich form controls (date picker, dropdown, multiselect) with HDS styling</td></tr>
+        <tr><td>Dialogs</td><td>@yourorg/elevate-common/dialog</td><td>latest</td><td>Standard dialog service, replaces custom modals</td></tr>
+        <tr><td>Layout</td><td>HDS Grid (CSS Grid tokens)</td><td>2.3.0</td><td>Replace Bootstrap grid with HDS spacing + grid tokens</td></tr>
+        <tr><td>Icons</td><td>HDS icon set</td><td>2.3.0</td><td>Consistent icon style across all apps</td></tr>
+      </tbody>
+    </table>
+
+    <h3>State Management</h3>
+    <table>
+      <thead><tr><th>Pattern</th><th>Where used</th><th>Count</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Angular Signals</td><td>portfolio-app (dashboard, allocation)</td><td>12 components</td><td><span class="tag tag-ok">modern</span></td></tr>
+        <tr><td>BehaviorSubject (RxJS)</td><td>trading-app (price state, order state)</td><td>8 services</td><td><span class="tag tag-warn">legacy &mdash; migrate to signals</span></td></tr>
+        <tr><td>Component @Input/@Output</td><td>shared-ui (all presentational)</td><td>22 components</td><td><span class="tag tag-ok">appropriate for presentational</span></td></tr>
+        <tr><td>NgRx / other store</td><td>&mdash;</td><td>0</td><td><span class="tag tag-info">not used</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>State Flow</h3>
+    <div class="diagram">
+      <div class="diagram-title">State Management Architecture</div>
+      <pre class="mermaid">
+graph LR
+    subgraph Signals["Angular Signals (modern)"]
+        PS[PortfolioState\nsignal()]
+        AS[AllocationState\ncomputed()]
+    end
+    subgraph RxJS["BehaviorSubject (legacy)"]
+        PRS[PriceState$\nBehaviorSubject]
+        ORS[OrderState$\nBehaviorSubject]
+    end
+    subgraph IO["@Input / @Output"]
+        SC[Shared UI\nComponents]
+    end
+
+    PS --> AS
+    PRS -->|subscribe| SC
+    ORS -->|subscribe| SC
+
+    style Signals fill:#e6f5f2,stroke:#1a7a6d
+    style RxJS fill:#fef3e2,stroke:#b8860b
+    style IO fill:#f8f7fa,stroke:#b5b0ab
+      </pre>
+      <div class="diagram-caption">Mixed state management: Signals in portfolio-app (modern), BehaviorSubject in trading-app (migration candidate). Shared UI uses @Input/@Output.</div>
+    </div>
+
+    <h3>HDS Adoption Heatmap</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Color tokens</span>
+      <div class="bar"><div class="fill amber" style="width: 60%;"></div></div>
+      <span class="pct">60%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Typography tokens</span>
+      <div class="bar"><div class="fill amber" style="width: 70%;"></div></div>
+      <span class="pct">70%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Spacing tokens</span>
+      <div class="bar"><div class="fill red" style="width: 25%;"></div></div>
+      <span class="pct">25%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Component wrapping</span>
+      <div class="bar"><div class="fill amber" style="width: 50%;"></div></div>
+      <span class="pct">50%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 140px;">Dark mode support</span>
+      <div class="bar"><div class="fill red" style="width: 0%;"></div></div>
+      <span class="pct">0%</span>
+    </div>
+  </div>
+
+  <!-- 8. QUALITY -->
+  <div class="section" id="quality">
+    <h2>8. Code Quality & Performance</h2>
+    <div class="section-sub">Generated by /angular-scan-quality</div>
+
+    <h3>Lint</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 100px;">Lint score</span>
+      <div class="bar"><div class="fill green" style="width: 94%;"></div></div>
+      <span class="pct">94%</span>
+    </div>
+    <p>12 warnings (no errors). Mostly unused imports and missing return types.</p>
+
+    <h3>Bundle Size (production build)</h3>
+    <table>
+      <thead><tr><th>App</th><th>Initial</th><th>Lazy</th><th>Total</th><th>Budget</th></tr></thead>
+      <tbody>
+        <tr><td>portfolio-app</td><td>342 KB</td><td>187 KB</td><td>529 KB</td><td><span class="tag tag-ok">under 2MB</span></td></tr>
+        <tr><td>trading-app</td><td>298 KB</td><td>156 KB</td><td>454 KB</td><td><span class="tag tag-ok">under 2MB</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Lighthouse (portfolio-app)</h3>
+    <table>
+      <thead><tr><th>Metric</th><th>Score</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Performance</td><td>87</td><td><span class="tag tag-ok">good</span></td></tr>
+        <tr><td>Accessibility</td><td>72</td><td><span class="tag tag-warn">needs work</span></td></tr>
+        <tr><td>Best Practices</td><td>95</td><td><span class="tag tag-ok">good</span></td></tr>
+        <tr><td>SEO</td><td>90</td><td><span class="tag tag-ok">good</span></td></tr>
+      </tbody>
+    </table>
+    <p>Accessibility score driven by missing alt text on 8 images and 3 form labels without associated inputs.</p>
+  </div>
+
+  <!-- 9. TESTS -->
+  <div class="section" id="tests">
+    <h2>9. Test Coverage & Gaps</h2>
+    <div class="section-sub">Generated by /angular-scan-tests</div>
+
+    <h3>Coverage Summary</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 100px;">Statements</span>
+      <div class="bar"><div class="fill green" style="width: 73%;"></div></div>
+      <span class="pct">73%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 100px;">Branches</span>
+      <div class="bar"><div class="fill amber" style="width: 61%;"></div></div>
+      <span class="pct">61%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 100px;">Functions</span>
+      <div class="bar"><div class="fill green" style="width: 78%;"></div></div>
+      <span class="pct">78%</span>
+    </div>
+
+    <h3>Test Inventory</h3>
+    <table>
+      <thead><tr><th>Type</th><th>Count</th><th>Framework</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Unit tests</td><td>247</td><td>Jest 29.7</td><td><span class="tag tag-ok">247/247 passing</span></td></tr>
+        <tr><td>E2E tests</td><td>0</td><td>&mdash;</td><td><span class="tag tag-bad">none</span></td></tr>
+        <tr><td>Smoke tests</td><td>0</td><td>&mdash;</td><td><span class="tag tag-bad">none</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Coverage Gaps (top 5 uncovered files)</h3>
+    <table>
+      <thead><tr><th>File</th><th>Coverage</th><th>Risk</th></tr></thead>
+      <tbody>
+        <tr><td><code>trading.service.ts</code></td><td>12%</td><td><span class="tag tag-bad">critical</span></td></tr>
+        <tr><td><code>portfolio.service.ts</code></td><td>23%</td><td><span class="tag tag-bad">high</span></td></tr>
+        <tr><td><code>order-entry.component.ts</code></td><td>34%</td><td><span class="tag tag-warn">medium</span></td></tr>
+        <tr><td><code>market-data.service.ts</code></td><td>41%</td><td><span class="tag tag-warn">medium</span></td></tr>
+        <tr><td><code>blotter.component.ts</code></td><td>45%</td><td><span class="tag tag-warn">medium</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 10. DEPLOY -->
+  <div class="section" id="deploy">
+    <h2>10. Deployment & CI/CD</h2>
+    <div class="section-sub">Generated by /angular-scan-deploy</div>
+
+    <h3>CI Pipeline</h3>
+    <table>
+      <thead><tr><th>Step</th><th>Tool</th><th>Duration</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Install</td><td>npm ci</td><td>~45s</td><td><span class="tag tag-ok">cached</span></td></tr>
+        <tr><td>Lint</td><td>nx lint</td><td>~12s</td><td><span class="tag tag-ok">ok</span></td></tr>
+        <tr><td>Test</td><td>nx test</td><td>~38s</td><td><span class="tag tag-ok">ok</span></td></tr>
+        <tr><td>Build</td><td>nx build</td><td>~67s</td><td><span class="tag tag-warn">no cache</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="diagram">
+      <div class="diagram-title">CI/CD Pipeline Flow</div>
+      <pre class="mermaid">
+graph LR
+    subgraph CI["CI (GitHub Actions)"]
+        I["npm ci"] --> L["nx lint"]
+        L --> T["nx test"]
+        T --> B["nx build"]
+    end
+    subgraph CD["Deployment"]
+        B --> D1["Dev\nauto on merge"]
+        D1 --> D2["Staging\nmanual trigger"]
+        D2 --> D3["Production\nmanual + approval"]
+    end
+      </pre>
+      <div class="diagram-caption">Linear pipeline: install, lint, test, build. Auto-deploy to dev, manual promotion to staging and production.</div>
+    </div>
+
+    <p>Total pipeline: ~2m 42s. Build step lacks Nx remote caching — could save ~40s on cached runs.</p>
+
+    <h3>Environments</h3>
+    <table>
+      <thead><tr><th>Environment</th><th>URL</th><th>Deployment</th><th>Last deploy</th></tr></thead>
+      <tbody>
+        <tr><td>Development</td><td>dev.trade-app.internal</td><td>Auto on merge to develop</td><td>2026-03-23</td></tr>
+        <tr><td>Staging</td><td>staging.trade-app.internal</td><td>Manual trigger</td><td>2026-03-20</td></tr>
+        <tr><td>Production</td><td>trade-app.internal</td><td>Manual + approval</td><td>2026-03-18</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 11. GIT -->
+  <div class="section" id="git">
+    <h2>11. Git History & Changelog</h2>
+    <div class="section-sub">Generated by /angular-scan-git</div>
+
+    <h3>Recent Activity (last 30 days)</h3>
+    <table>
+      <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Commits</td><td>87</td></tr>
+        <tr><td>Active contributors</td><td>6</td></tr>
+        <tr><td>PRs merged</td><td>23</td></tr>
+        <tr><td>Avg PR size</td><td>142 lines changed</td></tr>
+        <tr><td>Hotspot file</td><td><code>trading.service.ts</code> (14 commits)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Last 5 Commits</h3>
+    <pre><code>a1b2c3d  feat: add real-time price streaming to blotter     (jane, 2d ago)
+e4f5g6h  fix: portfolio calculation rounding error           (mike, 3d ago)
+i7j8k9l  refactor: extract shared grid config to lib         (jane, 4d ago)
+m0n1o2p  chore: bump ag-grid to 32.3.0                       (ci-bot, 5d ago)
+q3r4s5t  feat: add allocation pie chart to dashboard          (sarah, 6d ago)</code></pre>
+  </div>
+
+  <!-- 12. DOCS -->
+  <div class="section" id="docs">
+    <h2>12. Documentation Status</h2>
+    <div class="section-sub">Generated by /angular-scan-docs</div>
+
+    <h3>Documentation Coverage</h3>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 100px;">TSDoc coverage</span>
+      <div class="bar"><div class="fill amber" style="width: 42%;"></div></div>
+      <span class="pct">42%</span>
+    </div>
+    <div class="progress">
+      <span style="font-size: 0.8rem; min-width: 100px;">README quality</span>
+      <div class="bar"><div class="fill green" style="width: 80%;"></div></div>
+      <span class="pct">80%</span>
+    </div>
+
+    <table>
+      <thead><tr><th>Document</th><th>Status</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>README.md</td><td><span class="tag tag-ok">present</span></td><td>Setup instructions, architecture overview</td></tr>
+        <tr><td>CHANGELOG.md</td><td><span class="tag tag-bad">missing</span></td><td>&mdash;</td></tr>
+        <tr><td>CONTRIBUTING.md</td><td><span class="tag tag-bad">missing</span></td><td>&mdash;</td></tr>
+        <tr><td>API docs (TSDoc)</td><td><span class="tag tag-warn">partial</span></td><td>42% of public APIs documented</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 13. RECOMMENDATIONS -->
+  <div class="section" id="recs">
+    <h2>13. Recommendations</h2>
+
+    <h3>Immediate</h3>
+    <div class="rec-list">
+      <div class="rec-item">
+        <div class="num">1</div>
+        <div class="body"><strong>Add e2e tests.</strong> Zero e2e coverage is a deployment risk. Start with Playwright for the 3 critical user flows: login, place trade, view portfolio. Use <code>/angular-test-e2e</code>.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">2</div>
+        <div class="body"><strong>Fix accessibility issues.</strong> Lighthouse a11y score of 72 is below acceptable. Add alt text, fix form labels. Use <code>/angular-scan-quality --a11y-only</code>.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">3</div>
+        <div class="body"><strong>Load test concurrent users.</strong> 500+ target is untested. Run k6 or Artillery before next release.</div>
+      </div>
+    </div>
+
+    <h3>Short-term</h3>
+    <div class="rec-list">
+      <div class="rec-item">
+        <div class="num">4</div>
+        <div class="body"><strong>Upgrade Angular 18 &rarr; 19.</strong> Signals stable, resource API, improved SSR. Use <code>/angular-migrate-version</code>.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">5</div>
+        <div class="body"><strong>Complete HDS migration.</strong> Only 40% adopted. Run <code>/angular-hds-audit</code> then <code>/angular-hds-apply</code> to reach 100%.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">6</div>
+        <div class="body"><strong>Migrate BehaviorSubject to signals.</strong> Trading app still uses BehaviorSubject for price state. Use <code>/angular-migrate-signals</code>.</div>
+      </div>
+    </div>
+
+    <h3>Medium-term</h3>
+    <div class="rec-list">
+      <div class="rec-item">
+        <div class="num">7</div>
+        <div class="body"><strong>Implement alerts & notifications.</strong> Feature is flagged as "not started" but traders need price alerts.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">8</div>
+        <div class="body"><strong>Add PDF export.</strong> CSV export works but portfolio managers need PDF reports for clients.</div>
+      </div>
+      <div class="rec-item">
+        <div class="num">9</div>
+        <div class="body"><strong>Improve TSDoc coverage to 80%+.</strong> Focus on shared-models and data-access. Use <code>/angular-docs-generate</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="report-footer">
+    Generated by ORCH &bull; @angular &rarr; @angular-planner &bull; 2026-03-24 &bull; 13 sections, ~20K tokens
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#e8e6f0',
+        primaryTextColor: '#1a1620',
+        primaryBorderColor: '#8a84a0',
+        lineColor: '#6a6480',
+        secondaryColor: '#f0eef4',
+        tertiaryColor: '#f8f7fa',
+        fontFamily: 'Outfit, sans-serif',
+        fontSize: '13px',
+      }
+    });
+  </script>
+</body>
+</html>

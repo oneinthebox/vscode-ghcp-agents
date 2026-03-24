@@ -33,8 +33,12 @@ const AGENT_PACKAGES: Record<string, { skills: string[]; description: string }> 
     description: 'Observability — usage, tokens, compliance, drift, benchmarks',
   },
   orch: {
-    skills: ['present-deck', 'present-dashboard'],
-    description: 'Master orchestrator — workflow coordination, cross-agent hand-offs, presentations',
+    skills: ['present-report', 'present-deck', 'present-dashboard'],
+    description: 'Master orchestrator — workflow coordination, cross-agent hand-offs, reports, presentations',
+  },
+  local: {
+    skills: ['local-setup-env', 'local-setup-docker', 'local-setup-deps', 'local-diagnose'],
+    description: 'Local environment setup — install dependencies, configure Docker, localstack, diagnose issues',
   },
 };
 

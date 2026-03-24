@@ -44,8 +44,9 @@ The goal: Copilot stops suggesting generic code and starts suggesting **your tea
 |------|-------------|
 | **Audit Framework** | Foundation layer: session tracking, token estimation, tool boundary enforcement, file scope checks, instruction adherence scoring, behavioral drift detection, compliance reporting. Pre-flight checks via @orch-preflight. Per-run telemetry in `.orch/runs/`. |
 | **Doc Agent** | @docs agent narrowed to **reference supply chain** — converting, curating, refreshing, and drift-checking reference documentation. Codebase scanning and explanation moved to domain planners. |
-| **5 Domain Customization Sets** | Agents, skills, and instructions for: @angular, @springboot, @fastapi, @ci, @cd. Each domain uses a **role-based sub-agent pattern**: coordinator (triage + loop), planner (scan + explain + plan), engineer (generate + migrate + refactor), verifier (test + review + audit). Skills are **granular and domain-prefixed** (e.g., `/angular-scan-deps`, `/angular-migrate-signals`). |
-| **Skill Override System** | Temporary team overrides with 90-day expiry and mandatory path-to-central tracking. Escape hatch for domain teams, not a permanent customization layer. |
+| **3 Domain Customization Sets** | Agents, skills, and instructions for: @angular, @springboot, @fastapi. Each domain uses a **role-based sub-agent pattern**: coordinator (triage + loop), planner (scan + explain + plan), engineer (generate + migrate + refactor), verifier (test + review + audit). Skills are **granular and domain-prefixed** (e.g., `/angular-scan-deps`, `/angular-migrate-signals`). **CI/CD skills are domain-specific** — each domain agent includes its own CI/CD skills (e.g., `/angular-ci-pipeline`, `/angular-cd-deploy`) rather than separate @ci/@cd agents, because CI/CD processes are inherently stack-specific. |
+| **@local Shared Agent** | Local environment setup agent shared across all domains. Skills: `/local-setup-env`, `/local-setup-docker`, `/local-setup-deps`, `/local-diagnose`. Handles dependency installation, Docker configuration, localstack setup, and environment diagnostics. |
+| **Configuration Cascade** | Three-level rule system: `.github/copilot-instructions.md` (global safety + behavior) → domain skills (domain-specific rules in SKILL.md) → `.orch/config.yaml` (runtime settings: retries, auto mode, models). Global safety rules are non-overridable. Domain rules adapt per skill. |
 | **Documentation Registry** | A YAML-based registry tracking all doc sources, versions, scan snapshots, and drift status |
 | **Validation & Benchmarking** | Automated output validation (deterministic + heuristic checks) and model quality benchmarking across skills |
 | **Governance Hooks** | Lifecycle hooks for secrets scanning, prompt auditing, and tool-use gating |
@@ -71,7 +72,7 @@ The goal: Copilot stops suggesting generic code and starts suggesting **your tea
 |---------|------|-------------------|
 | **Application Developer** | Writes frontend/backend code daily | Benefits from always-on instructions + invokes skills for scaffolding and migration |
 | **Tech Lead** | Owns coding standards for a team | Authors and maintains instructions + reviews agent behavior |
-| **Platform Engineer** | Manages CI/CD and infrastructure | Uses operations agents + contributes pipeline skills |
+| **Platform Engineer** | Manages CI/CD and infrastructure | Uses domain-specific CI/CD skills (e.g., `/angular-ci-pipeline`) + @local agent for environment setup |
 | **Migration Lead** | Plans and executes version upgrades | Uses proof, drift, and migration skills to plan and track progress |
 | **ORCH Maintainer** | Curates the marketplace | Manages the registry, reviews plugin submissions, maintains doc freshness |
 
@@ -289,17 +290,38 @@ The @showcase agent has been **removed**. Presentation capabilities are now **sh
 **Agent structure:** Same role-based pattern — @fastapi (coordinator), @fastapi-planner, @fastapi-engineer, @fastapi-verifier. Skills follow the `fastapi-{action}` naming convention (e.g., `/fastapi-scan-deps`, `/fastapi-generate-route`, `/fastapi-migrate-version`, `/fastapi-test-unit`, `/fastapi-docs-audit`).
 **Reference docs:** FastAPI docs, Pydantic v2, internal service templates
 
-### 6.4 operations-ci-glue
+### 6.4 CI/CD — Domain-Specific Skills (Not Separate Agents)
 
-**Instructions:** GitHub Actions best practices, workflow structure, secret management, artifact handling
-**Agent structure:** Same role-based pattern — @ci (coordinator), @ci-planner, @ci-engineer, @ci-verifier. Skills follow the `ci-{action}` naming convention (e.g., `/ci-scan-pipelines`, `/ci-generate-workflow`, `/ci-test-workflow`, `/ci-docs-audit`).
-**Reference docs:** GitHub Actions docs, internal CI templates
+**Decision:** CI/CD is not a separate domain. How you build, test, and deploy an Angular app differs fundamentally from Spring Boot or FastAPI. Therefore, CI/CD capabilities are delivered as **skills within each domain agent**, not as standalone @ci or @cd agents.
 
-### 6.5 operations-cd-dps
+**CI/CD skills per domain:**
 
-**Instructions:** Deployment strategies, environment promotion, rollback procedures, observability
-**Agent structure:** Same role-based pattern — @cd (coordinator), @cd-planner, @cd-engineer, @cd-verifier. Skills follow the `cd-{action}` naming convention (e.g., `/cd-scan-environments`, `/cd-generate-config`, `/cd-test-rollback`, `/cd-docs-audit`).
-**Reference docs:** Internal deployment platform docs, infrastructure patterns
+| Domain | CI Skills | CD Skills |
+|--------|-----------|-----------|
+| @angular | `/angular-ci-pipeline`, `/angular-ci-optimize` | `/angular-cd-deploy`, `/angular-cd-rollback` |
+| @springboot | `/springboot-ci-pipeline`, `/springboot-ci-optimize` | `/springboot-cd-deploy`, `/springboot-cd-rollback` |
+| @fastapi | `/fastapi-ci-pipeline`, `/fastapi-ci-optimize` | `/fastapi-cd-deploy`, `/fastapi-cd-rollback` |
+
+**Rationale:** An Angular CI pipeline uses `ng build`, `ng test`, bundle analysis, and Lighthouse. A Spring Boot pipeline uses `mvn package`, integration tests, and JAR artifact management. A FastAPI pipeline uses `pytest`, `uvicorn`, and container builds. Attempting to generalize these into a single @ci agent produces a lowest-common-denominator experience. Domain-specific CI/CD skills encode the exact tools, configurations, and best practices for each stack.
+
+**Reference docs:** CI/CD reference material is stored per domain (e.g., `.orch/references/angular/ci-best-practices.md`, `.orch/references/spring-boot/deployment-guide.md`).
+
+### 6.5 @local — Local Environment Setup (Shared Agent)
+
+**Purpose:** Local environment setup is a shared concern — every developer needs it regardless of stack. The @local agent handles setting up development environments, installing dependencies, configuring Docker and localstack, and diagnosing common environment issues.
+
+**Agent structure:** @local is a single shared agent under @orch (like @docs and @audit). No sub-agents — the scope is narrow enough to not require role-based splitting.
+
+**Skills:**
+
+| Skill | Description |
+|-------|-------------|
+| `/local-setup-env` | Configure local development environment: shell, Node.js, Java, Python versions, environment variables |
+| `/local-setup-docker` | Set up Docker, docker-compose, localstack for local development and testing |
+| `/local-setup-deps` | Install and verify project dependencies (npm, maven, pip) with version alignment checks |
+| `/local-diagnose` | Diagnose common environment issues: port conflicts, version mismatches, missing tools, permission problems |
+
+**Reference docs:** Internal environment setup guides, Docker templates, localstack configuration
 
 ---
 
@@ -349,7 +371,7 @@ Diagram type selection:
 
 ```
 ┌─────────────────────────────────┐
-│       docs-registry.yaml        │
+│       .orch/registry.yaml        │
 └────────────────┬────────────────┘
                  │
     ┌────────────┼────────────────┐
@@ -474,7 +496,7 @@ sequenceDiagram
     CLI->>Proj: Copy 27 Angular skills (scan, generate, migrate, test, review, docs)
     CLI->>Proj: Copy audit hooks (4) + scripts (12)
     CLI->>Proj: Copy .orch/audit/config/ + .orch/runs/
-    CLI->>Proj: Create docs-registry.yaml (12 sources for Angular 18)
+    CLI->>Proj: Create .orch/registry.yaml (12 sources for Angular 18)
     CLI->>Proj: Write .nvmrc + .node-version
     CLI-->>Dev: Done. Run 'orch doctor' to verify.
 
@@ -660,7 +682,7 @@ sequenceDiagram
 sequenceDiagram
     actor Dev as Developer
     participant DOC as @docs Agent
-    participant REG as docs-registry.yaml
+    participant REG as .orch/registry.yaml
     participant REF as .orch/references/
     participant GIT as Git History
 

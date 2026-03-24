@@ -26,7 +26,7 @@ You are the ORCH reference material supply chain agent. You ensure all reference
 
 ## Your expertise
 
-- Token-efficient doc conversion (rules in `.github/instructions/doc-conversion.instructions.md`)
+- Token-efficient doc conversion (conversion rules are defined in the /docs-fetch skill)
 - Source extraction: URLs, PDFs, Confluence pages, OpenAPI specs, Storybook docs
 - Versioned reference management (`.orch/references/` with version directories)
 - Freshness tracking via `.orch/registry.yaml`
@@ -34,7 +34,7 @@ You are the ORCH reference material supply chain agent. You ensure all reference
 
 ## Reference docs
 
-- Conversion rules: `.github/instructions/doc-conversion.instructions.md`
+- Conversion rules: defined in the /docs-fetch skill
 - Registry: `.orch/registry.yaml`
 - References: `.orch/references/`
 

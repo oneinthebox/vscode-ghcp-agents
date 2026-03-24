@@ -3,6 +3,8 @@ name: angular-scan-deps
 description: "Scan project dependencies, versions, changelog matrix, and upgrade benefits"
 references:
   - references/angular/v19/compatibility-matrix.md
+allowed-tools:
+  - codebase
 ---
 
 ## Context
@@ -53,6 +55,17 @@ Reads `package.json` (and `package-lock.json` / `yarn.lock` / `pnpm-lock.yaml` i
 
 ### Compatibility Matrix Check
 | Package | Current | Target Angular | Compatible? | Notes |
+
+### Upgrade Path (Mermaid diagram)
+If upgrades are available, produce a sequential upgrade path diagram showing the recommended order:
+```mermaid
+graph LR
+    TS["TypeScript\n{from} to {to}"] --> ANG["Angular\n{from} to {to}"]
+    ANG --> NX["Nx\n{from} to {to}"]
+    NX --> THIRD["Third-party\n{list}"]
+    THIRD --> VERIFY["Verify\nbuild + test"]
+```
+Only include packages that need upgrading. Show dependencies (e.g., Angular requires TypeScript first).
 ```
 
 ## Validation

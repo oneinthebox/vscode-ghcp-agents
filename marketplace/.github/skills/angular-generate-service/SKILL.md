@@ -47,16 +47,38 @@ Generates an Angular service following v19 best practices: `providedIn: 'root'` 
 ```markdown
 ## Service Generated — {ServiceName}Service
 
-| File | Path |
-|------|------|
-| Service | `src/app/features/{feature}/{name}.service.ts` |
-| Test | `src/app/features/{feature}/{name}.service.spec.ts` |
+### Files Created
+| File | Path | Purpose |
+|------|------|---------|
+| Service | `src/app/features/{feature}/{name}.service.ts` | inject(), LoggingService, ConfigService |
+| Test | `src/app/features/{feature}/{name}.service.spec.ts` | Mocked HTTP, error cases |
 
 Build: {pass|fail}
 Tests: {pass|fail} ({count} specs)
 
+### Architecture Decisions
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| DI pattern | inject() | Functional style. No constructor boilerplate. |
+| Logging | LoggingService (elevate) | Org standard. Structured logs. No console.log. |
+| Config | ConfigService (elevate) | Centralized config. No hardcoded URLs or environment.ts abuse. |
+| Error handling | catchError + LoggingService | Every HTTP call wrapped. Errors logged with context. |
+| Return type | {Observable or Signal} | {rationale: Observable for HTTP streams, Signal for cached state} |
+
+### Diagrams
+
+#### Service Dependency Graph
+```mermaid
+graph LR
+    S["{ServiceName}Service\ninject()"] --> HTTP[HttpClient]
+    S --> LOG[LoggingService\nelevate]
+    S --> CFG[ConfigService\nelevate]
+    HTTP --> API["{API endpoint}"]
+```
+
 ### Recommended next steps
 - Inject the service into components that need it.
+- Run `/angular-elevate-audit` to verify elevate integration.
 - Run `/angular-docs-generate` if additional documentation is needed.
 ```
 

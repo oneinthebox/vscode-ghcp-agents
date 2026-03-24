@@ -19,6 +19,7 @@ agents:
       - "git push --force"
       - "git reset --hard"
       - "npm publish"
+      - "yarn publish"
 
   angular:
     # Coordinator only — routes to sub-agents, no direct edit or terminal
@@ -39,6 +40,7 @@ agents:
       - "git push --force"
       - "git reset --hard"
       - "npm publish"
+      - "yarn publish"
 
   angular-planner:
     allowed_tools:
@@ -63,6 +65,7 @@ agents:
       - "git push --force"
       - "git reset --hard"
       - "npm publish"
+      - "yarn publish"
 
   angular-engineer:
     allowed_tools:
@@ -79,6 +82,7 @@ agents:
       - "git push --force"
       - "git reset --hard"
       - "npm publish"
+      - "yarn publish"
 
   angular-verifier:
     allowed_tools:
@@ -99,6 +103,7 @@ agents:
       - "git push --force"
       - "git reset --hard"
       - "npm publish"
+      - "yarn publish"
 
   orch-preflight:
     allowed_tools:
@@ -111,8 +116,10 @@ agents:
       - "angular.json"
     blocked_commands:
       - "rm -rf"
-      - "git push"
-      - "git reset"
+      - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+      - "yarn publish"
 
   docs:
     allowed_tools:
@@ -125,8 +132,10 @@ agents:
       - ".orch/registry.yaml"
     blocked_commands:
       - "rm -rf"
-      - "git push"
-      - "git reset"
+      - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+      - "yarn publish"
 
   audit:
     allowed_tools:
@@ -137,8 +146,23 @@ agents:
       - ".github/skills/*/SKILL.md"    # read skill definitions for benchmark
     blocked_commands:
       - "rm -rf"
-      - "git push"
-      - "git reset"
+      - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+      - "yarn publish"
+
+  local:
+    allowed_tools:
+      - codebase
+      - terminal
+      - edit
+    allowed_scope:
+      - "**"
+    blocked_commands:
+      - "rm -rf"
+      - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
 
   # ── Sub-Agent Workers (internal, not user-invocable) ──
 
@@ -162,6 +186,8 @@ agents:
       - "rm -rf"
       - "git push --force"
       - "git reset --hard"
+      - "npm publish"
+      - "yarn publish"
 
   doc-convert-worker:
     allowed_tools:
@@ -177,7 +203,10 @@ agents:
       - "lib/**"
     blocked_commands:
       - "rm -rf"
-      - "git push"
+      - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+      - "yarn publish"
 
   # ── Future Domain Agents ──
 
@@ -196,6 +225,9 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+      - "yarn publish"
 
   backend-fastapi:
     allowed_tools:
@@ -211,6 +243,9 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+      - "yarn publish"
 
   ops-ci:
     allowed_tools:
@@ -225,6 +260,9 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+      - "yarn publish"
 
   ops-cd:
     allowed_tools:
@@ -239,4 +277,7 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git reset --hard"
+      - "npm publish"
+      - "yarn publish"
       - "kubectl delete"

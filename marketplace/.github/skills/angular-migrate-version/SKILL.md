@@ -108,6 +108,25 @@ Build: {pass|fail}
 Tests: {pass}/{total} passing
 Breaking changes addressed: {n}
 Deprecation warnings: {n}
+
+### Dependency Change Diagram (Mermaid — single diagram showing upgrades)
+Produce ONE diagram showing all package changes in the upgrade:
+```mermaid
+graph LR
+    TS["{TypeScript}\n{old} → {new}\n★ UPGRADED"] --> ANG["{Angular}\n{old} → {new}\n★ UPGRADED"]
+    ANG --> NX["{Nx}\n{old} → {new}\n★ UPGRADED"]
+    NX --> AG["{AG Grid}\n{old} → {new}\n★ UPGRADED"]
+    RXJS["{RxJS}\n{version}\nKEPT"] -.-> ANG
+    ZJ["{Zone.js}\n{old} → {new}\n★ UPGRADED"] -.-> ANG
+
+    style TS fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style ANG fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style NX fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style AG fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style ZJ fill:#dbeafe,stroke:#3b82f6,stroke-width:2px
+    style RXJS fill:#f8f7fa,stroke:#b5b0ab
+```
+Legend: Blue = upgraded (with old→new version). Gray = kept at current version. Arrows show dependency order.
 ```
 
 ## Validation

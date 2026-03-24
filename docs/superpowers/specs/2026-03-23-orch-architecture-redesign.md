@@ -74,10 +74,23 @@ Skills:
   - Output: side-by-side report with metrics table, winner per dimension, recommendation
 - `/audit-context` — in-session health check + handoff generation
 
-### 2.5 Removed
+### 2.5 @local Agent (Shared)
+
+`@local` — local environment setup agent, shared across all domains.
+
+Skills:
+- `/local-setup-env` — configure shell, language runtimes, environment variables
+- `/local-setup-docker` — set up Docker, docker-compose, localstack
+- `/local-setup-deps` — install and verify project dependencies
+- `/local-diagnose` — diagnose environment issues: port conflicts, version mismatches, missing tools
+
+No sub-agents — scope is narrow enough for a single agent.
+
+### 2.6 Removed
 
 - `@showcase` — replaced by shared `/present-deck` and `/present-dashboard` under `@orch`
 - `@scan-worker` — replaced by domain-specific scanners (e.g., invoked by `@angular-planner`)
+- `@ci` / `@cd` — CI/CD is domain-specific. Each domain agent includes its own CI/CD skills (e.g., `/angular-ci-pipeline`, `/angular-cd-deploy`). There are no standalone CI/CD agents.
 
 ---
 
@@ -118,12 +131,27 @@ Skills:
 - `/angular-review` — code review for anti-patterns
 - `/angular-docs-audit` — check TSDoc coverage, find gaps
 
-### 3.2 Shared Skills (under @orch)
+**CI/CD skills (domain-specific, under engineer):**
+- `/angular-ci-pipeline` — generate/update Angular CI pipeline (GitHub Actions)
+- `/angular-ci-optimize` — optimize CI: caching, parallelization, incremental builds
+- `/angular-cd-deploy` — deployment: environment promotion, CDN upload, artifact management
+- `/angular-cd-rollback` — rollback procedures and verification
+
+> **Pattern repeats for all domains:** @springboot gets `/springboot-ci-pipeline`, `/springboot-cd-deploy`, etc. @fastapi gets `/fastapi-ci-pipeline`, `/fastapi-cd-deploy`, etc. CI/CD is inherently stack-specific — there are no standalone @ci or @cd agents.
+
+### 3.2 @local Skills (shared)
+
+- `/local-setup-env` — configure shell, language runtimes, environment variables
+- `/local-setup-docker` — set up Docker, docker-compose, localstack
+- `/local-setup-deps` — install and verify project dependencies
+- `/local-diagnose` — diagnose environment issues
+
+### 3.3 Shared Skills (under @orch)
 
 - `/present-deck` — markdown → branded reveal.js HTML or PPTX
 - `/present-dashboard` — metrics → single-page HTML dashboard
 
-### 3.3 Skill-to-Reference Dependencies
+### 3.4 Skill-to-Reference Dependencies
 
 Each SKILL.md declares its reference dependencies:
 

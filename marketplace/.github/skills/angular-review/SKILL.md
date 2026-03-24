@@ -3,6 +3,8 @@ name: angular-review
 description: "Review Angular code against an anti-pattern checklist. Produces structured feedback with severity levels (error/warning/info). Checks for Angular-specific pitfalls, org standards, and security issues."
 references:
   - references/angular/v19/anti-patterns.md
+allowed-tools:
+  - codebase
 ---
 
 ## Context

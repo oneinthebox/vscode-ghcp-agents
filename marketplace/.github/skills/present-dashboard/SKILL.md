@@ -2,6 +2,10 @@
 name: present-dashboard
 description: "Generate a single-page HTML dashboard from audit and scan data. Self-contained, zero external dependencies, HDS themed. Produces a ready-to-open status board for teams and stakeholders."
 references: []
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context

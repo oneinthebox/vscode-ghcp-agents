@@ -2,6 +2,10 @@
 name: docs-fetch
 description: "Fetch documentation from external sources (URL, PDF, Confluence, OpenAPI, Storybook), convert to token-efficient markdown, and register in the ORCH registry. Delegates heavy conversion to @doc-convert-worker."
 references: []
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context

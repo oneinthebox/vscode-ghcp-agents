@@ -51,13 +51,14 @@ Generates Angular route configuration following v19 best practices: functional r
 ```markdown
 ## Route Generated — {path}
 
-| File | Path | Action |
-|------|------|--------|
-| Routes | `src/app/{feature}/{feature}.routes.ts` | Updated |
-| Guard | `src/app/{feature}/{name}.guard.ts` | Created |
-| Guard Test | `src/app/{feature}/{name}.guard.spec.ts` | Created |
-| Resolver | `src/app/{feature}/{name}.resolver.ts` | Created |
-| Resolver Test | `src/app/{feature}/{name}.resolver.spec.ts` | Created |
+### Files Created
+| File | Path | Purpose |
+|------|------|---------|
+| Routes | `src/app/{feature}/{feature}.routes.ts` | Updated with lazy-loaded route |
+| Guard | `src/app/{feature}/{name}.guard.ts` | Functional guard (canActivate) |
+| Guard Test | `src/app/{feature}/{name}.guard.spec.ts` | Auth + role test cases |
+| Resolver | `src/app/{feature}/{name}.resolver.ts` | Pre-fetch data before navigation |
+| Resolver Test | `src/app/{feature}/{name}.resolver.spec.ts` | Success + error cases |
 
 Route: `/{path}` → `{ComponentName}` (lazy loaded)
 Guards: {list}
@@ -65,9 +66,37 @@ Resolvers: {list}
 Build: {pass|fail}
 Tests: {pass|fail}
 
+### Architecture Decisions
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Loading strategy | Lazy (loadComponent) | Reduces initial bundle. Component loaded on demand. |
+| Guard style | Functional (canActivateFn) | Angular 19 standard. No class boilerplate. |
+| Resolver style | Functional (ResolveFn) | Same — functional, typed, tree-shakeable. |
+| Auth integration | ElevateAuthGuard | Org standard SSO guard. Not custom auth. |
+
+### Diagrams
+
+#### Route Navigation Flow
+```mermaid
+sequenceDiagram
+    actor User
+    participant R as Router
+    participant G as Guard
+    participant Res as Resolver
+    participant C as {ComponentName}
+    User->>R: Navigate to /{path}
+    R->>G: canActivate?
+    G-->>R: {allowed/denied}
+    R->>Res: resolve data
+    Res-->>R: {resolved data}
+    R->>C: Render with resolved data
+    C-->>User: Page displayed
+```
+
 ### Recommended next steps
 - Add navigation links to the new route.
-- Verify guard logic with integration tests.
+- Verify guard logic with e2e tests.
+- Run `/angular-docs-generate` for TSDoc on guard and resolver.
 ```
 
 ## Validation

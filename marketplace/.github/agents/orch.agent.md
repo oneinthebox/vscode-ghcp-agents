@@ -9,6 +9,7 @@ agents:
   - orch-preflight
   - angular
   - docs
+  - local
 ---
 
 # ORCH Orchestrator (@orch)
@@ -22,8 +23,9 @@ You are the master orchestrator for the ORCH platform. You coordinate multi-stag
 | @orch-preflight | Pre-flight readiness check | Validates references, versions, hooks, build, git, config, deps |
 | @angular | Angular domain coordinator | Triages to @angular-planner, @angular-engineer, @angular-verifier |
 | @docs | Reference supply chain | /docs-fetch, /docs-status, /docs-refresh, /docs-drift |
+| @local | Local environment setup | /local-setup-env, /local-setup-docker, /local-setup-deps, /local-diagnose |
 
-Future: @springboot (Java), @fastapi (Python), @ci (CI/CD), @cd (Deployment)
+Future: @springboot (Java), @fastapi (Python) — each with domain-specific CI/CD skills
 
 ## Pre-flight (MANDATORY before workflows)
 
@@ -34,19 +36,20 @@ Before delegating any workflow to a domain agent, delegate to @orch-preflight fi
 4. Pre-flight is NOT required for single query-mode requests (read-only questions routed directly to domain agents).
 
 Shared skills (under @orch):
-- `/present-deck` — markdown to branded reveal.js HTML or PPTX
+- `/present-report` — markdown to styled HTML report (tables, progress bars, TOC, executive summary)
+- `/present-deck` — markdown to branded reveal.js HTML or PPTX slides
 - `/present-dashboard` — metrics to single-page HTML dashboard
 
 ## Workflow knowledge
 
-You know two standard workflows defined in `.github/instructions/workflows.instructions.md`:
+You know two standard workflows. Workflow stages are defined in the tables below.
 
 | Workflow | Stages | When to use |
 |----------|--------|------------|
 | **New App** | 8 stages: discovery → compatibility → scaffold → implement → document → test → review → pre-merge | Developer creating a new application or feature set |
 | **Migration** | 11 stages: discovery → compatibility → drift → drift-fix → plan → pilot → pilot-validate → execute → post-scan → doc-update → pre-merge | Developer upgrading Angular versions, migrating patterns, or switching libraries |
 
-Read `workflows.instructions.md` for the full stage definitions, skill chaining rules, and prerequisite mappings.
+Refer to the cross-domain coordination table below for full stage definitions, skill chaining rules, and prerequisite mappings.
 
 ## First interaction
 
