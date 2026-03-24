@@ -133,7 +133,14 @@ function detectNodeProject(root: string, info: ProjectInfo): void {
       .filter(([dep]) => deps[dep])
       .map(([, name]) => name);
 
-    if (!deps['primeng'] && detectedAlts.length === 0) {
+    // Only recommend PrimeNG if project has UI components but no component library
+    // Don't recommend for brand new projects with no components yet
+    const hasComponents = fs.existsSync(path.join(root, 'src', 'app')) &&
+      fs.readdirSync(path.join(root, 'src', 'app'), { recursive: true })
+        .some((f: any) => String(f).endsWith('.component.ts'));
+    const hasNxApps = fs.existsSync(path.join(root, 'apps'));
+
+    if (!deps['primeng'] && detectedAlts.length === 0 && (hasComponents || hasNxApps)) {
       info.recommendations.push('PrimeNG is the recommended component library. Run: npm install primeng');
     }
     if (deps['primeng'] && detectedAlts.length > 0) {
@@ -145,7 +152,7 @@ function detectNodeProject(root: string, info: ProjectInfo): void {
   }
 
   // Angular version-specific recommendations
-  const angularVersion = parseVersion(deps['@angular/core']);
+  const angularVersion = parseMajorVersion(deps['@angular/core']);
   if (angularVersion) {
     if (angularVersion < 17) {
       info.recommendations.push(`Angular ${angularVersion} is below LTS-2. Run: @angular /angular-migrate-version`);
@@ -154,11 +161,17 @@ function detectNodeProject(root: string, info: ProjectInfo): void {
       info.recommendations.push('Karma is deprecated in Angular 18+. Run: @angular /angular-migrate-jest');
     }
 
-    // Check TypeScript compatibility
+    // Check TypeScript compatibility using major.minor
     const tsVersion = parseVersion(deps['typescript']);
     if (tsVersion) {
-      if (angularVersion >= 19 && tsVersion < 5.5) {
-        info.recommendations.push(`Angular 19 requires TypeScript >=5.5. You have ${deps['typescript']}.`);
+      const tsRequirements: Record<number, number> = {
+        21: 5.9, 20: 5.8, 19: 5.5, 18: 5.4, 17: 5.2,
+      };
+      const requiredTs = tsRequirements[angularVersion];
+      if (requiredTs && tsVersion < requiredTs) {
+        info.recommendations.push(
+          `Angular ${angularVersion} requires TypeScript >=${requiredTs}. You have ${deps['typescript']}. Run: npm install typescript@${requiredTs}`
+        );
       }
     }
   }
@@ -229,6 +242,17 @@ function readJson(root: string, filename: string): any | null {
 }
 
 function parseVersion(semver: string | undefined): number | null {
+  if (!semver) return null;
+  // Extract major.minor as a float (e.g., "~5.9.2" → 5.9, "^19.2.0" → 19.2)
+  const match = semver.match(/(\d+)\.(\d+)/);
+  if (!match) {
+    const majorOnly = semver.match(/(\d+)/);
+    return majorOnly ? parseInt(majorOnly[1]) : null;
+  }
+  return parseFloat(`${match[1]}.${match[2]}`);
+}
+
+function parseMajorVersion(semver: string | undefined): number | null {
   if (!semver) return null;
   const match = semver.match(/(\d+)/);
   return match ? parseInt(match[1]) : null;
