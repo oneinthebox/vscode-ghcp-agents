@@ -664,7 +664,8 @@ references:
           <header><h2>Introducing <span class="accent-text">ORCH</span>ESTRA</h2><p>Enterprise agents, skills, and audit &mdash; one command.</p></header>
           <div class="body">
             <pre><code>npm install -g @orch/cli
-orch init
+orch new nx-angular my-app    # new project
+orch init                      # existing project
 orch doctor
 orch reset</code></pre>
             <div class="split split-2">
@@ -983,7 +984,8 @@ agents:
         <section>
           <header><h2>Marketplace</h2><p>Discover, install, update, and manage. Everything via CLI.</p></header>
           <div class="body">
-            <pre><code>orch list                        # see all available agents and skills
+            <pre><code>orch new nx-angular my-app       # scaffold new project + init ORCH
+orch list                        # see all available agents and skills
 orch install @angular            # install a domain (39 skills + 5 agents)
 orch install @local              # install shared agent
 orch update                      # pull latest from marketplace
@@ -1179,7 +1181,8 @@ If auto_mode is "step-by-step": pause at every step.</code></pre>
         <header><h2>Getting Started</h2><p>Three commands to full orchestration.</p></header>
         <div class="body">
           <pre><code>npm install -g @orch/cli
-orch init
+orch new nx-angular my-app    # new project
+orch init                      # existing project
 orch doctor
 
 # In VS Code

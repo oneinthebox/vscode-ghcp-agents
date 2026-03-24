@@ -10,6 +10,7 @@ import { doctorCommand } from '../src/commands/doctor';
 
 import { resetCommand } from '../src/commands/reset';
 import { listCommand } from '../src/commands/list';
+import { newCommand } from '../src/commands/new';
 import { maintainConvertCommand, maintainRefreshCommand, maintainPublishCommand } from '../src/commands/maintain';
 
 const program = new Command();
@@ -111,6 +112,15 @@ program
   .option('--skip-scan', 'Skip initial codebase scan')
   .option('--skip-registry', 'Skip reference doc registration')
   .action(initCommand);
+
+program
+  .command('new <type> <name>')
+  .description('Create a new project + initialize ORCH')
+  .option('-s, --style <format>', 'Stylesheet format (scss, css, less)', 'scss')
+  .option('-p, --package-manager <pm>', 'Package manager (npm, yarn, pnpm)', 'npm')
+  .option('--docker', 'Add Dockerfile + docker-compose.yml')
+  .option('--ci <platform>', 'Add CI template (github-actions)')
+  .action(newCommand);
 
 program
   .command('install <agent>')

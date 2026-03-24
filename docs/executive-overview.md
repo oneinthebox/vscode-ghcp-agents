@@ -147,6 +147,7 @@ Generates a 13-section HTML report covering architecture, dependencies, patterns
 
 | Command | Purpose |
 |---------|---------|
+| `orch new <type> <name>` | Create new project + initialize ORCH |
 | `orch init` | Initialize ORCH in current project |
 | `orch install <domain>` | Install a domain agent (e.g., `angular`) |
 | `orch update` | Update all installed domains to latest |
@@ -235,7 +236,11 @@ Every agent action passes through the audit framework. Nothing executes without 
 ### Getting Started
 
 ```bash
+# New project
 npm install -g @orch/cli
+orch new nx-angular my-app
+
+# Or existing project
 orch init
 orch doctor
 ```
@@ -260,4 +265,4 @@ Then in VS Code with GitHub Copilot:
 | What's the first domain? | Angular — 39 skills, 3 role-based agents, declarative workflows |
 | What about other stacks? | Same pattern — Spring Boot, FastAPI, and any domain follow the coordinator + planner + engineer + verifier model |
 | Is it audited? | 100% — every session, every token, every tool call |
-| How do teams adopt it? | `orch init` — one command to start |
+| How do teams adopt it? | `orch new` for new projects, `orch init` for existing — one command to start |

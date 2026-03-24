@@ -163,14 +163,15 @@ vscode-ghcp-agents/
 ## Getting Started
 
 ```bash
-# Install the ORCH CLI
+# New project from scratch
 npm install -g @orch/cli
+orch new nx-angular my-app    # creates Nx workspace + initializes ORCH
+cd my-app
+orch doctor
 
-# Initialize ORCH in your project
-cd your-project
+# Existing project
+cd your-existing-project
 orch init
-
-# Verify installation
 orch doctor
 ```
 

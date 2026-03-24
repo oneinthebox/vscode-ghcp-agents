@@ -41,6 +41,10 @@ export async function initCommand(options: any): Promise<void> {
     fail('No project detected in this directory.');
     info('Expected one of: package.json, pom.xml, pyproject.toml, requirements.txt');
     info('Run orch init from your project root directory.');
+    info('');
+    info('Starting from scratch? Try:');
+    info('  orch new nx-angular my-app    # Nx Angular monorepo (recommended)');
+    info('  orch new angular my-app       # standalone Angular app');
     console.log('');
     process.exit(1);
   }

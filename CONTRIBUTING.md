@@ -100,6 +100,9 @@ cd ..
 
 # Verify
 orch --version
+
+# Scaffold a test project to develop against
+orch new nx-angular test-app    # scaffold a test project
 ```
 
 ---

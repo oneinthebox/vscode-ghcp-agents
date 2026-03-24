@@ -45,6 +45,17 @@ A hands-on guide for developers using ORCH daily. Follow top to bottom on your f
 
 ### Install and Initialize
 
+**New project:**
+
+```bash
+npm install -g @orch/cli
+orch new nx-angular my-app
+cd my-app
+orch doctor
+```
+
+**Existing project:**
+
 ```bash
 npm install -g @orch/cli
 cd your-project
@@ -131,6 +142,7 @@ Decision: No file changes? Query. Clear and bounded? Quick fix. Everything else?
 
 | Command | Purpose | Example |
 |---------|---------|---------|
+| `orch new <type> <name>` | Create new project + initialize ORCH | `orch new nx-angular my-app` |
 | `orch init` | Initialize ORCH in your project | `cd my-app && orch init` |
 | `orch install @angular` | Install a specific domain | `orch install @angular` |
 | `orch update` | Pull latest tooling + references | `orch update` |
@@ -141,6 +153,8 @@ Decision: No file changes? Query. Clear and bounded? Quick fix. Everything else?
 | `orch reset --force` | Clean wipe without confirmation | `orch reset --force` |
 | `orch maintain convert` | Convert doc sources to markdown | `orch maintain convert` |
 | `orch maintain refresh` | Refresh stale reference docs | `orch maintain refresh` |
+
+**`orch new`** scaffolds a new project and runs `orch init` automatically. Types: `nx-angular` (Nx monorepo, recommended), `angular` (standalone CLI app), `empty` (no framework). Options: `--style scss`, `--package-manager npm`, `--docker`, `--ci github-actions`.
 
 **`orch init`** detects project type, copies agents/skills/hooks, creates `.orch/` structure, fetches reference docs from doc-packs.
 
@@ -790,6 +804,20 @@ Developer → Chrome (capture HAR) → /local-mock-capture → /local-mock-gener
 ---
 
 ## 13. Creating a New Project
+
+### Recommended: Use the CLI
+
+```bash
+orch new nx-angular my-trade-app
+```
+
+This is the fastest way. It scaffolds the workspace, creates shared libs, and runs `orch init` automatically.
+
+### Alternative: Use the skill (if you're already inside VS Code with ORCH)
+
+```
+@local /local-create-workspace nx-angular my-trade-app
+```
 
 ### 13.1 Create an Nx Angular Monorepo (Recommended)
 
