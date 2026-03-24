@@ -33,6 +33,30 @@ sources:
     last_refreshed: null
     status: draft
 
+  - id: nx-angular-version-matrix
+    name: "Nx and Angular Version Compatibility Matrix"
+    type: url
+    origin: https://nx.dev/docs/technologies/angular/guides/angular-nx-version-matrix
+    format: html
+    output: .orch/references/angular/nx-angular-version-matrix.md
+    scope: frontend-ts-angular
+    version: "latest"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: angular-supported-versions
+    name: "Angular Actively Supported Versions"
+    type: url
+    origin: https://angular.dev/reference/versions
+    format: html
+    output: .orch/references/angular/supported-versions.md
+    scope: frontend-ts-angular
+    version: "latest"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
   - id: angular-essentials-v19
     name: "Angular Essentials v19"
     type: url

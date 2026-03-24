@@ -102,7 +102,7 @@ function detectNodeProject(root: string, info: ProjectInfo): void {
     info.testStack.unit = 'jest';
   } else if (deps['karma']) {
     info.testStack.unit = 'karma';
-    info.recommendations.push('Migrate from Karma to Jest using /migrate skill');
+    info.recommendations.push('Migrate from Karma to Jest. Run: @angular /angular-migrate-jest');
   } else if (deps['vitest']) {
     info.testStack.unit = 'vitest';
   }
@@ -111,10 +111,10 @@ function detectNodeProject(root: string, info: ProjectInfo): void {
     info.testStack.e2e = 'playwright';
   } else if (deps['cypress']) {
     info.testStack.e2e = 'cypress';
-    info.recommendations.push('Consider migrating from Cypress to Playwright for new e2e tests');
+    info.recommendations.push('Consider migrating from Cypress to Playwright. Run: @angular /angular-migrate-playwright');
   } else if (deps['protractor']) {
     info.testStack.e2e = 'protractor';
-    info.recommendations.push('Migrate from Protractor to Playwright (Protractor is deprecated)');
+    info.recommendations.push('Migrate from Protractor to Playwright (deprecated). Run: @angular /angular-migrate-playwright');
   }
 
   // Library recommendations
@@ -134,7 +134,7 @@ function detectNodeProject(root: string, info: ProjectInfo): void {
       .map(([, name]) => name);
 
     if (!deps['primeng'] && detectedAlts.length === 0) {
-      info.recommendations.push('PrimeNG is the recommended component library — consider adding it');
+      info.recommendations.push('PrimeNG is the recommended component library. Run: npm install primeng');
     }
     if (deps['primeng'] && detectedAlts.length > 0) {
       info.recommendations.push(`Both PrimeNG and ${detectedAlts.join(', ')} detected — prefer PrimeNG for new components`);
@@ -148,10 +148,10 @@ function detectNodeProject(root: string, info: ProjectInfo): void {
   const angularVersion = parseVersion(deps['@angular/core']);
   if (angularVersion) {
     if (angularVersion < 17) {
-      info.recommendations.push(`Angular ${angularVersion} is below LTS-2. Upgrade recommended.`);
+      info.recommendations.push(`Angular ${angularVersion} is below LTS-2. Run: @angular /angular-migrate-version`);
     }
     if (angularVersion >= 18 && deps['karma']) {
-      info.recommendations.push('Karma is deprecated in Angular 18+. Migrate to Jest.');
+      info.recommendations.push('Karma is deprecated in Angular 18+. Run: @angular /angular-migrate-jest');
     }
 
     // Check TypeScript compatibility

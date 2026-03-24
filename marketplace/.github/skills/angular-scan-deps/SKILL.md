@@ -3,6 +3,8 @@ name: angular-scan-deps
 description: "Scan project dependencies, versions, changelog matrix, and upgrade benefits"
 references:
   - references/angular/v19/compatibility-matrix.md
+  - references/angular/nx-angular-version-matrix.md
+  - references/angular/supported-versions.md
 allowed-tools:
   - codebase
 ---

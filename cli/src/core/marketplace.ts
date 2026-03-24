@@ -95,14 +95,14 @@ export function readMarketplace(marketplacePath: string): MarketplaceContents {
   }
 
   // Read audit scripts
-  const auditDir = path.join(mp, 'scripts', 'audit');
+  const auditDir = path.join(mp, '.orch', 'scripts', 'audit');
   if (fs.existsSync(auditDir)) {
     contents.auditScripts = fs.readdirSync(auditDir)
       .filter(f => f.endsWith('.sh') || f.endsWith('.py'));
   }
 
   // Read semantic adapters
-  const semanticDir = path.join(mp, 'scripts', 'semantic', 'adapters');
+  const semanticDir = path.join(mp, '.orch', 'scripts', 'semantic', 'adapters');
   if (fs.existsSync(semanticDir)) {
     contents.semanticAdapters = fs.readdirSync(semanticDir)
       .filter(f => fs.statSync(path.join(semanticDir, f)).isDirectory());

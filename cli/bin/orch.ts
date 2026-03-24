@@ -118,6 +118,7 @@ program
   .description('Create a new project + initialize ORCH')
   .option('-s, --style <format>', 'Stylesheet format (scss, css, less)', 'scss')
   .option('-p, --package-manager <pm>', 'Package manager (npm, yarn, pnpm)', 'npm')
+  .option('-a, --angular-version <version>', 'Angular version to install (e.g., 21, 20, 19)')
   .option('--docker', 'Add Dockerfile + docker-compose.yml')
   .option('--ci <platform>', 'Add CI template (github-actions)')
   .action(newCommand);

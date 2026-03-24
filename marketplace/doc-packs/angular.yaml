@@ -15,6 +15,29 @@ sources:
   # Static entries come first so they win in dedup over templates.
   # Templates cover v17/v18/v19 where angular.dev points to correct docs.
 
+  # ── Version Governance (always latest, not version-specific) ──
+  - id: nx-angular-version-matrix
+    name: "Nx and Angular Version Compatibility Matrix"
+    type: url
+    origin: https://nx.dev/docs/technologies/angular/guides/angular-nx-version-matrix
+    format: html
+    output: .orch/references/angular/nx-angular-version-matrix.md
+    scope: frontend-ts-angular
+    version: "latest"
+    last_refreshed: null
+    status: draft
+
+  - id: angular-supported-versions
+    name: "Angular Actively Supported Versions"
+    type: url
+    origin: https://angular.dev/reference/versions
+    format: html
+    output: .orch/references/angular/supported-versions.md
+    scope: frontend-ts-angular
+    version: "latest"
+    last_refreshed: null
+    status: draft
+
   # ── v16 (legacy, old domain) ──
   - id: angular-docs-v16
     name: "Angular Docs v16"

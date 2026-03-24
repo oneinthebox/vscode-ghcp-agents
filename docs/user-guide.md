@@ -422,6 +422,10 @@ Developers can now upgrade to the new version
 
 **For maintainers:** See [CONTRIBUTING.md](../CONTRIBUTING.md) for how to update the matrix and reference docs.
 
+**Authoritative sources** (registered in `.orch/registry.yaml`, refreshed via `@docs /docs-refresh`):
+- [Nx and Angular Version Compatibility Matrix](https://nx.dev/docs/technologies/angular/guides/angular-nx-version-matrix) — which Angular versions each Nx version supports
+- [Angular Actively Supported Versions](https://angular.dev/reference/versions) — which Angular versions are current vs LTS vs EOL
+
 ### 5.4 Boundaries (`.orch/audit/config/boundaries.yaml`)
 
 Defines which tools each agent can use and which files it can touch:

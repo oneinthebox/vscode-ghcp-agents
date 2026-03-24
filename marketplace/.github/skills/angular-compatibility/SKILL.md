@@ -3,6 +3,8 @@ name: angular-compatibility
 description: "Version compatibility matrix and upgrade path planning for the Angular ecosystem"
 references:
   - references/angular/v19/compatibility-matrix.md
+  - references/angular/nx-angular-version-matrix.md
+  - references/angular/supported-versions.md
 allowed-tools:
   - codebase
 ---

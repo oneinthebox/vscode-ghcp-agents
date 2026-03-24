@@ -22,12 +22,13 @@ const TEMPLATES: Record<string, {
     command: (name, opts) => {
       const style = opts.style || 'scss';
       const pm = opts.packageManager || 'npm';
-      return `npx create-nx-workspace@latest ${name} --preset=angular-monorepo --appName=${name} --style=${style} --nxCloud=skip --packageManager=${pm} --interactive=false`;
+      let cmd = `npx create-nx-workspace@latest ${name} --preset=angular-monorepo --appName=${name} --style=${style} --nxCloud=skip --packageManager=${pm} --interactive=false`;
+      return cmd;
     },
     postCreate: [
-      'npx nx generate @nx/angular:library shared-models --directory=libs/shared-models --standalone --prefix=shared --skipTests=true',
-      'npx nx generate @nx/angular:library shared-ui --directory=libs/shared-ui --standalone --prefix=shared --skipTests=true',
-      'npx nx generate @nx/angular:library data-access --directory=libs/data-access --standalone --prefix=data --skipTests=true',
+      'npx nx generate @nx/angular:library --name=shared-models --directory=libs/shared-models --standalone --prefix=shared --unitTestRunner=jest --no-interactive',
+      'npx nx generate @nx/angular:library --name=shared-ui --directory=libs/shared-ui --standalone --prefix=shared --unitTestRunner=jest --no-interactive',
+      'npx nx generate @nx/angular:library --name=data-access --directory=libs/data-access --standalone --prefix=data --unitTestRunner=jest --no-interactive',
     ],
   },
   'angular': {
@@ -78,6 +79,23 @@ export async function newCommand(type: string, name: string, options: any): Prom
   } catch (e) {
     fail(`Failed to create project. Check the output above for errors.`);
     return;
+  }
+
+  // Step 1b: Upgrade Angular version if specified
+  if (options.angularVersion) {
+    await section(`Upgrading to Angular ${options.angularVersion}`);
+    const upgradeCmd = `npx ng update @angular/core@${options.angularVersion} @angular/cli@${options.angularVersion} --force --allow-dirty`;
+    info(`Running: ${upgradeCmd}`);
+    try {
+      execSync(upgradeCmd, {
+        stdio: 'inherit',
+        cwd: targetDir,
+        timeout: 300000,
+      });
+      success(`Angular upgraded to v${options.angularVersion}.`);
+    } catch (e) {
+      warn(`Angular upgrade to v${options.angularVersion} had issues. Run orch doctor to check.`);
+    }
   }
 
   // Step 2: Post-creation setup (shared libs for Nx)
