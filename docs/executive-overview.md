@@ -30,7 +30,7 @@ ORCH is a **marketplace of custom Copilot agents, skills, and workflows** instal
 | Capability | Description |
 |------------|-------------|
 | **Role-based agents** | Planner, Engineer, and Verifier sub-agents per domain |
-| **58 granular skills** | One skill per task — scan, generate, migrate, test, deploy |
+| **60 granular skills** | One skill per task — scan, generate, migrate, test, deploy |
 | **Declarative workflows** | YAML-defined, phase-by-phase execution with checkpoints |
 | **Full audit trail** | Every action logged — tokens, tools, adherence, drift |
 
@@ -101,7 +101,7 @@ ORCH is a **marketplace of custom Copilot agents, skills, and workflows** instal
 
 The Angular domain serves as the reference implementation. All domains follow the same pattern.
 
-### Skill Inventory (38 skills)
+### Skill Inventory (39 skills)
 
 | Category | Count | Examples |
 |----------|-------|----------|
@@ -183,6 +183,20 @@ Community contribution follows `CONTRIBUTING.md` — add skills, submit workflow
 
 ## What Happens Behind the Scenes
 
+### Version Governance
+
+Agents never suggest upgrading to a version the org hasn't tested. A **curated compatibility matrix** acts as a governance gate:
+
+| Step | Who | What |
+|------|-----|------|
+| 1 | Framework team ships v20 | New version available on npm |
+| 2 | ORCH maintainer tests it | Validates compatibility with TypeScript, Nx, internal libs |
+| 3 | Maintainer updates matrix | Adds v20 to the approved compatibility rules |
+| 4 | `orch update` distributes | All projects receive the updated matrix |
+| 5 | Developers can now upgrade | `/angular-migrate-version` plans the path using approved versions |
+
+If a developer asks to upgrade to a version that isn't in the matrix, the agent responds: "Version not yet approved — contact the ORCH maintainer." No untested versions reach production code.
+
 ### Audit & Observability
 
 Every agent action passes through the audit framework. Nothing executes without a complete record.
@@ -243,7 +257,7 @@ Then in VS Code with GitHub Copilot:
 | What is ORCH? | A marketplace of custom Copilot agents, skills, and workflows for enterprise teams |
 | Why do we need it? | Generic Copilot doesn't know our standards, patterns, or conventions |
 | What does it replace? | Ad hoc Copilot usage with no governance or consistency |
-| What's the first domain? | Angular — 38 skills, 3 role-based agents, declarative workflows |
+| What's the first domain? | Angular — 39 skills, 3 role-based agents, declarative workflows |
 | What about other stacks? | Same pattern — Spring Boot, FastAPI, and any domain follow the coordinator + planner + engineer + verifier model |
 | Is it audited? | 100% — every session, every token, every tool call |
 | How do teams adopt it? | `orch init` — one command to start |

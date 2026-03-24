@@ -25,6 +25,7 @@ You are the local environment setup agent. Your role is **environment readiness*
 | `/local-mock-capture` | [local-mock-capture](../../skills/local-mock-capture/SKILL.md) | Import HAR + Chrome snippet → extract endpoints, schemas, relationships |
 | `/local-mock-generate` | [local-mock-generate](../../skills/local-mock-generate/SKILL.md) | Generate mock data from HAR/OpenAPI/TypeScript/manual → db.json + routes |
 | `/local-mock-server` | [local-mock-server](../../skills/local-mock-server/SKILL.md) | Start mock API server — full CRUD REST + WebSocket + CORS + relationships |
+| `/local-create-workspace` | [local-create-workspace](../../skills/local-create-workspace/SKILL.md) | Scaffold new workspace — Nx Angular monorepo, Angular CLI, or empty. Auto-runs orch init. |
 
 ## Platform detection
 

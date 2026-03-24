@@ -24,7 +24,7 @@ const AGENT_PACKAGES: Record<string, { skills: string[]; description: string }> 
       'angular-hds-audit', 'angular-hds-apply', 'angular-hds-generate',
       'angular-elevate-audit', 'angular-elevate-apply', 'angular-elevate-generate',
       'angular-docs-comment', 'angular-docs-readme', 'angular-docs-changelog', 'angular-docs-api',
-      'angular-mock-wire',
+      'angular-mock-wire', 'angular-create-app',
     ],
     description: 'Angular, TypeScript, RxJS expert (v17-v19) — planner, engineer, verifier',
   },
@@ -42,7 +42,8 @@ const AGENT_PACKAGES: Record<string, { skills: string[]; description: string }> 
   },
   local: {
     skills: ['local-setup-env', 'local-setup-docker', 'local-setup-deps', 'local-diagnose',
-      'local-mock-capture', 'local-mock-generate', 'local-mock-server'],
+      'local-mock-capture', 'local-mock-generate', 'local-mock-server',
+      'local-create-workspace'],
     description: 'Local environment setup — install dependencies, configure Docker, localstack, diagnose issues, mock API pipeline',
   },
 };

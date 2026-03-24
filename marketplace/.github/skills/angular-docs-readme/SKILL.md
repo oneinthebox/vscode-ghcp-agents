@@ -57,7 +57,7 @@ Custom sections preserved: {n} (if update)
 - Architecture (2 apps, 3 libs)
 - Available scripts (12 detected)
 - Testing
-- ORCH agents (11 agents, 58 skills available)
+- ORCH agents (11 agents, 60 skills available)
 ```
 
 ## Validation

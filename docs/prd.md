@@ -503,7 +503,7 @@ sequenceDiagram
     CLI-->>CLI: Detect: Angular 18, Nx, Jest, Playwright
     CLI->>MP: Read available agents + skills
     CLI->>Proj: Copy @angular coordinator + 3 sub-agents (planner, engineer, verifier)
-    CLI->>Proj: Copy 38 Angular skills (scan, generate, migrate, test, review, docs, mock-wire)
+    CLI->>Proj: Copy 39 Angular skills (scan, generate, migrate, test, review, docs, mock-wire)
     CLI->>Proj: Copy audit hooks (4) + scripts (12)
     CLI->>Proj: Copy .orch/audit/config/ + .orch/runs/
     CLI->>Proj: Create .orch/registry.yaml (12 sources for Angular 18)

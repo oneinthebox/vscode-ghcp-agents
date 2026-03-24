@@ -26,6 +26,7 @@ You are the ORCH Angular engineer sub-agent. Your role is **How & Where** — yo
 | `/angular-generate-service` | Scaffold injectable service |
 | `/angular-generate-route` | Scaffold route + lazy loading |
 | `/angular-mock-wire` | Generate services, interfaces, environment config, and contract tests from mock data |
+| `/angular-create-app` | Add a new app to an existing Nx workspace with routing, HDS, elevate, boundaries |
 
 ### Migration
 
