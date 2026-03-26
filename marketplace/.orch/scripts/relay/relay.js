@@ -180,14 +180,37 @@ function processCompletion(event, marker, runDir, events) {
       duration_sec: (Date.now() - new Date(event.lifecycle.started_at).getTime()) / 1000
     };
 
-    // Git checkpoint
+    // Git checkpoint — NEVER blocks the workflow
     if (event.checkpoint && event.checkpoint.enabled) {
       try {
-        execSync('git add -A && git commit -m "orch: ' + event.identity.phase_name.replace(/"/g, '\\"') + '"', {
+        // Stage source files only (exclude ORCH infrastructure)
+        execSync('git add -A -- . ":!.github" ":!.orch" ":!.vscode" ":!.github.pre-orch" 2>/dev/null || true', {
           cwd: projectRoot, stdio: 'pipe'
         });
+        // Only commit if there are staged changes
+        try {
+          execSync('git diff --cached --quiet', { cwd: projectRoot, stdio: 'pipe' });
+          // Exit 0 = nothing staged, skip commit
+          log('  Checkpoint: no source changes to commit (ORCH-only changes excluded)');
+        } catch (diffErr) {
+          // Exit 1 = has staged changes, commit them
+          try {
+            execSync('git commit -m "orch: ' + event.identity.phase_name.replace(/"/g, '\\"') + '"', {
+              cwd: projectRoot, stdio: 'pipe'
+            });
+            event.checkpoint.git_tag = 'orch/' + event.identity.event_id;
+            try {
+              execSync('git tag ' + event.checkpoint.git_tag, { cwd: projectRoot, stdio: 'pipe' });
+            } catch (tagErr) {
+              log('  Checkpoint: tag failed (may already exist) — continuing');
+            }
+            log('  Checkpoint: committed + tagged ' + event.checkpoint.git_tag);
+          } catch (commitErr) {
+            log('  Checkpoint: commit failed — ' + (commitErr.message || '').split('\n')[0] + ' — continuing');
+          }
+        }
       } catch (err) {
-        // Commit may fail if nothing changed — not fatal
+        log('  Checkpoint: git add failed — ' + (err.message || '').split('\n')[0] + ' — continuing');
       }
     }
 
@@ -295,16 +318,31 @@ function dispatchScript(event, runDir, events) {
         log('Warning: could not write output file: ' + err.message);
       }
 
-      // Git checkpoint
+      // Git checkpoint — NEVER blocks the workflow
       if (event.checkpoint && event.checkpoint.enabled) {
         try {
-          execSync('git add -A && git commit -m "orch: ' + event.identity.phase_name.replace(/"/g, '\\"') + '"', {
+          execSync('git add -A -- . ":!.github" ":!.orch" ":!.vscode" ":!.github.pre-orch" 2>/dev/null || true', {
             cwd: projectRoot, stdio: 'pipe'
           });
-          event.checkpoint.git_tag = 'orch/' + event.identity.event_id;
-          execSync('git tag ' + event.checkpoint.git_tag, { cwd: projectRoot, stdio: 'pipe' });
+          try {
+            execSync('git diff --cached --quiet', { cwd: projectRoot, stdio: 'pipe' });
+            log('  Checkpoint: no source changes to commit');
+          } catch (diffErr) {
+            try {
+              execSync('git commit -m "orch: ' + event.identity.phase_name.replace(/"/g, '\\"') + '"', {
+                cwd: projectRoot, stdio: 'pipe'
+              });
+              event.checkpoint.git_tag = 'orch/' + event.identity.event_id;
+              try {
+                execSync('git tag ' + event.checkpoint.git_tag, { cwd: projectRoot, stdio: 'pipe' });
+              } catch (te) {}
+              log('  Checkpoint: committed + tagged ' + event.checkpoint.git_tag);
+            } catch (ce) {
+              log('  Checkpoint: commit failed — continuing');
+            }
+          }
         } catch (err) {
-          // Git operations may fail — not fatal
+          log('  Checkpoint: git failed — continuing');
         }
       }
 

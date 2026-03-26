@@ -49,7 +49,18 @@ Run all checks in order. Produce a consolidated pre-flight report.
 
 - Run `git status --porcelain` to check for uncommitted changes.
 - Only run if `preflight.check_git_clean` is true in config.
-- **Action if failed**: Warn about uncommitted changes. List modified files. Do not block — but recommend committing or stashing first.
+- **EXCLUDE these directories from the check** — they are ORCH-managed and always have changes:
+  - `.github/` (agents, skills, hooks, instructions)
+  - `.orch/` (config, references, scripts, audit, cache, runs, reports)
+  - `.vscode/` (settings.json)
+  - `.github.pre-orch/` (backup from orch init)
+  - `node_modules/`
+  - `.angular/`
+  - `.nx/`
+- **Use this command instead**: `git status --porcelain | grep -v '^\?\? \.\(github\|orch\|vscode\|angular\|nx\)' | grep -v '^\?\? node_modules' | grep -v '^ M \.\(github\|orch\|vscode\)' | grep -v 'github\.pre-orch'`
+- **This is a WARNING, NEVER a blocker.** Dirty git state should NOT prevent workflow execution.
+- **Action if source files are dirty**: Warn and recommend committing. Continue with the workflow.
+- **Action if only ORCH files are dirty**: Ignore completely — this is normal after `orch init`.
 
 ### 6. Config valid
 
