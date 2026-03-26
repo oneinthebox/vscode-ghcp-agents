@@ -375,8 +375,20 @@ function dispatchAI(event, runDir) {
   log('AI start: ' + event.identity.phase_name + ' — sending to Copilot Chat');
 
   try {
-    const agentName = event.identity.agent || 'angular';
-    const cmd = 'code chat --mode agent --reuse-window --add-file "' + promptFile + '" "@' + agentName + ' Execute the phase described in the attached prompt file. Write the completion marker when done."';
+    // Map short agent names from YAML to full VS Code agent names
+    var rawAgent = event.identity.agent || 'angular';
+    var agentMap = {
+      'planner': 'angular-planner',
+      'engineer': 'angular-engineer',
+      'verifier': 'angular-verifier',
+      'angular': 'angular',
+      'orch': 'orch',
+      'docs': 'docs',
+      'audit': 'audit',
+      'local': 'local'
+    };
+    const agentName = agentMap[rawAgent] || rawAgent;
+    const cmd = 'code chat --mode agent --reuse-window --add-file "' + promptFile + '" "@' + agentName + ' Execute the phase described in the attached prompt file. When complete, you MUST create the completion marker file specified at the end of the prompt. Do NOT ask follow-up questions. Do NOT offer next steps. Just execute, write the marker, and stop."';
     const child = spawn('sh', ['-c', cmd], { detached: true, stdio: 'ignore' });
     child.unref();
     log('  Sent to @' + agentName + ' via code chat');

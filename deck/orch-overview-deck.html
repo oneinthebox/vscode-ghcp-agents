@@ -670,7 +670,7 @@ orch doctor
 orch reset</code></pre>
             <div class="split split-2">
               <div><h3>What it creates</h3><ul><li><strong>Role-based agents</strong> &mdash; specialized AI personas with defined tools and boundaries</li><li><strong>Granular skills</strong> &mdash; focused, reusable task definitions with references and scripts</li><li><strong>Smart instructions</strong> &mdash; always-on coding standards, auto-applied per context</li><li><strong>Event-driven workflows</strong> &mdash; multi-phase execution with safe-by-default approval</li><li><strong>Structured reports</strong> &mdash; HTML, Markdown, JSON with templates and trend tracking</li><li><strong>Comprehensive audit</strong> &mdash; every tool call, file edit, and token logged and scored</li><li><strong>Version-aware resolution</strong> &mdash; detects your stack, loads appropriate patterns</li><li><strong>Platform integration</strong> &mdash; Elevate libraries and HDS design system wired in</li></ul></div>
-              <div><h3>What stays in your hands</h3><ul><li>Which agents are installed</li><li>What tools each agent can access</li><li>Auto mode or approval at every step</li><li>Model selection backed by benchmark data</li><li>Clean removal with one command when needed</li></ul></div>
+              <div><h3>What stays in your hands</h3><ul><li><strong>Agent selection</strong> &mdash; choose which agents are installed per project</li><li><strong>Tool boundaries</strong> &mdash; define what each agent can access and modify</li><li><strong>Approval control</strong> &mdash; safe mode by default, auto when you're ready</li><li><strong>Model choice</strong> &mdash; select models per role, backed by benchmark data</li><li><strong>Clean exit</strong> &mdash; one command removes everything, restores original state</li></ul></div>
             </div>
           </div>
         </section>
@@ -904,81 +904,67 @@ phases:
 
       <!-- 14 -->
       <section>
-        <header><h2>The Agent Ecosystem</h2><p>Three clean layers. One orchestrator. Domain agents. Shared services.</p></header>
+        <header><h2>The Agent Ecosystem</h2><p>Three layers. One orchestrator. Domain agents. Shared services.</p></header>
         <div class="body">
-          <div style="display: flex; flex-direction: column; gap: var(--sp-3); width: 100%;">
-            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--fg-accent); border-radius: 8px; padding: var(--sp-3) var(--sp-5);">
-              <h3 style="margin: 0 0 var(--sp-1) 0;">Orchestrator</h3>
-              <div style="display: flex; align-items: baseline; gap: var(--sp-4);">
-                <span style="font-family: var(--f-mono); font-weight: 500; color: var(--fg-accent);">@orch</span>
-                <span style="font-size: var(--fs-small); color: var(--fg-secondary);">Auto-detects domain, pre-flight, plans, monitors</span>
-              </div>
-            </div>
-            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--border-default); border-radius: 8px; padding: var(--sp-3) var(--sp-5);">
-              <h3 style="margin: 0 0 var(--sp-1) 0;">Domain Agents</h3>
-              <div style="display: flex; align-items: baseline; gap: var(--sp-6); flex-wrap: wrap;">
-                <span><span style="font-family: var(--f-mono); font-weight: 500; color: var(--fg-teal);">@angular</span> <span class="tag tag-teal">active</span></span>
-                <span><span style="font-family: var(--f-mono); font-weight: 500; color: var(--fg-teal);">@springboot</span> <span class="tag tag-amber">coming</span></span>
-                <span><span style="font-family: var(--f-mono); font-weight: 500; color: var(--fg-teal);">@fastapi</span> <span class="tag tag-amber">coming</span></span>
-              </div>
-            </div>
-            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--border-default); border-radius: 8px; padding: var(--sp-3) var(--sp-5);">
-              <h3 style="margin: 0 0 var(--sp-1) 0;">Shared Services</h3>
-              <div style="display: flex; align-items: baseline; gap: var(--sp-6); flex-wrap: wrap;">
-                <span style="font-family: var(--f-mono); font-weight: 500; color: oklch(0.5 0.1 85);">@docs</span>
-                <span style="font-family: var(--f-mono); font-weight: 500; color: var(--neutral-500);">@audit</span>
-                <span style="font-family: var(--f-mono); font-weight: 500; color: var(--neutral-500);">@local</span>
-              </div>
-              <div style="font-size: var(--fs-small); color: var(--fg-secondary); margin-top: var(--sp-1);">References, compliance, environment setup</div>
-            </div>
+          <h3>Orchestrator</h3>
+          <div class="flow" style="flex-wrap: nowrap; margin-bottom: var(--sp-4);">
+            <div class="flow-step" style="border-color: var(--fg-accent); background: var(--bg-warm);">@orch<small>auto-detect &middot; pre-flight &middot; plan &middot; monitor</small></div>
+          </div>
+
+          <h3>Domain Agents</h3>
+          <div class="flow" style="flex-wrap: nowrap; margin-bottom: var(--sp-4);">
+            <div class="flow-step" style="border-color: var(--fg-accent);">@angular<small>active</small></div>
+            <div class="flow-step" style="border-color: var(--neutral-300);">@springboot<small>coming soon</small></div>
+            <div class="flow-step" style="border-color: var(--neutral-300);">@fastapi<small>coming soon</small></div>
+          </div>
+
+          <h3>Shared Services</h3>
+          <div class="flow" style="flex-wrap: nowrap;">
+            <div class="flow-step">@docs<small>references &middot; registry &middot; freshness</small></div>
+            <div class="flow-step">@audit<small>compliance &middot; tokens &middot; drift</small></div>
+            <div class="flow-step">@local<small>environment &middot; docker &middot; mocks</small></div>
           </div>
         </div>
       </section>
 
       <!-- 14b — ORCH Architecture Diagram -->
       <section>
-        <header><h2>ORCH Architecture</h2><p>Event-driven flow. One command to autonomous execution.</p></header>
+        <header><h2>Event-Driven Execution</h2><p>One command. Plan → Outbound store → Relay → Queue → Status update → Report.</p></header>
         <div class="body">
-          <div style="display: flex; flex-direction: column; gap: var(--sp-4); align-items: center; width: 100%;">
+          <div class="flow" style="flex-wrap: nowrap;">
+            <div class="flow-step" style="background: var(--bg-warm);">User<small>"@orch migrate to Angular 21"</small></div>
+            <div class="flow-arr">&rarr;</div>
+            <div class="flow-step" style="border-color: var(--fg-accent);">@orch<small>pre-flight &middot; detect &middot; match</small></div>
+            <div class="flow-arr">&rarr;</div>
+            <div class="flow-step">Plan<small>publish.js &rarr; event files</small></div>
+            <div class="flow-arr">&rarr;</div>
+            <div class="flow-step" style="border-color: var(--fg-accent);">Relay<small>poll 5s &middot; dispatch &middot; monitor</small></div>
+            <div class="flow-arr">&rarr;</div>
+            <div class="flow-step done">Report<small>.orch/reports/ &middot; git tag</small></div>
+          </div>
 
-            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--border-default); border-radius: 8px; padding: var(--sp-3) var(--sp-5); text-align: center; width: 80%;">
-              <strong>User</strong>: "@orch migrate to Angular 21"
-            </div>
-
-            <div style="color: var(--fg-muted);">&#x25BC;</div>
-
-            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--fg-accent); border-radius: 8px; padding: var(--sp-3) var(--sp-5); text-align: center; width: 80%;">
-              <strong>@orch</strong> &mdash; Pre-flight &middot; Detect domain &middot; Match workflow
-            </div>
-
-            <div style="color: var(--fg-muted);">&#x25BC;</div>
-
-            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--border-default); border-radius: 8px; padding: var(--sp-3) var(--sp-5); width: 80%;">
-              <strong>Plan</strong> &mdash; Event files created
-              <div style="display: flex; gap: var(--sp-2); margin-top: var(--sp-2); flex-wrap: wrap; justify-content: center;">
-                <span class="tag tag-teal">001 scan</span>
-                <span class="tag tag-teal">002 compat</span>
-                <span class="tag tag-amber">003 upgrade</span>
-                <span class="tag tag-amber">004 migrate</span>
-                <span class="tag">005 verify</span>
+          <div style="margin-top: var(--sp-5);">
+            <h3>Inside the relay</h3>
+            <div class="flow" style="flex-wrap: nowrap;">
+              <div class="flow-step">Ready<small>events with deps met</small></div>
+              <div class="flow-arr">&rarr;</div>
+              <div style="border: 1.5px dashed var(--neutral-300); border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-3); display: flex; align-items: center; gap: var(--sp-2); position: relative;">
+                <span style="position: absolute; top: -8px; left: var(--sp-3); background: var(--bg-page); padding: 0 4px; font-size: var(--fs-tiny); color: var(--fg-muted); font-weight: 600;">consumers</span>
+                <div class="flow-step">Script<small>spawn node &middot; 4x parallel</small></div>
+                <div class="flow-step">AI<small>code chat &middot; 1x sequential</small></div>
               </div>
-              <div style="margin-top: var(--sp-2); font-size: 0.8em; color: var(--fg-muted); text-align: center;">
-                approve &middot; approve-all &middot; --auto
-              </div>
+              <div class="flow-arr">&rarr;</div>
+              <div class="flow-step">.output.json<small>script result</small></div>
+              <div class="flow-step">.complete.json<small>AI marker</small></div>
+              <div class="flow-arr">&rarr;</div>
+              <div class="flow-step done">Status<small>queued &rarr; ready &rarr; complete</small></div>
             </div>
+          </div>
 
-            <div style="color: var(--fg-muted);">&#x25BC;</div>
-
-            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--fg-accent); border-radius: 8px; padding: var(--sp-3) var(--sp-5); text-align: center; width: 80%;">
-              <strong>Relay</strong> &mdash; Scripts: parallel (4x) &middot; AI: code chat &middot; Polls every 5s
-            </div>
-
-            <div style="color: var(--fg-muted);">&#x25BC;</div>
-
-            <div style="background: var(--teal-100, oklch(0.95 0.03 170)); border: 1.5px solid var(--teal-500, oklch(0.55 0.12 170)); border-radius: 8px; padding: var(--sp-3) var(--sp-5); text-align: center; width: 80%;">
-              <strong>Complete</strong> &mdash; Report at .orch/reports/ &middot; Git tag &middot; Trend tracked
-            </div>
-
+          <div style="display: flex; gap: var(--sp-4); margin-top: var(--sp-4); font-size: var(--fs-small); color: var(--fg-secondary);">
+            <div><span class="tag tag-teal">safe</span> scripts auto, AI pauses for approval</div>
+            <div><span class="tag tag-amber">--auto</span> everything runs, zero pauses</div>
+            <div><span class="tag">approve-all</span> mid-workflow upgrade to auto</div>
           </div>
         </div>
       </section>

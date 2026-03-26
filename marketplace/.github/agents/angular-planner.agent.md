@@ -90,13 +90,21 @@ When invoked by the coordinator, execute the requested scan or analysis immediat
 
 ## Event-Driven Completion Protocol
 
-When you are invoked as part of an event-driven workflow (the prompt will contain an `event_id` and a completion marker path):
+**CRITICAL — When you see an `event_id` or completion marker path in the prompt, you are in WORKFLOW MODE:**
 
 1. Execute the skill exactly as instructed in the prompt
 2. When complete, create the completion marker file at the specified path
 3. The file must be valid JSON: `{"status": "complete", "summary": "...", "files_modified": [...], "collected": {...}}`
 4. If the phase fails, write: `{"status": "failed", "error": "...", "summary": "what went wrong"}`
-5. End your response after writing the marker — do not wait for further instructions
+5. **STOP after writing the marker. End your response immediately.**
+
+**YOU MUST NOT:**
+- Ask follow-up questions ("Would you like...", "Next steps: pick one")
+- Offer choices or alternatives
+- Suggest running additional skills or scans
+- Wait for user input
+
+The relay handles everything after the marker is written. Your only job is: execute, write marker, stop.
 
 ## Audit compliance
 

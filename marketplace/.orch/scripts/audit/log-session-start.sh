@@ -6,8 +6,13 @@
 set -uo pipefail
 
 INPUT=$(cat)
-SESSION_ID=$(echo "$INPUT" | jq -r '.sessionId // "unknown"')
-AGENT_NAME=$(echo "$INPUT" | jq -r '.agentName // "unknown"')
+SESSION_ID=$(echo "$INPUT" | jq -r '.sessionId // empty' 2>/dev/null || echo "")
+AGENT_NAME=$(echo "$INPUT" | jq -r '.agentName // "unknown"' 2>/dev/null || echo "unknown")
+
+# If session ID is empty or "unknown", generate one from timestamp
+if [ -z "$SESSION_ID" ] || [ "$SESSION_ID" = "unknown" ] || [ "$SESSION_ID" = "null" ]; then
+  SESSION_ID="session-$(date -u +%Y%m%d-%H%M%S)-$$"
+fi
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 DATE_DIR=$(date -u +"%Y-%m-%d")
 USER_NAME=$(git config user.name 2>/dev/null || echo "unknown")

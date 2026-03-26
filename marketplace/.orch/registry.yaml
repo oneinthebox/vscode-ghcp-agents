@@ -534,6 +534,17 @@ sources:
     last_refreshed: "2026-03-25"
     status: current
 
+  - id: primeng-lts
+    name: "PrimeNG — LTS & Version Compatibility"
+    type: url
+    origin: https://primeng.org/lts
+    format: html
+    output: .orch/references/primeng/lts-guide.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-27"
+    status: current
+
   - id: primeng-v18-install
     name: "PrimeNG v18 — Installation"
     type: url
@@ -703,15 +714,15 @@ sources:
     status: draft
 
   - id: ag-grid-compatibility
-    name: "AG Grid — Angular Version Compatibility Matrix"
+    name: "AG Grid — Angular Version Compatibility"
     type: url
     origin: https://www.ag-grid.com/angular-data-grid/compatibility/
     format: html
     output: .orch/references/ag-grid/compatibility-guide.md
     scope: frontend-ts-angular
     managed_by: "pack:angular"
-    last_refreshed: null
-    status: draft
+    last_refreshed: "2026-03-27"
+    status: current
 
   - id: ag-grid-upgrade-v35
     name: "AG Grid — Upgrading to v35"

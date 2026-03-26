@@ -658,8 +658,9 @@ export function executeAssembly(
 }
 
 /**
- * Copy pre-converted reference docs (.md files) from marketplace to target.
- * Only copies files that match output paths in the assembly plan's registry sources.
+ * Copy ALL reference docs from marketplace to target.
+ * Sources: (1) registry output paths, (2) skill references, (3) all .md files in references tree.
+ * This ensures every doc that any skill or workflow might need is available.
  */
 function copyReferenceDocs(
   mp: string,
@@ -671,15 +672,12 @@ function copyReferenceDocs(
   const refsDir = path.join(mp, '.orch', 'references');
   if (!fs.existsSync(refsDir)) return 0;
 
-  // Build a set of expected output paths from registry sources
-  const expectedOutputs = new Set<string>();
-  for (const source of registrySources) {
-    if (source.output) {
-      expectedOutputs.add(source.output);
-    }
-  }
+  // Strategy: copy ALL .md and .yaml files from the references tree.
+  // Previously we only copied files matching registry output paths, which missed
+  // skill-referenced docs (e.g., compatibility-matrix.md referenced by angular-compatibility
+  // skill but not in the registry). Now we copy everything — the reference tree is
+  // curated content that should always be available.
 
-  // Walk marketplace references and copy matching files
   const walk = (dir: string, relBase: string) => {
     if (!fs.existsSync(dir)) return;
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -687,18 +685,20 @@ function copyReferenceDocs(
       const relPath = path.join(relBase, entry.name);
       if (entry.isDirectory()) {
         walk(srcPath, relPath);
-      } else if (entry.name.endsWith('.md') || entry.name.endsWith('.json')) {
+      } else if (entry.name.endsWith('.md') || entry.name.endsWith('.json') || entry.name.endsWith('.yaml')) {
         const refRelPath = path.join('.orch', 'references', relPath);
-        // Copy if it matches an expected output or is in the references tree
-        if (expectedOutputs.has(refRelPath) || expectedOutputs.size === 0) {
-          const dest = path.join(target, refRelPath);
-          const result = safeCopy(srcPath, dest);
-          if (result === 'copied') {
-            copied++;
+        const dest = path.join(target, refRelPath);
+        const result = safeCopy(srcPath, dest);
+        if (result === 'copied') {
+          copied++;
+          manifest.files.push(refRelPath);
+          manifest.checksums[refRelPath] = computeChecksum(dest);
+        } else if (result === 'skipped') {
+          // Still track in manifest for reset cleanup
+          if (!manifest.files.includes(refRelPath)) {
             manifest.files.push(refRelPath);
-
-            manifest.checksums[refRelPath] = computeChecksum(dest);
           }
+          manifest.checksums[refRelPath] = computeChecksum(dest);
         }
       }
     }
