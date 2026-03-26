@@ -469,6 +469,72 @@ function publish(args) {
       continue; // skip the normal single-event creation for this phase
     }
 
+    // Version-step expansion: for angular-migrate-version with angular-core scope,
+    // expand into one sub-phase per major version jump (16→17, 17→18, etc.)
+    if (phase.skill === '/angular-migrate-version' &&
+        phase.args && phase.args.includes('angular-core') &&
+        context.from && context.to) {
+      var fromMajor = parseInt(context.from, 10);
+      var toMajor = parseInt(context.to, 10);
+
+      if (!isNaN(fromMajor) && !isNaN(toMajor) && toMajor > fromMajor + 1) {
+        // Multiple version jumps needed — create sub-phases
+        var versionSteps = [];
+        for (var v = fromMajor; v < toMajor; v++) {
+          versionSteps.push({ from: v, to: v + 1 });
+        }
+
+        process.stderr.write(`  Expanding ${phase.name} into ${versionSteps.length} version steps: ${fromMajor}→${toMajor}\n`);
+
+        for (var vs = 0; vs < versionSteps.length; vs++) {
+          var step = versionSteps[vs];
+          var subId = eventId + String.fromCharCode(97 + vs); // 004a, 004b, etc.
+          var subEvent = buildEvent(
+            runId, workflow.name, phase, i, workflow.phases.length,
+            execInfo, previousEventId, context
+          );
+          subEvent.identity.event_id = subId;
+          subEvent.identity.phase_name = `Upgrade Angular ${step.from} → ${step.to}`;
+          subEvent.context = Object.assign({}, subEvent.context, {
+            from: String(step.from),
+            to: String(step.to),
+            step_index: vs + 1,
+            total_steps: versionSteps.length
+          });
+          if (vs > 0) {
+            subEvent.dependencies.depends_on = [eventId + String.fromCharCode(96 + vs)];
+            subEvent.lifecycle.status = 'queued';
+            subEvent.lifecycle.status_history = [{ status: 'queued', at: new Date().toISOString() }];
+            subEvent.lifecycle.ready_at = null;
+          }
+
+          if (execInfo.type === 'ai') {
+            try { promptBuilder.buildSkeletonPrompt(subEvent, runDir, projectRoot); } catch (e) {}
+          }
+
+          store.writeEvent(runDir, subEvent);
+          eventIds.push(subId);
+          previousEventId = subId;
+          process.stderr.write(`  Phase ${subId}: Upgrade Angular ${step.from} → ${step.to} [${execInfo.type}]\n`);
+        }
+
+        // Synthetic done event with original ID
+        var lastVsId = eventId + String.fromCharCode(96 + versionSteps.length);
+        var doneVsEvent = buildEvent(runId, workflow.name, phase, i, workflow.phases.length, { type: 'script', scriptPath: null }, lastVsId, context);
+        doneVsEvent.identity.event_id = eventId;
+        doneVsEvent.identity.phase_name = `${phase.name} (done — ${fromMajor}→${toMajor})`;
+        doneVsEvent.execution.type = 'synthetic';
+        doneVsEvent.dependencies.depends_on = [lastVsId];
+        doneVsEvent.lifecycle.status = 'queued';
+        doneVsEvent.lifecycle.status_history = [{ status: 'queued', at: new Date().toISOString() }];
+        store.writeEvent(runDir, doneVsEvent);
+        eventIds.push(eventId);
+        previousEventId = eventId;
+
+        continue;
+      }
+    }
+
     const event = buildEvent(
       runId, workflow.name, phase, i, workflow.phases.length,
       execInfo, previousEventId, context

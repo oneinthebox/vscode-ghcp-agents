@@ -227,6 +227,21 @@ function buildPrompt(event, runDir, projectRoot) {
   lines.push('---');
   lines.push('');
 
+  // Mission statement — prominent at top so the AI can't miss the target
+  var evtCtx = event.context || {};
+  if (evtCtx.to || evtCtx.from || evtCtx.feature_name) {
+    lines.push('## MISSION');
+    if (evtCtx.from && evtCtx.to) {
+      lines.push(`**Upgrade from Angular ${evtCtx.from} to Angular ${evtCtx.to}.** Do NOT upgrade beyond ${evtCtx.to}. The user specifically requested Angular ${evtCtx.to}.`);
+    } else if (evtCtx.to) {
+      lines.push(`**Target: Angular ${evtCtx.to}.** Do NOT upgrade beyond this version.`);
+    }
+    if (evtCtx.feature_name) {
+      lines.push(`**Feature: ${evtCtx.feature_name}** at \`${evtCtx.target_path || 'src/app/features/' + evtCtx.feature_name}\``);
+    }
+    lines.push('');
+  }
+
   lines.push('## Task');
   if (contextSection) {
     lines.push(contextSection);
@@ -237,6 +252,7 @@ function buildPrompt(event, runDir, projectRoot) {
 
   lines.push('## Project Context');
   lines.push(`- Angular version: ${angularVersion}`);
+  if (evtCtx.to) lines.push(`- **Target version: Angular ${evtCtx.to}**`);
   lines.push(`- Node version: ${nodeVersion}`);
   if (event.context && event.context.project_root) {
     lines.push(`- Project root: ${event.context.project_root}`);
@@ -439,6 +455,21 @@ function buildSkeletonPrompt(event, runDir, projectRoot) {
   lines.push('---');
   lines.push('');
 
+  // Mission statement — prominent at top so the AI can't miss the target
+  var evtCtx = event.context || {};
+  if (evtCtx.to || evtCtx.from || evtCtx.feature_name) {
+    lines.push('## MISSION');
+    if (evtCtx.from && evtCtx.to) {
+      lines.push(`**Upgrade from Angular ${evtCtx.from} to Angular ${evtCtx.to}.** Do NOT upgrade beyond ${evtCtx.to}. The user specifically requested Angular ${evtCtx.to}.`);
+    } else if (evtCtx.to) {
+      lines.push(`**Target: Angular ${evtCtx.to}.** Do NOT upgrade beyond this version.`);
+    }
+    if (evtCtx.feature_name) {
+      lines.push(`**Feature: ${evtCtx.feature_name}** at \`${evtCtx.target_path || 'src/app/features/' + evtCtx.feature_name}\``);
+    }
+    lines.push('');
+  }
+
   lines.push('## Task');
   if (contextSection) {
     lines.push(contextSection);
@@ -449,6 +480,7 @@ function buildSkeletonPrompt(event, runDir, projectRoot) {
 
   lines.push('## Project Context');
   lines.push(`- Angular version: ${angularVersion}`);
+  if (evtCtx.to) lines.push(`- **Target version: Angular ${evtCtx.to}**`);
   lines.push(`- Node version: ${nodeVersion}`);
   if (event.context && event.context.project_root) {
     lines.push(`- Project root: ${event.context.project_root}`);

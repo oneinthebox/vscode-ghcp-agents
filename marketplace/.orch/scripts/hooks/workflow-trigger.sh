@@ -86,10 +86,66 @@ fi
 # Build context JSON from the prompt
 CONTEXT="{}"
 
-# For migrations: extract target version number
+# For migrations: extract target version number and current version
 if [ "$MATCHED_NAME" = "angular-migration" ]; then
-  TARGET_VERSION=$(echo "$PROMPT" | grep -oE "[0-9]+" | tail -1)
-  if [ -n "$TARGET_VERSION" ]; then
+  # Known Angular versions (update this list when new major versions ship)
+  KNOWN_VERSIONS="16 17 18 19 20 21"
+  LATEST_KNOWN="21"
+
+  # Detect current version from package.json
+  FROM_VERSION=""
+  if [ -f "package.json" ]; then
+    FROM_VERSION=$(node -e "try{const p=JSON.parse(require('fs').readFileSync('package.json','utf8'));const v=(p.dependencies||{})['@angular/core']||'';console.log(v.replace(/[\^~]/,'').split('.')[0])}catch(e){}" 2>/dev/null)
+  fi
+
+  # Extract target version
+  TARGET_VERSION=""
+
+  # Check for explicit version number: "angular 18", "to 18", "version 18"
+  EXPLICIT_VERSION=$(echo "$PROMPT" | grep -oiE "(angular|to|version)\s+[0-9]+" | grep -oE "[0-9]+" | tail -1)
+
+  if [ -n "$EXPLICIT_VERSION" ]; then
+    # Validate: must be a known version AND greater than current
+    if echo "$KNOWN_VERSIONS" | grep -qw "$EXPLICIT_VERSION"; then
+      if [ -n "$FROM_VERSION" ] && [ "$EXPLICIT_VERSION" -le "$FROM_VERSION" ] 2>/dev/null; then
+        # Target is same or lower than current — treat as "already on this version"
+        # Don't trigger the workflow
+        echo "" >&2
+        echo "Target Angular $EXPLICIT_VERSION is not higher than current Angular $FROM_VERSION. No migration needed." >&2
+        exit 0
+      fi
+      TARGET_VERSION="$EXPLICIT_VERSION"
+    else
+      # Version not in known list (e.g., Angular 26) — default to latest known
+      echo "Angular $EXPLICIT_VERSION is not a known version. Using latest known: Angular $LATEST_KNOWN" >&2
+      TARGET_VERSION="$LATEST_KNOWN"
+    fi
+  fi
+
+  # Handle "latest", "current", "newest", "stable" — no explicit number
+  if [ -z "$TARGET_VERSION" ]; then
+    if echo "$PROMPT" | grep -qiE "latest|newest|current|stable|lts"; then
+      TARGET_VERSION="$LATEST_KNOWN"
+    fi
+  fi
+
+  # Still no target? Default to one major version up from current
+  if [ -z "$TARGET_VERSION" ] && [ -n "$FROM_VERSION" ]; then
+    TARGET_VERSION=$((FROM_VERSION + 1))
+    # Cap at latest known
+    if [ "$TARGET_VERSION" -gt "$LATEST_KNOWN" ] 2>/dev/null; then
+      TARGET_VERSION="$LATEST_KNOWN"
+    fi
+  fi
+
+  # Final fallback
+  if [ -z "$TARGET_VERSION" ]; then
+    TARGET_VERSION="$LATEST_KNOWN"
+  fi
+
+  if [ -n "$FROM_VERSION" ]; then
+    CONTEXT="{\"from\":\"${FROM_VERSION}\",\"to\":\"${TARGET_VERSION}\"}"
+  else
     CONTEXT="{\"to\":\"${TARGET_VERSION}\"}"
   fi
 fi
