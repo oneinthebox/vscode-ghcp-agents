@@ -75,6 +75,15 @@ module.exports = {
         }
       } catch (e) { /* no output file — skip */ }
 
+      // Also read .output.md file (AI phase saved analysis)
+      var outputMdFile = path.join(runDir, event.identity.event_id + '.output.md');
+      try {
+        var mdContent = fs.readFileSync(outputMdFile, 'utf8');
+        if (mdContent && mdContent.length > 10) {
+          collected[event.identity.event_id].output_md = mdContent;
+        }
+      } catch (e) { /* no .output.md — skip */ }
+
       // Also read .complete.json (AI phase output)
       var completeFile = path.join(runDir, event.identity.event_id + '.complete.json');
       try {

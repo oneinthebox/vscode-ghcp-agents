@@ -350,8 +350,15 @@ function buildPrompt(event, runDir, projectRoot) {
     lines.push('');
   }
 
+  lines.push('## Save Your Work');
+  lines.push('**IMPORTANT:** Do NOT just respond in chat. Save your analysis and output to a file so downstream phases and the report builder can use it.');
+  lines.push('');
+  lines.push(`**Save your detailed output to:** \`.orch/workflow-state/events/${runId}/${event_id}.output.md\``);
+  lines.push('');
+  lines.push('This file should contain your full analysis, findings, tables, and any Mermaid diagrams you generated. The report builder reads this file.');
+  lines.push('');
   lines.push('## Completion Protocol');
-  lines.push('When you have completed this phase, create this file:');
+  lines.push('After saving your output, create the completion marker:');
   lines.push('');
   lines.push(`**Path:** \`.orch/workflow-state/events/${runId}/${event_id}.complete.json\``);
   lines.push('');
@@ -359,10 +366,19 @@ function buildPrompt(event, runDir, projectRoot) {
   lines.push('```json');
   lines.push('{');
   lines.push('  "status": "complete",');
-  lines.push('  "summary": "<what you did>",');
-  lines.push('  "files_modified": ["<list>"],');
-  lines.push('  "collected": { "<key-value data for downstream phases>" },');
+  lines.push('  "summary": "<one-line summary of what you did>",');
+  lines.push('  "files_modified": ["<list of files you created or modified>"],');
+  lines.push('  "collected": { "<structured key-value data for downstream phases and the report>" },');
   lines.push('  "error": null');
+  lines.push('}');
+  lines.push('```');
+  lines.push('');
+  lines.push('**The `collected` field is critical.** Put your key findings here as structured data — this is what the report builder uses. Example:');
+  lines.push('```json');
+  lines.push('"collected": {');
+  lines.push('  "components_found": 12,');
+  lines.push('  "standalone_adoption": "67%",');
+  lines.push('  "key_finding": "Project uses NgModule patterns with partial standalone migration"');
   lines.push('}');
   lines.push('```');
   lines.push('');
@@ -527,8 +543,15 @@ function buildSkeletonPrompt(event, runDir, projectRoot) {
     lines.push('');
   }
 
+  lines.push('## Save Your Work');
+  lines.push('**IMPORTANT:** Do NOT just respond in chat. Save your analysis and output to a file so downstream phases and the report builder can use it.');
+  lines.push('');
+  lines.push(`**Save your detailed output to:** \`.orch/workflow-state/events/${runId}/${event_id}.output.md\``);
+  lines.push('');
+  lines.push('This file should contain your full analysis, findings, tables, and any Mermaid diagrams you generated. The report builder reads this file.');
+  lines.push('');
   lines.push('## Completion Protocol');
-  lines.push('When you have completed this phase, create this file:');
+  lines.push('After saving your output, create the completion marker:');
   lines.push('');
   lines.push(`**Path:** \`.orch/workflow-state/events/${runId}/${event_id}.complete.json\``);
   lines.push('');
@@ -536,10 +559,19 @@ function buildSkeletonPrompt(event, runDir, projectRoot) {
   lines.push('```json');
   lines.push('{');
   lines.push('  "status": "complete",');
-  lines.push('  "summary": "<what you did>",');
-  lines.push('  "files_modified": ["<list>"],');
-  lines.push('  "collected": { "<key-value data for downstream phases>" },');
+  lines.push('  "summary": "<one-line summary of what you did>",');
+  lines.push('  "files_modified": ["<list of files you created or modified>"],');
+  lines.push('  "collected": { "<structured key-value data for downstream phases and the report>" },');
   lines.push('  "error": null');
+  lines.push('}');
+  lines.push('```');
+  lines.push('');
+  lines.push('**The `collected` field is critical.** Put your key findings here as structured data — this is what the report builder uses. Example:');
+  lines.push('```json');
+  lines.push('"collected": {');
+  lines.push('  "components_found": 12,');
+  lines.push('  "standalone_adoption": "67%",');
+  lines.push('  "key_finding": "Project uses NgModule patterns with partial standalone migration"');
   lines.push('}');
   lines.push('```');
   lines.push('');
