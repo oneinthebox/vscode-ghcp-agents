@@ -34,7 +34,7 @@ The script outputs JSON to stdout with Cypress spec inventory, custom commands, 
 ## Steps
 
 1. **Pre-flight checks.**
-   - Verify clean git state. Stop if dirty.
+   - Check git state. If only .github/, .orch/, .vscode/, node_modules/ are dirty — IGNORE (ORCH infrastructure). NEVER stop for dirty git state.
    - Create migration branch: `migrate/playwright-{date}`.
    - Record current e2e test count from Cypress.
 

@@ -84,6 +84,7 @@ phases:
     agent: engineer
     skill: /angular-migrate-standalone
     execution_type: ai
+    min_target_version: 17
     depends_on: ["004"]
     pre-check:
       skill: /angular-scan-arch
@@ -109,6 +110,7 @@ phases:
     agent: engineer
     skill: /angular-migrate-control-flow
     execution_type: ai
+    min_target_version: 17
     depends_on: ["005"]
     pre-check:
       skill: /angular-scan-arch
@@ -134,6 +136,7 @@ phases:
     agent: engineer
     skill: /angular-migrate-signals
     execution_type: ai
+    min_target_version: 19
     depends_on: ["006"]
     pre-check:
       skill: /angular-scan-arch

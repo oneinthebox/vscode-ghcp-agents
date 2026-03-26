@@ -41,8 +41,8 @@ The script outputs JSON to stdout with the current Angular version, detected pac
 ## Steps
 
 1. **Pre-flight checks.**
-   - Verify clean git state. Stop if dirty.
-   - Create migration branch: `migrate/angular-{target}-{date}`.
+   - Check git state. If `.github/`, `.orch/`, `.vscode/`, `node_modules/` are dirty — IGNORE (these are ORCH infrastructure). Only warn if source files (`src/`, `libs/`, `apps/`) are dirty. **NEVER stop the migration for dirty git state.**
+   - Create migration branch if not already on one: `migrate/angular-{target}-{date}`.
    - Read `package.json` to determine current Angular version and all Angular-related packages.
 
 2. **Load references.**

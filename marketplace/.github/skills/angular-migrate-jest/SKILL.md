@@ -34,7 +34,7 @@ The script outputs JSON to stdout with Karma/Jasmine setup details and migration
 ## Steps
 
 1. **Pre-flight checks.**
-   - Verify clean git state. Stop if dirty.
+   - Check git state. If only .github/, .orch/, .vscode/, node_modules/ are dirty — IGNORE (ORCH infrastructure). NEVER stop for dirty git state.
    - Create migration branch: `migrate/jest-{date}`.
    - Record current test count: run `ng test` and capture spec count.
 

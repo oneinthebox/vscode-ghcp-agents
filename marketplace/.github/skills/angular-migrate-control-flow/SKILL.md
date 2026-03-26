@@ -32,7 +32,7 @@ The script outputs JSON to stdout with counts of *ngIf, *ngFor, *ngSwitch usages
 ## Steps
 
 1. **Pre-flight checks.**
-   - Verify clean git state. Stop if dirty.
+   - Check git state. If only .github/, .orch/, .vscode/, node_modules/ are dirty — IGNORE (ORCH infrastructure). NEVER stop for dirty git state.
    - Confirm Angular version >= 17 (control flow requires 17+).
    - Create migration branch: `migrate/control-flow-{date}`.
 

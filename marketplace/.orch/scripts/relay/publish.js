@@ -140,6 +140,7 @@ function parseWorkflowYaml(content) {
       skills: allSkills,
       args: extract('args') || null,
       execution_type: extract('execution_type') || null,
+      min_target_version: extract('min_target_version') ? parseInt(extract('min_target_version'), 10) : null,
       checkpoint: extractBool('checkpoint'),
       verify: extract('verify') || null,
       approval: extract('approval') || null,
@@ -404,6 +405,22 @@ function publish(args) {
     const phase = workflow.phases[i];
     const execInfo = resolveExecutionType(phase, projectRoot);
     const eventId = String(i + 1).padStart(3, '0');
+
+    // Version gate: skip phases where target version is below minimum
+    if (phase.min_target_version && context.to) {
+      var targetMajor = parseInt(context.to, 10);
+      if (!isNaN(targetMajor) && targetMajor < phase.min_target_version) {
+        process.stderr.write(`  Phase ${eventId}: ${phase.name} — SKIPPED (requires Angular ${phase.min_target_version}+, target is ${targetMajor})\n`);
+        // Create a skipped event so downstream deps resolve
+        var skippedEvent = buildEvent(runId, workflow.name, phase, i, workflow.phases.length, execInfo, previousEventId, context);
+        store.updateStatus(skippedEvent, 'skipped');
+        skippedEvent.result = { summary: `Skipped — requires Angular ${phase.min_target_version}+, target is ${targetMajor}` };
+        store.writeEvent(runDir, skippedEvent);
+        eventIds.push(eventId);
+        previousEventId = eventId;
+        continue;
+      }
+    }
 
     // Check if this phase should be decomposed into sub-phases
     const batchSize = readContextConfig(projectRoot).batch_size || 10;
