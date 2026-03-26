@@ -1,6 +1,6 @@
 # ORCH (Orchestra) for GitHub Copilot
 
-**Enterprise framework that gives GitHub Copilot your team's Angular expertise -- version-aware agents, 60 skills, audit trail, and multi-phase workflows.**
+**Enterprise framework that gives GitHub Copilot your team's Angular expertise -- version-aware agents, 61 skills, 44 scripts, event-driven workflows, audit trail, and safe-by-default automation.**
 
 ---
 
@@ -33,8 +33,10 @@ Once installed, open VS Code and use the Copilot Chat panel to invoke agents:
 
 ## Architecture
 
+`@orch` is the universal entry point. It detects the project domain from project files (`package.json`, `pom.xml`, `pyproject.toml`) via `detect-domains.js`, runs pre-flight checks, and routes to the appropriate domain agent. For multi-domain tasks, `@orch` composes plans spanning multiple agents (e.g., `@angular` + `@local`). `@angular` can also be invoked directly as a fast path that skips pre-flight and domain detection.
+
 ```
-┌──────────────────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────────────���────┐
 │                     Domain Agents                             │
 │                                                               │
 │   @angular (coordinator)                                      │
@@ -46,7 +48,8 @@ Once installed, open VS Code and use the Copilot Chat panel to invoke agents:
 ├──────────────────────────────────────────────────────────────┤
 │                     Shared Agents                             │
 │                                                               │
-│   @orch            Master orchestrator, workflows, reports    │
+│   @orch            Universal entry — auto-detects domain,      │
+│       │            runs pre-flight, composes plans, monitors   │
 │       └── @orch-preflight   Pre-flight readiness checks       │
 │   @audit           Observability — usage, tokens, compliance  │
 │   @docs            Reference supply chain — fetch, drift      │
@@ -56,8 +59,8 @@ Once installed, open VS Code and use the Copilot Chat panel to invoke agents:
 ├──────────────────────────────────────────────────────────────┤
 │                     Foundation                                │
 │                                                               │
-│   Skills (60)  │  Workflows (3)  │  Audit hooks  │  Config   │
-│   Version resolver  │  Reference docs  │  Registry            │
+│   Skills (61)  │  Workflows (3)  │  Audit hooks  │  Config   │
+│   Event relay  │  Version resolver  │  Reference docs  │  Registry │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -67,13 +70,18 @@ Once installed, open VS Code and use the Copilot Chat panel to invoke agents:
 
 | Feature | Details |
 |---------|---------|
-| **60 skills** | Scanning, generation, migration, refactoring, documentation, testing, design system, platform integration, mock data, reporting |
+| **61 skills, 44 scripts** | Scanning, generation, migration, refactoring, documentation, testing, design system, platform integration, mock data, reporting, 92 examples, 5 shared libs |
 | **11 agents** | 1 coordinator (@angular) + 3 sub-agents (planner, engineer, verifier) + 7 shared (orch, preflight, audit, docs, doc-convert-worker, local, migrate-worker) |
 | **3 workflows** | `angular-migration` (10 phases), `angular-new-feature` (10 phases), `angular-project-recap` (11 phases) |
-| **Version-aware** | Auto-detects Angular version from `package.json`, loads version-appropriate patterns via `resolver.yaml` |
+| **Event-driven relay** | File-based event system with terminal relay process. Script phases run automatically; AI phases dispatched via `code chat --mode agent` (VS Code 1.112+). Safe-by-default: pauses before AI writes for `approve` / `approve-all` / `skip`. Pass `--auto` for full autonomy. |
+| **Version-aware stack resolution** | `check-stack.js` auto-detects Angular version from `package.json` (<5 ms), `resolver.yaml` maps features to version gates, `resolve-references.js` filters reference docs. Saves ~50% reference tokens. |
 | **Audit trail** | Session tracking, token estimation, tool boundary enforcement, compliance scoring, drift detection |
+| **Comprehensive boundaries** | Two-layer system: `blocked_commands` in `.vscode/settings.json` (hard, VS Code-enforced) + `boundaries.yaml` (soft, ORCH audit hooks) |
+| **Report templates + trends** | 4 templates in `.orch/templates/` (migration, recap, audit, feature). Trend snapshots in `.orch/trends/` for tracking metrics over time. |
+| **VS Code settings.json** | Ships autopilot mode, terminal auto-approve, edit auto-accept, and blocked_commands for safe autonomous operation |
 | **Mock data pipeline** | HAR capture, OpenAPI/TypeScript/manual source, synthetic generation, json-server, WebSocket replay |
 | **Multi-format reports** | Markdown, HTML (self-contained), JSON (CI-friendly), PDF, reveal.js deck |
+| **Isolated dependencies** | `.orch/package.json` with ts-morph, json-server in separate `.orch/node_modules/`, isolated from project deps |
 
 ---
 
@@ -98,7 +106,7 @@ Once installed, open VS Code and use the Copilot Chat panel to invoke agents:
 | `@angular-planner` | Why & What — scans, analyzes, explains, plans | Internal | 11 scan/analysis skills |
 | `@angular-engineer` | How & Where — writes code, runs migrations | Internal | 20+ generation/migration skills |
 | `@angular-verifier` | Check & Validate — tests, lint, review | Internal | 7 verification skills |
-| `@orch` | Master orchestrator — workflows, cross-agent coordination | Yes | /present-report, /present-deck, /present-dashboard |
+| `@orch` | Universal entry — auto-detects domain, runs pre-flight, composes plans, monitors workflows | Yes | /present-report, /present-deck, /present-dashboard |
 | `@orch-preflight` | Pre-flight readiness checks before workflows | Internal | 7 validation checks |
 | `@audit` | Observability — usage, tokens, compliance, drift, benchmarks | Yes | 6 audit skills |
 | `@docs` | Reference supply chain — fetch, convert, refresh, drift | Yes | 4 docs skills |
@@ -110,9 +118,9 @@ Once installed, open VS Code and use the Copilot Chat panel to invoke agents:
 
 ## Version-Aware Stack Resolution
 
-ORCH auto-detects your project's Angular version from `package.json` and caches the result in `.orch/cache/stack.yaml`. Detection is checksum-based and completes in under 5 ms.
+ORCH auto-detects your project's Angular version from `package.json` via the `check-stack.js` hook and caches the result in `.orch/cache/stack.yaml`. Detection is checksum-based (SHA-256 fingerprint over `package.json`, `angular.json`, `nx.json`, `tsconfig.json`) and completes in under 5 ms.
 
-The resolver (`.orch/references/angular/resolver.yaml`) maps features to version gates. Skills automatically load only the reference docs that apply to your project's version:
+The resolver (`.orch/references/angular/resolver.yaml`) maps features to version gates. The `resolve-references.js` script filters reference docs by the detected version. Skills automatically load only the reference docs that apply to your project's version:
 
 - **Angular 17 (LTS)**: NgModules, structural directives, constructor DI, RxJS patterns
 - **Angular 18 (LTS)**: Standalone default, control flow recommended, `inject()`, signals stable

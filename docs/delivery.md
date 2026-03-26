@@ -321,7 +321,7 @@ Note: Prompt auditing is already handled by the audit framework (Stage 0.0). Gov
 
 ## Phase 2 — Orchestrate
 
-**Goal:** Enable cross-domain workflows via a master orchestrator agent.
+**Goal:** Enable cross-domain workflows via a master orchestrator agent, event-driven relay execution, and safe-by-default automation.
 
 ### Stage 2.1 — Orchestrator Agent
 
@@ -335,18 +335,63 @@ Note: Prompt auditing is already handled by the audit framework (Stage 0.0). Gov
 
 **Stage total: ~6 days**
 
-### Stage 2.2 — Cross-Domain Workflows
+### Stage 2.2 — Event-Driven Relay System (DELIVERED)
+
+| # | Task | Deliverable | Status |
+|---|------|-------------|--------|
+| 2.2.0 | Build file-based event store | `event-store.js` — append-only event store in `.orch/events/` | Delivered |
+| 2.2.1 | Build event publisher | `publish.js` — coordinator publishes phase events with metadata | Delivered |
+| 2.2.2 | Build relay process | `relay.js` — terminal-resident process, dispatches script phases automatically, AI phases via `code chat` | Delivered |
+| 2.2.3 | Build event monitor | `monitor.js` — watches `.orch/events/` for new events | Delivered |
+| 2.2.4 | Build prompt builder | `prompt-builder.js` — constructs AI phase prompts with context injection | Delivered |
+| 2.2.5 | Integrate `code chat --mode agent` | Relay dispatches AI phases via VS Code 1.112+ `code chat` CLI | Delivered |
+| 2.2.6 | Safe-by-default approval flow | Relay pauses before AI phases; user sends `approve`, `approve-all`, or `skip` | Delivered |
+| 2.2.7 | `--auto` flag for full autonomy | Bypass approval pauses for CI/unattended execution | Delivered |
+| 2.2.8 | `orch-approve` skill | `/orch-approve` skill for in-chat approval commands | Delivered |
+
+### Stage 2.3 — Version-Aware Stack Resolution (DELIVERED)
+
+| # | Task | Deliverable | Status |
+|---|------|-------------|--------|
+| 2.3.1 | Build check-stack.js hook | SHA-256 fingerprint-based stack detection on session start (<5 ms) | Delivered |
+| 2.3.2 | Build resolver.yaml | Feature-to-version-gate mapping for Angular 17-21 | Delivered |
+| 2.3.3 | Build resolve-references.js | Version-filtered reference doc loading | Delivered |
+| 2.3.4 | Stack profile caching | `.orch/cache/stack.yaml` with checksum-based invalidation | Delivered |
+
+### Stage 2.4 — Report Templates + Trend Tracking (DELIVERED)
+
+| # | Task | Deliverable | Status |
+|---|------|-------------|--------|
+| 2.4.1 | Build 4 report templates | `.orch/templates/` — migration, recap, audit, feature | Delivered |
+| 2.4.2 | Build trend snapshot system | `.orch/trends/` — captures metrics per run for trend arrows | Delivered |
+
+### Stage 2.5 — VS Code Settings + Boundary Enforcement (DELIVERED)
+
+| # | Task | Deliverable | Status |
+|---|------|-------------|--------|
+| 2.5.1 | Ship .vscode/settings.json | Autopilot mode, terminal auto-approve, edit auto-accept | Delivered |
+| 2.5.2 | Comprehensive blocked_commands | Hard enforcement via VS Code settings.json | Delivered |
+| 2.5.3 | Two-layer boundary system | Hard (settings.json) + soft (boundaries.yaml) enforcement | Delivered |
+
+### Stage 2.6 — Isolated Dependencies (DELIVERED)
+
+| # | Task | Deliverable | Status |
+|---|------|-------------|--------|
+| 2.6.1 | Create .orch/package.json | Isolated dependency manifest (ts-morph, json-server) | Delivered |
+| 2.6.2 | Isolated node_modules | `.orch/node_modules/` separate from project deps | Delivered |
+
+### Stage 2.7 — Cross-Domain Workflows
 
 | # | Task | Deliverable | Dependencies | Est. |
 |---|------|-------------|-------------|------|
-| 2.2.1 | Build end-to-end feature workflow | Orchestrator scaffolds frontend + backend + tests + CI for a new feature | 2.1.5 | 3d |
-| 2.2.2 | Build cross-stack migration workflow | Orchestrator coordinates Angular upgrade + backend API changes + domain CI/CD skill updates | 2.1.5 | 3d |
-| 2.2.3 | Build full-stack PR review workflow | Orchestrator delegates PR review to domain verifiers based on changed files | 2.1.5 | 2d |
-| 2.2.4 | Test with pilot teams | Validate cross-domain workflows on real projects | 2.2.1–2.2.3 | 5d |
+| 2.7.1 | Build end-to-end feature workflow | Orchestrator scaffolds frontend + backend + tests + CI for a new feature | 2.1.5 | 3d |
+| 2.7.2 | Build cross-stack migration workflow | Orchestrator coordinates Angular upgrade + backend API changes + domain CI/CD skill updates | 2.1.5 | 3d |
+| 2.7.3 | Build full-stack PR review workflow | Orchestrator delegates PR review to domain verifiers based on changed files | 2.1.5 | 2d |
+| 2.7.4 | Test with pilot teams | Validate cross-domain workflows on real projects | 2.7.1–2.7.3 | 5d |
 
 **Stage total: ~13 days**
 
-**Phase 2 total: ~4 weeks**
+**Phase 2 total: ~4 weeks** (relay system, stack resolution, report templates, VS Code settings, and boundary enforcement delivered)
 
 ---
 
@@ -392,9 +437,9 @@ Note: Prompt auditing is already handled by the audit framework (Stage 0.0). Gov
 |-------|----------|----------------|
 | **Phase 0: Foundation** | ~11 weeks | Audit framework + pre-flight checks + config.yaml + doc pipeline (reference supply chain) + Angular domain (coordinator + planner + engineer + verifier) + shared presentation skills + pilot validation |
 | **Phase 1: Expand** | ~9 weeks | All 3 domains (each with coordinator + planner + engineer + verifier + domain-specific CI/CD skills) + @local shared agent + governance + model benchmarking + org rollout |
-| **Phase 2: Orchestrate** | ~4 weeks | Master orchestrator + cross-domain workflows |
+| **Phase 2: Orchestrate** | ~4 weeks | Master orchestrator + event-driven relay system (relay.js, publish.js, event-store.js, monitor.js, prompt-builder.js) + `code chat --mode agent` integration + safe-by-default auto mode (approve/approve-all/skip) + version-aware stack resolution (check-stack.js, resolver.yaml) + 4 report templates + trend tracking + .vscode/settings.json (autopilot, blocked_commands) + isolated .orch/package.json + cross-domain workflows. **Current: 61 skills, 44 scripts, 92 examples, 5 shared libs.** |
 | **Phase 3: Distribute** | ~3 weeks | Plugin packaging + internal marketplace |
-| **Total** | ~27 weeks | Full ORCH platform with role-based agents, granular skills, domain-specific CI/CD, @local env setup, pre-flight checks, per-run telemetry, and complete audit observability |
+| **Total** | ~27 weeks | Full ORCH platform with role-based agents, granular skills, domain-specific CI/CD, @local env setup, pre-flight checks, per-run telemetry, event-driven relay, and complete audit observability |
 
 ---
 

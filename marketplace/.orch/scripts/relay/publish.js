@@ -116,6 +116,22 @@ function parseWorkflowYaml(content) {
     const skill = singleSkill || (multiSkills && multiSkills.length > 0 ? multiSkills[0] : null);
     const allSkills = multiSkills && multiSkills.length > 0 ? multiSkills : (singleSkill ? [singleSkill] : []);
 
+    // Parse pre-check and post-check nested blocks
+    const extractNestedBlock = (blockName) => {
+      const blockRe = new RegExp(`^\\s+${blockName}:\\s*$`, 'm');
+      if (!blockRe.test(chunk)) return null;
+      const blockStart = chunk.search(blockRe);
+      const blockContent = chunk.slice(blockStart);
+      const blockLines = blockContent.split('\n').slice(1); // skip the header line
+      const block = {};
+      for (const line of blockLines) {
+        const kv = line.match(/^\s+(skill|args|capture):\s*["']?(.+?)["']?\s*$/);
+        if (kv) block[kv[1]] = kv[2].trim();
+        else if (line.trim() && !/^\s+\w+:/.test(line)) break; // end of nested block
+      }
+      return Object.keys(block).length > 0 ? block : null;
+    };
+
     phases.push({
       name: phaseName,
       id: extract('id') || phaseName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
@@ -127,14 +143,85 @@ function parseWorkflowYaml(content) {
       checkpoint: extractBool('checkpoint'),
       verify: extract('verify') || null,
       approval: extract('approval') || null,
-      on_failure: extract('on-failure') || 'retry',
+      on_failure: extract('on-failure') || 'pause',
       depends_on: extractList('depends_on'),
       collect: extractList('collect'),
+      pre_check: extractNestedBlock('pre-check'),
+      post_check: extractNestedBlock('post-check'),
       report_section: extract('report-section') || null
     });
   }
 
   return { name, trigger, phases, report, post_workflow };
+}
+
+// ---------------------------------------------------------------------------
+// Context config + phase decomposition helpers
+// ---------------------------------------------------------------------------
+
+function readContextConfig(projectRoot) {
+  const defaults = { batch_size: 10, prompt_style: 'lazy', soft_budget_tokens: 8000, max_inherited_phases: 5 };
+  try {
+    const content = fs.readFileSync(path.join(projectRoot, '.orch/config.yaml'), 'utf8');
+    const contextMatch = content.match(/context:([\s\S]*?)(?=\n\w|\n$|$)/);
+    if (contextMatch) {
+      const block = contextMatch[1];
+      const extract = (key, fallback) => {
+        const re = new RegExp(`${key}:\\s*(.+?)\\s*$`, 'm');
+        const m = block.match(re);
+        return m ? m[1].trim() : fallback;
+      };
+      defaults.batch_size = parseInt(extract('batch_size', defaults.batch_size), 10);
+      defaults.prompt_style = extract('prompt_style', defaults.prompt_style);
+      defaults.soft_budget_tokens = parseInt(extract('soft_budget_tokens', defaults.soft_budget_tokens), 10);
+      defaults.max_inherited_phases = parseInt(extract('max_inherited_phases', defaults.max_inherited_phases), 10);
+    }
+  } catch (err) {
+    // Config file not found — use defaults
+  }
+  return defaults;
+}
+
+function detectFilesForPhase(phase, projectRoot) {
+  // Only decompose if the skill has a detection script
+  const skill = phase.skill;
+  if (!skill) return null;
+
+  const skillName = skill.replace(/^\//, '');
+  const scriptsDir = path.join(projectRoot, '.github/skills', skillName, 'scripts');
+
+  try {
+    const scripts = fs.readdirSync(scriptsDir).filter(f => f.endsWith('.js') && f.startsWith('detect'));
+    if (scripts.length === 0) return null;
+
+    // Run the detection script
+    const { execSync } = require('child_process');
+    const output = execSync(`node ${path.join(scriptsDir, scripts[0])} ${projectRoot}`, {
+      cwd: projectRoot,
+      timeout: 30000,
+      encoding: 'utf8'
+    });
+
+    const result = JSON.parse(output);
+    // Detection scripts output various formats — look for file lists
+    const files = result.files || result.untestedFiles || result.modules || [];
+    if (Array.isArray(files) && files.length > 0) {
+      // Extract file paths from objects if needed
+      return files.map(f => typeof f === 'string' ? f : f.file || f.path || f.name).filter(Boolean);
+    }
+  } catch (err) {
+    // Detection script failed or not found — skip decomposition
+  }
+
+  return null;
+}
+
+function chunkArray(array, size) {
+  const chunks = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
 }
 
 // ---------------------------------------------------------------------------
@@ -236,7 +323,9 @@ function buildEvent(runId, workflowName, phase, index, totalPhases, execInfo, pr
     },
     checkpoint: {
       enabled: phase.checkpoint,
-      git_tag: null
+      git_tag: null,
+      pre_check: phase.pre_check || null,
+      post_check: phase.post_check || null
     },
     retry: {
       max_retries: phase.on_failure === 'skip' ? 0 : 3,
@@ -314,6 +403,72 @@ function publish(args) {
   for (let i = 0; i < workflow.phases.length; i++) {
     const phase = workflow.phases[i];
     const execInfo = resolveExecutionType(phase, projectRoot);
+    const eventId = String(i + 1).padStart(3, '0');
+
+    // Check if this phase should be decomposed into sub-phases
+    const batchSize = readContextConfig(projectRoot).batch_size || 10;
+    const filesToProcess = detectFilesForPhase(phase, projectRoot);
+
+    if (filesToProcess && filesToProcess.length > batchSize) {
+      // Split into sub-phases
+      const batches = chunkArray(filesToProcess, batchSize);
+      for (let b = 0; b < batches.length; b++) {
+        const subPhaseId = eventId + String.fromCharCode(97 + b); // 001a, 001b, etc.
+        const subEvent = buildEvent(
+          runId, workflow.name, phase, i, workflow.phases.length,
+          execInfo, previousEventId, context
+        );
+        subEvent.identity.event_id = subPhaseId;
+        subEvent.identity.phase_name = `${phase.name} (batch ${b + 1} of ${batches.length})`;
+        subEvent.context.batch_files = batches[b];
+        subEvent.context.batch_index = b + 1;
+        subEvent.context.batch_total = batches.length;
+        // Sub-phases are sequential: each depends on the previous
+        if (b > 0) {
+          subEvent.dependencies.depends_on = [eventId + String.fromCharCode(96 + b)]; // depends on previous sub-phase
+          subEvent.lifecycle.status = 'queued';
+          subEvent.lifecycle.status_history = [{ status: 'queued', at: new Date().toISOString() }];
+          subEvent.lifecycle.ready_at = null;
+        }
+
+        // At publish time: write skeleton prompt for AI sub-phases
+        if (execInfo.type === 'ai') {
+          try {
+            promptBuilder.buildSkeletonPrompt(subEvent, runDir, projectRoot);
+          } catch (err) {
+            process.stderr.write(`Warning: prompt build failed for ${subPhaseId}: ${err.message}\n`);
+          }
+        }
+
+        store.writeEvent(runDir, subEvent);
+        eventIds.push(subPhaseId);
+        previousEventId = subPhaseId;
+        process.stderr.write(`  Phase ${subPhaseId}: ${phase.name} (batch ${b + 1}/${batches.length}) [${execInfo.type}] (${subEvent.lifecycle.status})\n`);
+      }
+
+      // BUG #22 fix: Create a synthetic "done" event with the original phase ID.
+      // This preserves cross-phase dependencies — downstream phases that reference
+      // the original ID (e.g., depends_on: ["005"]) will find this synthetic event.
+      // It depends on the last sub-phase and auto-completes when the relay detects it.
+      const lastSubId = eventId + String.fromCharCode(96 + batches.length); // last sub-phase
+      const doneEvent = buildEvent(
+        runId, workflow.name, phase, i, workflow.phases.length,
+        { type: 'script', scriptPath: null }, lastSubId, context
+      );
+      doneEvent.identity.event_id = eventId; // original ID preserved
+      doneEvent.identity.phase_name = `${phase.name} (done — synthetic)`;
+      doneEvent.execution.type = 'synthetic'; // relay auto-completes this
+      doneEvent.dependencies.depends_on = [lastSubId];
+      doneEvent.lifecycle.status = 'queued';
+      doneEvent.lifecycle.status_history = [{ status: 'queued', at: new Date().toISOString() }];
+      store.writeEvent(runDir, doneEvent);
+      eventIds.push(eventId);
+      previousEventId = eventId; // downstream phases depend on the original ID
+      process.stderr.write(`  Phase ${eventId}: ${phase.name} (synthetic done, depends on ${lastSubId})\n`);
+
+      continue; // skip the normal single-event creation for this phase
+    }
+
     const event = buildEvent(
       runId, workflow.name, phase, i, workflow.phases.length,
       execInfo, previousEventId, context

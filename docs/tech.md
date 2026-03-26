@@ -69,10 +69,12 @@ graph TB
             LocalSkills["Local Skills<br/>/local-setup-env, /local-setup-docker,<br/>/local-setup-deps, /local-diagnose"]
         end
 
-        subgraph Orchestration["@orch — Orchestrator"]
-            MasterAgent["@orch Agent<br/>Triage + handoff"]
+        subgraph Orchestration["@orch — Orchestrator + Event Relay"]
+            MasterAgent["@orch Agent<br/>Triage + publish events"]
             Preflight["@orch-preflight<br/>Pre-flight checks"]
             SharedSkills["Shared Skills<br/>/present-deck, /present-dashboard"]
+            Relay["relay.js<br/>Event-driven phase dispatch"]
+            EventStore[".orch/events/<br/>File-based event store"]
         end
 
         subgraph Governance["Governance Layer"]
@@ -298,7 +300,7 @@ vscode-ghcp-agents/
 │   │   │   ├── orch.agent.md                    # Master orchestrator
 │   │   │   └── orch-preflight.agent.md          # Pre-flight checks sub-agent
 │   │   │
-│   │   ├── skills/                              (58 skill directories with SKILL.md + local refs)
+│   │   ├── skills/                              (61 skill directories with SKILL.md + local refs)
 │   │   │   ├── angular-compatibility/           # @angular-planner: version compatibility
 │   │   │   │   └── SKILL.md
 │   │   │   ├── angular-docs-api/                # @angular-engineer: API docs
@@ -324,7 +326,7 @@ vscode-ghcp-agents/
 │   │   │   │   └── SKILL.md
 │   │   │   ├── angular-test-unit/               # @angular-verifier: Jest tests
 │   │   │   │   └── SKILL.md
-│   │   │   ├── ...                              # (38 angular + 20 shared skills total)
+│   │   │   ├── ...                              # (41 angular + 20 shared skills total)
 │   │   │   ├── audit-benchmark/                 # @audit: model comparison
 │   │   │   │   └── SKILL.md
 │   │   │   ├── audit-compliance/                # @audit: compliance report
@@ -396,6 +398,15 @@ vscode-ghcp-agents/
 │   │   │   │   ├── aggregate-metrics.sh
 │   │   │   │   ├── update-session-status.sh
 │   │   │   │   └── notify.sh
+│   │   │   ├── relay/
+│   │   │   │   ├── relay.js                     # Terminal relay process
+│   │   │   │   ├── publish.js                   # Event publisher
+│   │   │   │   ├── event-store.js               # File-based event store
+│   │   │   │   ├── monitor.js                   # Event file watcher
+│   │   │   │   └── prompt-builder.js            # AI phase prompt constructor
+│   │   │   ├── hooks/
+│   │   │   │   ├── check-stack.js               # Version-aware stack detection
+│   │   │   │   └── resolve-references.js        # Version-filtered reference loading
 │   │   │   └── semantic/
 │   │   │       ├── README.md
 │   │   │       └── adapters/
@@ -406,11 +417,25 @@ vscode-ghcp-agents/
 │   │   │               └── transform.ts
 │   │   ├── runs/                                (audit run output)
 │   │   ├── audit/                               (audit record storage)
+│   │   ├── events/                              (file-based event store for relay)
+│   │   ├── templates/                           (report templates)
+│   │   │   ├── migration.hbs
+│   │   │   ├── recap.hbs
+│   │   │   ├── audit.hbs
+│   │   │   └── feature.hbs
+│   │   ├── trends/                              (trend snapshots for reports)
+│   │   ├── cache/                               (stack detection cache)
+│   │   │   └── stack.yaml
+│   │   ├── package.json                         # Isolated ORCH deps (ts-morph, json-server)
+│   │   ├── node_modules/                        # Isolated from project deps
 │   │   ├── config.yaml                          # ORCH runtime config
 │   │   └── registry.yaml                        # Central registry for all doc sources
 │   │
 │   ├── doc-packs/                               (angular.yaml template)
 │   │   └── angular.yaml
+│   │
+│   ├── .vscode/
+│   │   └── settings.json                        # Autopilot, terminal auto-approve, edit auto-accept, blocked_commands
 │   │
 │   └── orch-status-extension/                   # VS Code status bar extension
 │       ├── package.json
@@ -828,6 +853,107 @@ flowchart LR
 **Decision:** Presentation capabilities (/present-deck, /present-dashboard) are shared skills owned by @orch, not a dedicated @showcase agent.
 
 **Rationale:** A dedicated agent for 2 skills is over-engineered. Presentation skills need cross-domain data access (audit metrics, migration progress, doc coverage) which @orch already has via its handoff relationships. Shared skills avoid the overhead of another agent persona, tool declaration, and boundary configuration. If presentation grows to 5+ skills, re-evaluate.
+
+### 5.16 Event-Driven Relay Architecture
+
+**Decision:** Workflows execute via a file-based event system with a terminal relay process, not synchronous agent chains.
+
+**Rationale:** Copilot Chat sessions are stateless and have limited context windows. Running a 10-phase migration inside a single agent session causes context rot. The event-driven relay decouples phases: the coordinator publishes events describing each phase, the relay process dispatches them one at a time, and each phase runs in a fresh context.
+
+**Key components:**
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| **Event Store** | `event-store.js` | Append-only file-based store in `.orch/events/`. Publishes, reads, and acknowledges events. |
+| **Publisher** | `publish.js` | The coordinator uses this to emit phase events with metadata (agent, skill, arguments, phase number). |
+| **Relay** | `relay.js` | Terminal-resident process that monitors the event store. Dispatches script phases automatically. Dispatches AI phases via `code chat --mode agent` (VS Code 1.112+). Pauses before AI phases for approval in safe mode. |
+| **Monitor** | `monitor.js` | Watches `.orch/events/` for new events, triggers relay actions. |
+| **Prompt Builder** | `prompt-builder.js` | Constructs the prompt for each AI phase, injecting phase context, prior results, and relevant references. |
+
+**Execution flow:**
+
+```mermaid
+sequenceDiagram
+    actor Dev as Developer
+    participant CO as @angular (coordinator)
+    participant PS as publish.js
+    participant ES as .orch/events/
+    participant RL as relay.js (terminal)
+    participant CC as code chat CLI
+    participant AG as Sub-agent
+
+    Dev->>CO: "Migrate to Angular 19"
+    CO->>PS: Publish 10 phase events
+    PS->>ES: Write events to store
+    CO-->>Dev: "Workflow queued. Relay started."
+
+    loop For each phase
+        RL->>ES: Read next pending event
+        alt Script phase
+            RL->>RL: Execute script directly
+        else AI phase (safe mode)
+            RL-->>Dev: "Phase 5: Standalone migration. approve / skip?"
+            Dev-->>RL: "approve" or "approve-all"
+            RL->>CC: code chat --mode agent --message "..."
+            CC->>AG: Dispatch to sub-agent
+            AG-->>CC: Phase result
+            CC-->>RL: Complete
+        end
+        RL->>ES: Acknowledge event
+    end
+    RL-->>Dev: "Workflow complete. Report generated."
+```
+
+**`code chat` CLI:** VS Code 1.112+ provides `code chat --mode agent` for programmatic Copilot Chat invocation from the terminal. The relay uses this to dispatch AI phases without requiring the user to manually interact with the Chat panel.
+
+### 5.17 Version-Aware Stack Resolution
+
+**Decision:** Auto-detect the project's tech stack on session start and cache the result. Use version gates in `resolver.yaml` to filter features and reference docs by detected version.
+
+**Rationale:** Loading Angular 19 signal docs for a v17 project wastes ~50% of reference tokens. Version-aware filtering ensures agents only see relevant patterns and documentation.
+
+**Components:**
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| **Stack Hook** | `check-stack.js` | Runs on `sessionStart`. Computes SHA-256 fingerprint over `package.json`, `angular.json`, `nx.json`, `tsconfig.json`. Cascade: cache -> detect -> pin -> default. Completes in <5 ms. |
+| **Resolver** | `.orch/references/angular/resolver.yaml` | Maps features to version gates. Each entry declares `available` (>=N) and `recommended` (>=M) versions. |
+| **Reference Resolver** | `resolve-references.js` | Reads stack profile + resolver.yaml, returns filtered list of reference doc paths for the detected version. |
+| **Stack Profile** | `.orch/cache/stack.yaml` | Cached detection result: Angular version, TypeScript version, installed libraries, workspace type. |
+
+### 5.18 Report Template System
+
+**Decision:** Report generation uses templates stored in `.orch/templates/`, with trend snapshot support for tracking metrics over time.
+
+**Rationale:** Standardized templates ensure consistent report structure across workflows. Trend snapshots enable comparing metrics across runs (e.g., migration progress, quality scores, coverage improvements).
+
+**Templates (4):**
+
+| Template | Purpose |
+|----------|---------|
+| `migration.hbs` | Migration workflow report: phase timelines, before/after metrics, risk items, rollback points |
+| `recap.hbs` | Project recap report: architecture, dependencies, quality, tests, coverage |
+| `audit.hbs` | Audit summary: token consumption, compliance scores, boundary violations |
+| `feature.hbs` | Feature creation report: C4 diagrams, code highlights, test coverage, HDS compliance |
+
+**Trend tracking:** Each report run captures a trend snapshot in `.orch/trends/`. Subsequent reports include trend arrows (up/down/flat) comparing current metrics to the previous snapshot.
+
+### 5.19 Comprehensive Boundary Enforcement
+
+**Decision:** Two-layer boundary system: hard enforcement via VS Code settings and soft enforcement via ORCH boundaries.yaml.
+
+**Rationale:** Hard enforcement (`blocked_commands` in `.vscode/settings.json`) is enforced by VS Code itself and cannot be bypassed by the agent. Soft enforcement (`boundaries.yaml`) is enforced by ORCH audit hooks and produces warnings/violations in the audit log. The two layers provide defense in depth.
+
+| Layer | File | Enforcement | Examples |
+|-------|------|-------------|----------|
+| Hard | `.vscode/settings.json` | VS Code blocks command execution | `rm -rf`, `git push --force`, `DROP TABLE` |
+| Soft | `.orch/config/boundaries.yaml` | ORCH audit hooks log violations | Tool boundary (agent used undeclared tool), file scope (agent touched out-of-scope files) |
+
+### 5.20 Isolated ORCH Dependencies
+
+**Decision:** ORCH runtime dependencies (ts-morph, json-server) are installed in `.orch/node_modules/` via `.orch/package.json`, isolated from the project's `node_modules/`.
+
+**Rationale:** ORCH tools should not pollute the project's dependency tree or create version conflicts. The isolated `node_modules` ensures ORCH can use whatever tool versions it needs without affecting the project's `package.json` or lockfile.
 
 ---
 

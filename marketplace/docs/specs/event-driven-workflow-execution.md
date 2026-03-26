@@ -339,6 +339,66 @@ Add event store runtime files to `.gitignore`
 | `.orch/workflows/angular-new-feature.yaml` | Add depends_on (mixed) |
 | `.gitignore` | Add event store runtime paths |
 
+## Unified Flow: @orch as Universal Entry Point
+
+### compose-plan.js — Dynamic Plan Composition
+
+When `@orch` receives a request that does not match a static workflow YAML, `compose-plan.js` dynamically builds a plan:
+
+1. **Domain detection** (`detect-domains.js`): Scans the workspace for project markers — `package.json` (Angular/Node), `pom.xml` (Spring Boot), `pyproject.toml`/`requirements.txt` (Python). Returns the detected domains.
+2. **Plan composition**: Based on the detected domains and the user's request, `compose-plan.js` assembles a phase list that may span multiple domain agents (e.g., `@angular` + `@local` for "set up mock API and wire it into the Angular app").
+3. **Event publishing**: The composed plan is converted into the same event files used by static YAML workflows. From this point forward, the relay treats static and dynamic plans identically.
+
+### detect-domains.js — Routing Mechanism
+
+`detect-domains.js` is the routing mechanism behind `@orch`. It reads project files at the workspace root and returns a domain list:
+
+| File | Domain |
+|------|--------|
+| `package.json` (with `@angular/core`) | `angular` |
+| `pom.xml` | `springboot` |
+| `pyproject.toml` / `requirements.txt` | `python` |
+| `docker-compose.yml` | `docker` |
+
+When invoked through `@angular` directly, domain detection is skipped — the Angular domain is assumed.
+
+### The Unified Pattern: All Requests → Events → Relay
+
+Whether a workflow comes from a static YAML definition or a dynamically composed plan, the execution path converges:
+
+```
+User request
+  ↓
+@orch (or @angular directly)
+  ↓
+Pre-flight checks (via @orch only): git clean, deps installed, build baseline
+  ↓
+Domain detection (via @orch only): detect-domains.js reads project files
+  ↓
+Plan: static YAML or compose-plan.js dynamic composition
+  ↓
+Event files written to .orch/workflow-state/events/{run-id}/
+  ↓
+Relay dispatches phases (same for both paths)
+  ↓
+Report generated
+```
+
+This means:
+- Every request becomes events, regardless of entry point
+- Static workflows (YAML) and dynamic plans (composed by `@orch`) produce the same event files
+- The relay is the single execution engine — no separate code paths
+
+### Prompt Sanitization
+
+When `@orch` or a workflow phase collects data from the user or from scan results, that data is sanitized before injection into prompts:
+
+- **Input escaping**: User-provided strings are escaped to prevent prompt injection (backtick wrapping, markdown-special-character escaping)
+- **Size limits**: Collected data is truncated to a configurable maximum token count before injection
+- **Structural validation**: Collected JSON data is validated against expected schemas before being interpolated into prompt templates
+
+This ensures that data flowing through the event pipeline cannot corrupt downstream AI phase prompts.
+
 ## Existing Code to Reuse
 
 | Pattern | Location | Reuse |

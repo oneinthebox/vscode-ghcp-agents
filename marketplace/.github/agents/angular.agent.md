@@ -132,6 +132,10 @@ Note: Full version-specific guidance lives in @angular-planner and @angular-engi
 
 ### Workflow execution (event-driven)
 
+**When invoked via @orch:** @orch handles pre-flight, domain detection, and plan composition. By the time @angular is invoked, events are already published and the relay may already be running. Check `active-run.json` — if a run exists, don't re-publish.
+
+**When invoked directly:** Skip pre-flight (fast path). Publish events and start relay yourself.
+
 When the triage result is **workflow mode** and a workflow YAML matches:
 
 1. Extract runtime context from the user's request:

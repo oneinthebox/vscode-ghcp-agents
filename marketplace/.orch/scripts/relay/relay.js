@@ -472,11 +472,12 @@ function poll() {
         log('Phase ' + event.identity.event_id + ' (' + event.identity.phase_name + ') -> ready (no deps)');
         continue;
       }
-      const allComplete = deps.every(function (depId) {
+      // BUG #15 fix: treat both 'complete' and 'skipped' as satisfied dependencies
+      const allSatisfied = deps.every(function (depId) {
         const dep = events.find(function (e) { return e.identity.event_id === depId; });
-        return dep && dep.lifecycle.status === 'complete';
+        return dep && (dep.lifecycle.status === 'complete' || dep.lifecycle.status === 'skipped');
       });
-      if (allComplete) {
+      if (allSatisfied) {
         store.updateStatus(event, 'ready');
         store.writeEvent(runDir, event);
         log('Phase ' + event.identity.event_id + ' (' + event.identity.phase_name + ') -> ready');
@@ -516,7 +517,14 @@ function poll() {
   // 4. Dispatch ready events
   const readyEvents = events.filter(function (e) { return e.lifecycle.status === 'ready'; });
   for (const event of readyEvents) {
-    if (event.execution.type === 'script') {
+    if (event.execution.type === 'synthetic') {
+      // BUG #22: Synthetic "done" events auto-complete when they become ready.
+      // Their dependency (last sub-phase) is already complete — just mark done.
+      store.updateStatus(event, 'complete');
+      event.result = { exit_code: 0, summary: 'Batch complete (synthetic)', duration_sec: 0 };
+      store.writeEvent(runDir, event);
+      log('Complete (synthetic): ' + event.identity.phase_name);
+    } else if (event.execution.type === 'script') {
       if (runningScripts.size < config.max_concurrent_scripts) {
         dispatchScript(event, runDir, events);
       }

@@ -105,6 +105,24 @@ Workflows are multi-phase operations defined in `.orch/workflows/*.yaml`. Each p
 - **angular-new-feature** -- Feature scaffolding with planning, generation, HDS/Elevate integration, and verification
 - **angular-project-recap** -- Full codebase analysis producing a comprehensive project overview
 
+**Event-driven execution:** When you trigger a workflow, ORCH publishes events and starts a relay process in the terminal. Script phases run automatically. AI phases are dispatched via VS Code's `code chat --mode agent` CLI (VS Code 1.112+) or pause for user approval in safe mode. The relay monitors `.orch/events/` and dispatches phases one at a time, each in a fresh context to prevent context rot.
+
+**Domain detection:** When invoked through `@orch`, the domain is auto-detected from project files (`package.json` for Angular, `pom.xml` for Spring Boot, `pyproject.toml`/`requirements.txt` for Python). When invoked through `@angular` directly, the Angular domain is assumed. Both paths produce the same event files and use the same relay execution.
+
+**Approval commands during workflows:**
+
+| Command | Effect |
+|---------|--------|
+| `@angular approve` | Approve the current pending AI phase |
+| `@angular approve-all` | Approve all remaining AI phases (no more pauses) |
+| `@angular skip` | Skip the current AI phase and move to the next |
+
+**`--auto` flag:** Pass `--auto` when invoking a workflow to run all phases without approval pauses. Useful for CI environments or when you trust the full pipeline.
+
+```
+@angular --auto migrate to Angular 19
+```
+
 ### Triage
 
 When a request arrives at `@angular`, the coordinator classifies it into one of three modes:
@@ -268,6 +286,20 @@ Request a multi-step operation. The coordinator routes through planner, engineer
 @orch Create a new Nx Angular project called portfolio-tracker
 ```
 
+### @orch vs @angular -- When to Use Which
+
+| Use `@orch` when | Use `@angular` when |
+|---|---|
+| You want pre-flight safety checks (git clean, deps installed) | You know it's Angular and want speed |
+| The task spans multiple domains (Docker + Angular + mock) | Single Angular task |
+| You want plan review before execution | You trust the workflow and want immediate action |
+| You're not sure which agent to use | You know the exact skill to invoke |
+
+Both use the same event-driven relay for workflow execution. The difference is what happens **before** the relay starts.
+
+- **`@orch`** is the universal entry point. It auto-detects your project's domain from project files (`package.json`, `pom.xml`, `pyproject.toml`), runs pre-flight checks, composes a plan (possibly spanning multiple domains), and shows the plan for review before execution begins.
+- **`@angular`** is the fast path. It skips pre-flight and domain detection, assumes Angular, and routes directly to the domain sub-agents. Same relay execution once the workflow starts.
+
 ### Shared Agent Commands
 
 ```
@@ -386,6 +418,19 @@ The coordinator selects the correct variant based on the detected version.
 
 Workflows are defined in `.orch/workflows/*.yaml`. Each workflow has a trigger pattern, a sequence of phases, and post-workflow actions (report generation, git tag, status bar notification).
 
+### How Workflow Execution Works
+
+Workflows execute via ORCH's **event-driven relay system**:
+
+1. **Publish:** The coordinator analyzes the request and publishes phase events to `.orch/events/`.
+2. **Relay:** A terminal relay process (`relay.js`) monitors the event store and dispatches phases sequentially.
+3. **Script phases** run automatically (e.g., dependency scans, compatibility checks).
+4. **AI phases** are dispatched via VS Code's `code chat --mode agent` CLI. In safe mode (default), the relay pauses before each AI phase and waits for approval.
+5. **Approval:** Send `@angular approve` to proceed, `@angular approve-all` to approve all remaining phases, or `@angular skip` to skip.
+6. **Report:** After all phases complete, a report is generated from the `.orch/templates/` template with trend data from `.orch/trends/`.
+
+Pass `--auto` to skip approval pauses: `@angular --auto migrate to Angular 19`.
+
 ### 6.1. angular-migration
 
 **Trigger**: "upgrade", "migrate", "update angular"
@@ -434,7 +479,7 @@ Produces a feature creation report with system context diagrams (C4), architectu
 
 **Trigger**: "recap", "explain", "overview", "onboard", "walkthrough"
 
-Runs 10 analysis phases sequentially (architecture, features, dependencies, compatibility, tests, quality, documentation, git history, deployment, project explanation) — 8 scan skills plus angular-compatibility and angular-explain — and stitches the results into a comprehensive `PROJECT-RECAP.md`. The final phase renders the report in all requested formats.
+The coordinator publishes 10 phase events to the event store. The relay dispatches each scan skill sequentially -- architecture, features, dependencies, compatibility, tests, quality, documentation, git history, deployment, project explanation -- via `code chat --mode agent`. Since all recap phases are read-only scans, they run without approval pauses even in safe mode. Results are stitched into a comprehensive `PROJECT-RECAP.md`. The final phase renders the report using the `recap.hbs` template from `.orch/templates/`, with trend data comparing to any previous recap snapshots.
 
 Collected data includes: C4 diagrams, module graphs, component trees, route maps, dependency classifications, test coverage by module, quality scorecards, bundle analysis, commit frequency, contributor analysis, pipeline stages, and an executive summary.
 
@@ -521,15 +566,15 @@ The `/audit-benchmark` skill supports two comparison axes and their cross-produc
 
 ## 9. Auto Mode
 
-ORCH supports three automation levels, configured in `.orch/config.yaml` under `workflow.auto_mode` or overridden per invocation.
+ORCH supports three automation levels, configured in `.orch/config.yaml` under `workflow.auto_mode` or overridden per invocation. The event-driven relay enforces these levels: in safe mode, the relay pauses before AI phases that perform writes and waits for approval via `@angular approve`, `@angular approve-all`, or `@angular skip`.
 
 ### Levels
 
 | Level | Behavior | Pauses for |
 |-------|----------|-----------|
-| `step-by-step` | Show plan, wait for approval at every step | Everything |
-| `safe` (default) | Read-only skills run immediately; write skills show plan, get one approval, then execute | Plan approval (write ops), build/test failures, low-confidence decisions |
-| `all` | Execute everything end-to-end without asking | Build/test failures, unresolvable errors only |
+| `step-by-step` | Show plan, wait for approval at every step | Everything (including read-only scans) |
+| `safe` (default) | Read-only skills and script phases run immediately; AI write phases pause for approval. Send `approve-all` to unlock remaining phases. | AI write phases, build/test failures, low-confidence decisions |
+| `all` | Execute everything end-to-end without asking. Equivalent to passing `--auto`. | Build/test failures, unresolvable errors only |
 
 ### Read-only skills (always run immediately, no approval)
 
@@ -560,6 +605,19 @@ ORCH supports three automation levels, configured in `.orch/config.yaml` under `
 - **Worktree mode**: `--auto=all --worktree` runs in a git worktree. If anything breaks, delete the worktree. Zero risk to the working copy.
 - **Checkpoints**: Every migration phase creates a git commit and tag. Rollback to any point with `git checkout`.
 - **Post-run report**: Auto mode always produces a detailed execution summary.
+
+### VS Code settings.json
+
+ORCH ships a `.vscode/settings.json` with key settings for autonomous operation:
+
+| Setting | Purpose |
+|---------|---------|
+| `github.copilot.chat.agent.autopilot` | Enables autopilot mode for agent chat sessions |
+| `github.copilot.chat.agent.autoApproveTerminalCommands` | Auto-approves terminal commands during agent sessions |
+| `github.copilot.chat.agent.autoAcceptEdits` | Auto-accepts file edits proposed by agents |
+| `github.copilot.chat.agent.blockedCommands` | Hard-blocked commands that VS Code will never execute (e.g., `rm -rf`, `git push --force`, `DROP TABLE`) |
+
+These settings work alongside the `.orch/config/boundaries.yaml` soft enforcement layer. The `blocked_commands` in settings.json are **hard enforcement** -- VS Code blocks them regardless of agent instructions. The boundaries.yaml rules are **soft enforcement** -- ORCH audit hooks log violations but rely on agent compliance.
 
 ---
 

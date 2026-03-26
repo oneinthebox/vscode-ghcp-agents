@@ -111,3 +111,13 @@ events:
   store_path: .orch/workflow-state/events
   retention_days: 30
   legacy_compat: true           # Write legacy workflow-state YAML for backward compat
+
+# ═══════════════════════════════════════════════════════════════
+# CONTEXT MANAGEMENT
+# ═══════════════════════════════════════════════════════════════
+
+context:
+  batch_size: 10              # max files per sub-phase for decomposed phases
+  prompt_style: lazy          # lazy (file pointers) | inline (current behavior)
+  soft_budget_tokens: 8000    # hint to AI, not enforced
+  max_inherited_phases: 5     # only show pointers for last N dependency phases

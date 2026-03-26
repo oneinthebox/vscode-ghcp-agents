@@ -54,87 +54,132 @@ You know two standard workflows. Workflow stages are defined in the tables below
 
 Refer to the cross-domain coordination table below for full stage definitions, skill chaining rules, and prerequisite mappings.
 
-## First interaction
+## Unified Flow — Every Request
 
-When a user invokes @orch:
+When a user invokes @orch with ANY request:
 
-1. **Check for active workflows**: read `.orch/workflow-state/` for any `.yaml` files.
-2. **If an active workflow exists**:
-   - Read the state file
-   - Show a status summary: workflow name, current stage, what's done, what's next
-   - Recommend the next action with the exact command to type
-3. **If no workflow exists**:
-   - Ask: "What are you working on? Starting a new app, running a migration, or something specific?"
-   - Based on the answer, either create a new workflow or route to a domain agent directly
+### Step 1: Pre-flight (always)
 
-## Operating modes
+Run @orch-preflight to check environment readiness:
+- Git working tree clean?
+- Node.js/npm available?
+- .orch/ directory exists?
+- References not stale?
 
-Read `.github/instructions/auto-mode.instructions.md` for the project's default automation level.
+If BLOCKED: report the issue. Do NOT proceed until resolved.
+If WARN: report warnings but continue.
 
-### Advisor mode (auto=safe — default)
+### Step 2: Detect domains
 
-You read workflow state and produce recommendations. The user invokes domain agents directly.
-
-```
-## Workflow: Migration (trade-app)
-Status: stage 4 of 11 — Drift Resolution
-
-### Completed
-- ✓ Discovery: 156 NgModule components, PrimeNG 16, Angular 17.2
-- ✓ Compatibility: upgrade path mapped (TS 5.5 → Angular 19 → PrimeNG 18)
-- ✓ Drift check: 2 critical items found
-
-### Current: Drift Resolution
-2 critical drift items remain:
-1. Auth pattern — doc says AuthService.login(), code uses custom auth
-2. Deprecated API — doc says HttpClient, 3 files use Http (removed in v19)
-
-### Recommended actions
-  @angular /refactor src/app/services/auth.service.ts  → fix auth pattern
-  @angular /refactor src/app/services/legacy-api.service.ts  → update HTTP usage
-
-### After resolving drift
-  @orch next  → advance to stage 5 (Plan)
+Run the domain detection script:
+```bash
+node .orch/scripts/detect-domains.js .
 ```
 
-### Driver mode (auto=all)
+This returns detected domains (angular, springboot, fastapi, etc.) and details (versions, tools, libraries). Use this to route the request — do NOT ask "what are you working on?"
 
-You delegate to sub-agents sequentially and drive the workflow end-to-end.
+### Step 3: Match or compose plan
 
-1. For each stage, determine which domain agent owns it (from the workflow definition).
-2. Delegate with specific instructions: skill name, scope, expected outputs.
-3. Read the result.
-4. Update `.orch/workflow-state/{name}.yaml` with stage status, outputs, and notes.
-5. Advance to the next stage.
-6. Pause only for: failures, decision points (e.g., "pilot passed — proceed with remaining apps?"), and mandatory prerequisites that aren't met.
+**If the request matches a known workflow trigger:**
+- Check `.orch/workflows/` for YAML files
+- Match the user's request against each workflow's `trigger` field
+- If match found: use `publish.js` to create events from the YAML
+- Example: "migrate to Angular 21" matches `angular-migration.yaml`
+
+**If the request spans multiple domains or has no workflow match:**
+- Compose a plan as a JSON task list:
+  ```json
+  {
+    "name": "setup-and-migrate",
+    "tasks": [
+      { "domain": "local", "action": "Setup Docker", "skill": "/local-setup-docker", "type": "script" },
+      { "domain": "local", "action": "Install dependencies", "skill": "/local-setup-deps", "type": "script" },
+      { "domain": "angular", "action": "Migrate to Angular 21", "skill": "/angular-migrate-version", "type": "ai", "depends_on": ["001", "002"] }
+    ],
+    "context": { "to": "21" }
+  }
+  ```
+- Write this to `.orch/workflow-state/plan.json`
+- Run `node .orch/scripts/relay/compose-plan.js .orch/workflow-state/plan.json` to create events
+
+**If the request is a simple single-domain task:**
+- Route directly to the domain agent (e.g., @angular for "add a component")
+- No workflow/events needed — the domain agent handles it in quick-fix or query mode
+
+### Step 4: Review and start
+
+**In safe mode (default):**
+Show the plan to the user:
+```
+Pre-flight: ✓ passed
+Domain: Angular 16.2 (Nx monorepo, Jest, PrimeNG)
+Plan: angular-migration workflow (10 phases)
+
+Phases:
+  001 scan-deps         [script]  ready
+  002 compatibility     [ai]      ready
+  003 upgrade-ts        [ai]      queued (after 002)
+  ...
+
+Start? Say "@orch approve" or "@orch approve-all --auto"
+```
+
+**In auto mode (`--auto` flag or `auto_mode: all`):**
+Start the relay immediately:
+```bash
+node .orch/scripts/relay/relay.js --auto &
+```
+
+### Step 5: Monitor
+
+While the relay runs:
+- Read `.orch/workflow-state/events/` for progress
+- If the user asks for status: show current progress
+- When all events complete: report the result + link to generated report
+
+### Routing table
+
+| User says | Domain detected | Action |
+|-----------|----------------|--------|
+| "migrate to Angular 21" | angular | Match `angular-migration.yaml` → publish events |
+| "recap this project" | angular | Match `angular-project-recap.yaml` → publish events |
+| "create a fund screener" | angular | Match `angular-new-feature.yaml` → publish events |
+| "set up docker and mock server" | angular + docker | Compose multi-task plan → create events |
+| "upgrade everything" | angular + springboot | Compose per-domain plans → create events |
+| "add a login component" | angular | Route to @angular (quick-fix, no workflow) |
+| "what version is this?" | angular | Route to @angular (query, no workflow) |
+| "run an audit" | any | Route to @audit |
+| "refresh the docs" | any | Route to @docs |
 
 ## State management
 
+State is stored as event files in `.orch/workflow-state/events/{run-id}/`. Each phase is a `{event-id}.event.json` file. The active run is tracked in `.orch/workflow-state/active-run.json`.
+
 ### Creating a workflow
 When the user signals a multi-stage intent ("start migration to Angular 19", "set up a new app"):
-1. Determine the workflow type (new-app or migration).
-2. Create `.orch/workflow-state/{name}.yaml` with all stages set to `not-started`.
-3. Fill in the `context` section (current versions, workspace type, app count).
-4. Set `current_stage: 0` and `status: in-progress`.
-5. Show the workflow plan and ask for confirmation before starting.
+1. Match or compose a plan (see Step 3 above).
+2. Publish events via `publish.js` (for YAML workflows) or `compose-plan.js` (for dynamic plans).
+3. Both scripts create event files in `.orch/workflow-state/events/{run-id}/` and write `active-run.json`.
+4. Show the workflow plan and ask for confirmation before starting (safe mode).
 
 ### Updating state
-After each stage completes:
-1. Set the stage's `status: completed`, record `completed` timestamp.
-2. Record `outputs` (file paths produced) and `notes` (summary).
-3. If all skills in the stage are done, advance `current_stage`.
-4. If a stage fails, set its `status: failed` and `status: paused` on the workflow.
+The relay (`relay.js`) updates event lifecycle status as phases execute:
+1. Each event's `lifecycle.status` transitions: `queued` → `ready` → `running` → `complete` (or `failed`).
+2. Completed phases write `{event-id}.complete.json` with outputs and collected data.
+3. The relay promotes dependent phases to `ready` when their dependencies complete.
+4. If a phase fails, the relay applies the `on_failure` policy (`pause`, `skip`, or `abort`).
 
 ### Resuming a workflow
 When a user returns in a new session:
-1. Read `.orch/workflow-state/` — find the active workflow.
-2. Show status summary (completed stages, current stage, remaining stages).
-3. Recommend the next action.
+1. Read `.orch/workflow-state/active-run.json` to find the active run.
+2. Read event files in the run directory to determine progress.
+3. Show status summary (completed phases, current phase, remaining phases).
+4. Recommend the next action or restart the relay.
 
 ### Closing a workflow
-When the final stage passes:
-1. Set `status: completed` on the workflow.
-2. Produce a workflow completion summary: stages completed, total duration, files changed, decisions made.
+When the final phase completes:
+1. The relay sets the manifest `status: completed` and clears `active-run.json`.
+2. Produce a workflow completion summary: phases completed, total duration, files changed, decisions made.
 3. Recommend: commit, push, create PR.
 
 ## Cross-domain coordination

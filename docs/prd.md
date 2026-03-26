@@ -53,6 +53,12 @@ The goal: Copilot stops suggesting generic code and starts suggesting **your tea
 | **Master Orchestrator** | @orch agent that triages requests and delegates to domain-specific agents via handoffs. Owns shared presentation skills (`/present-deck`, `/present-dashboard`). |
 | **Pre-flight Agent** | @orch-preflight for environment and configuration validation before agent sessions |
 | **Per-run Telemetry** | `.orch/runs/` directory captures per-run telemetry: timing, tokens, tool calls, outcomes |
+| **Event-Driven Relay System** | Workflows execute via a file-based event system with a terminal relay process. The coordinator publishes events to `.orch/events/`; a relay process (`relay.js`) monitors the event store and dispatches phases. Script phases run automatically; AI phases are dispatched via VS Code's `code chat --mode agent` CLI (VS Code 1.112+). The relay pauses before AI phases for user approval (`approve`, `approve-all`, `skip`). Pass `--auto` for full autonomous execution. Key components: `relay.js`, `publish.js`, `event-store.js`, `monitor.js`, `prompt-builder.js`. |
+| **Version-Aware Stack Resolution** | `check-stack.js` hook detects Angular version from `package.json` on session start (<5 ms). `resolver.yaml` maps features to version gates. `resolve-references.js` filters reference docs by detected version. Stack profiles cached in `.orch/cache/stack.yaml`. |
+| **Report Templates + Trend Tracking** | 4 report templates in `.orch/templates/` (migration, recap, audit, feature). Templates support trend snapshots for tracking metrics over time. |
+| **Safe-by-Default Auto Mode** | The relay pauses before AI phases by default. Users approve individually (`@angular approve`), approve all remaining (`@angular approve-all`), or skip (`@angular skip`). The `--auto` flag enables full autonomy. VS Code `.vscode/settings.json` ships autopilot, terminal auto-approve, and edit auto-accept settings. |
+| **Comprehensive Boundary Enforcement** | Two-layer boundary system: `blocked_commands` in `.vscode/settings.json` (hard enforcement by VS Code) + `boundaries.yaml` (soft enforcement by ORCH audit framework). |
+| **Isolated Dependencies** | `.orch/package.json` with ts-morph, json-server installed in a separate `.orch/node_modules/`, isolated from project dependencies. |
 | **Internal Marketplace** | Plugin packaging and distribution for cross-team consumption |
 
 ### 3.2 Out of Scope
@@ -113,7 +119,7 @@ Audit is the foundation layer — it is built first and everything else runs thr
 | **Context rot detection** | Track token accumulation and adherence score within a session; detect quality degradation; surface as "quality declining" (not raw token metrics) via status bar and agent self-warn |
 | **Session status tracking** | Track work progress for bounded tasks (migration from scan, doc conversion from registry); provide % complete when denominator is known |
 | **Notification system** | Three channels: status bar (glanceable, silent), agent in-chat (primary), VS Code toast (interrupt-only for decisions/errors/quality). OS notification only for critical security alerts |
-| **Sub-agent delegation** | Domain coordinators (@angular, @springboot, etc.) delegate to role-based sub-agents: @{domain}-planner (scan, explain, plan), @{domain}-engineer (generate, migrate, refactor), @{domain}-verifier (test, review, audit). Only results flow back. Reduces context rot by 80%+ for scanning and migration workflows. |
+| **Sub-agent delegation** | Domain coordinators (@angular, @springboot, etc.) delegate to role-based sub-agents: @{domain}-planner (scan, explain, plan), @{domain}-engineer (generate, migrate, refactor), @{domain}-verifier (test, review, audit). Only results flow back. Reduces context rot by 80%+ for scanning and migration workflows. For workflows, the coordinator acts as a publisher: it publishes phase events to the event store, and the relay process dispatches each phase to the appropriate agent via `code chat --mode agent`. |
 | **Semantic analysis** | Type-aware codebase analysis via language-specific adapters (ts-morph for TypeScript, adapter pattern for Java/Python). Generates lossless semantic summaries for agent context and executes precise, formatting-preserving transforms for migrations. |
 
 **Audit storage:** JSON log files per session in `.orch/audit/`, append-only violation log, daily/weekly metrics rollups. Per-run telemetry (timing, tokens, tool calls, outcomes) in `.orch/runs/`. Designed for export to enterprise observability stacks (Splunk, ELK, Datadog).
@@ -503,7 +509,7 @@ sequenceDiagram
     CLI-->>CLI: Detect: Angular 18, Nx, Jest, Playwright
     CLI->>MP: Read available agents + skills
     CLI->>Proj: Copy @angular coordinator + 3 sub-agents (planner, engineer, verifier)
-    CLI->>Proj: Copy 39 Angular skills (scan, generate, migrate, test, review, docs, mock-wire)
+    CLI->>Proj: Copy 41 Angular skills (scan, generate, migrate, test, review, docs, mock-wire, approve)
     CLI->>Proj: Copy audit hooks (4) + scripts (12)
     CLI->>Proj: Copy .orch/audit/config/ + .orch/runs/
     CLI->>Proj: Create .orch/registry.yaml (12 sources for Angular 18)

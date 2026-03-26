@@ -392,7 +392,7 @@
         <div class="mark"></div>
         <div class="overline">Orchestra for coding agents</div>
         <h1>What if Copilot <span class="highlight-text">knew</span> your team's code?</h1>
-        <div class="lead">Enterprise-grade agents, skills, and audit that turn generic AI suggestions into standardized, observable, org-specific development workflows.</div>
+        <div class="lead">Event-driven agents, skills, and audit that turn generic AI suggestions into standardized, observable, org-specific development workflows.</div>
         <div class="dateline">March 2026</div>
       </section>
 
@@ -646,7 +646,7 @@ references:
             <div class="pain-item"><strong>No governance</strong><span>Which tools did the agent use? What files? Was it authorized? Nobody knows.</span></div>
             <div class="pain-item"><strong>Invisible cost</strong><span>Token consumption is a black box. No tracking per team, agent, or task.</span></div>
             <div class="pain-item"><strong>Slow onboarding</strong><span>New devs get generic AI. Can't teach internal libraries or conventions.</span></div>
-            <div class="pain-item"><strong>Painful migrations</strong><span>Angular 19 &rarr; 21 across repos. Weeks of manual, error-prone work.</span></div>
+            <div class="pain-item"><strong>Painful migrations</strong><span>Upgrading to Angular 21 across repos. Weeks of manual, error-prone work.</span></div>
             <div class="pain-item"><strong>Quality drift</strong><span>Agent output degrades over time. Nobody notices until reviews pile up.</span></div>
           </div>
         </div>
@@ -661,7 +661,7 @@ references:
       <!-- 8 — vertical stack: intro + what orch installs -->
       <section>
         <section>
-          <header><h2>Introducing <span class="accent-text">ORCH</span>ESTRA</h2><p>Enterprise agents, skills, and audit &mdash; one command.</p></header>
+          <header><h2>Introducing <span class="accent-text">ORCH</span>ESTRA</h2><p>One command. Auto-detects your stack. Safe by default. Event-driven execution.</p></header>
           <div class="body">
             <pre><code>npm install -g @orch/cli
 orch new nx-angular my-app    # new project
@@ -669,7 +669,7 @@ orch init                      # existing project
 orch doctor
 orch reset</code></pre>
             <div class="split split-2">
-              <div><h3>What it creates</h3><ul><li>11 role-based agents tailored to your stack</li><li>60 skills (10 planner, 23 engineer, 6 migration, 8 local, 6 audit, 4 docs, 3 present)</li><li>3 declarative workflows + audit hooks on every lifecycle event</li><li>Styled reports &mdash; recap, migration, docs, benchmarking</li><li>Version-aware stack resolution + model benchmarking out of the box</li></ul></div>
+              <div><h3>What it creates</h3><ul><li>11 role-based agents tailored to your stack</li><li>61 skills (10 planner, 23 engineer, 6 migration, 8 local, 6 audit, 4 docs, 3 present, 1 elevate)</li><li>3 event-driven workflows + audit hooks on every lifecycle event</li><li>Styled reports &mdash; recap, migration, docs, benchmarking</li><li>Version-aware stack resolution + model benchmarking out of the box</li></ul></div>
               <div><h3>What stays in your hands</h3><ul><li>Which agents are installed</li><li>What tools each agent can access</li><li>Auto mode or approval at every step</li><li>Model selection backed by benchmark data</li><li>Clean removal with one command when needed</li></ul></div>
             </div>
           </div>
@@ -692,7 +692,7 @@ orch reset</code></pre>
     local.agent.md              # local env setup
     migrate-worker.agent.md     # migration executor
   skills/
-    angular-scan-deps/SKILL.md  # 60 granular skills
+    angular-scan-deps/SKILL.md  # 61 granular skills
     angular-migrate-standalone/SKILL.md
     ...
   hooks/
@@ -724,11 +724,11 @@ orch reset</code></pre>
       <!-- 9 — vertical stack: architecture + triage detail -->
       <section>
         <section>
-          <header><h2>Role-Based Agent Architecture</h2><p>Every request triaged. Every agent has one job. Handoffs visible in VS Code.</p></header>
+          <header><h2>Role-Based Agent Architecture</h2><p>@orch auto-detects everything. One command. Safe by default. Same result via @orch or @angular.</p></header>
           <div class="body">
             <div class="flow" style="flex-wrap: nowrap;">
-              <div class="flow-step" style="background: var(--bg-warm); border-color: var(--neutral-300);">@orch<small>orchestrate</small></div><div class="flow-arr">&rarr;</div>
-              <div class="flow-step">Pre-flight<small>readiness</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step" style="background: var(--bg-warm); border-color: var(--neutral-300);">@orch<small>detect &amp; route</small></div><div class="flow-arr">&rarr;</div>
+              <div class="flow-step">Pre-flight<small>safety checks</small></div><div class="flow-arr">&rarr;</div>
               <div class="flow-step" style="border-color: var(--fg-accent);">@angular<small>coordinate</small></div><div class="flow-arr">&rarr;</div>
               <div style="border: 1.5px dashed var(--neutral-300); border-radius: var(--radius-md); padding: var(--sp-2) var(--sp-3); display: flex; align-items: center; gap: var(--sp-2); position: relative;">
                 <span style="position: absolute; top: -8px; left: var(--sp-3); background: var(--bg-page); padding: 0 4px; font-size: var(--fs-tiny); color: var(--fg-muted); font-weight: 600;">domain sub-agents</span>
@@ -792,7 +792,7 @@ orch reset</code></pre>
             <tr><td>Verifier</td><td><code>/angular-test-unit</code></td><td>Generate Jest tests per org conventions</td></tr>
             <tr><td>Verifier</td><td><code>/angular-review</code></td><td>Review against anti-pattern checklist</td></tr>
           </tbody></table>
-          <p style="font-size: var(--fs-caption); color: var(--fg-muted); text-align: center;">60 skills: 10 planner, 23 engineer, 6 migration, 8 local, 6 audit, 4 docs, 3 present. Each declares reference dependencies &mdash; only loads what it needs.</p>
+          <p style="font-size: var(--fs-caption); color: var(--fg-muted); text-align: center;">61 skills: 10 planner, 23 engineer, 6 migration, 8 local, 6 audit, 4 docs, 3 present, 1 elevate. Each declares reference dependencies &mdash; only loads what it needs.</p>
         </div>
       </section>
 
@@ -800,15 +800,15 @@ orch reset</code></pre>
       <section class="section-slide">
         <div class="bar"></div>
         <h2>In <span class="highlight-text">practice</span></h2>
-        <p>Declarative workflows. One command. Full audit trail.</p>
+        <p>Event-driven workflows. One command. Full audit trail.</p>
       </section>
 
       <!-- 12 — Migration with workflow sub-slides -->
       <section>
         <section>
-          <header><h2>Upgrade Angular 19 &rarr; 21</h2><p>One command. Workflow-driven. Verified at every phase.</p></header>
+          <header><h2>Upgrade to Angular 21</h2><p>One command. Event-driven workflow. Verified at every phase.</p></header>
           <div class="body">
-            <pre><code>@angular upgrade this app from Angular 19 to 21</code></pre>
+            <pre><code>@angular upgrade this app to Angular 21</code></pre>
             <div class="flow">
               <div class="flow-step">1. Scan<small>deps, arch</small></div><div class="flow-arr">&rarr;</div>
               <div class="flow-step">2. Plan<small>10 phases</small></div><div class="flow-arr">&rarr;</div>
@@ -818,13 +818,13 @@ orch reset</code></pre>
               <div class="flow-step done">6. Report</div>
             </div>
             <div class="split split-2">
-              <div><h3>Automated phases</h3><ul><li>TypeScript 5.5 &rarr; 5.8</li><li>Angular 19 &rarr; 20 &rarr; 21 via ng update</li><li>NgModules &rarr; standalone (ts-morph)</li><li>*ngIf &rarr; @if, *ngFor &rarr; @for</li><li>Signals migration + git checkpoint each phase</li></ul></div>
+              <div><h3>Automated phases</h3><ul><li>TypeScript upgrade &rarr; 5.8</li><li>Incremental ng update &rarr; Angular 21</li><li>NgModules &rarr; standalone (ts-morph)</li><li>*ngIf &rarr; @if, *ngFor &rarr; @for</li><li>Signals migration + git checkpoint each phase</li></ul></div>
               <div><h3>Deliverables</h3><ul><li>Build + test verified after every phase</li><li>Rollback-safe &mdash; git checkpoint per phase</li><li>Before/after pattern counts per phase</li><li>Risk detection (deprecated APIs, manual fixes)</li><li>Migration report with diagrams + recommendations</li></ul></div>
             </div>
           </div>
         </section>
         <section>
-          <header><h2>Workflow-Driven Execution</h2><p>Workflows are declarative YAML. The coordinator reads and executes.</p></header>
+          <header><h2>Event-Driven Execution</h2><p>Workflows are declarative YAML. The relay publishes events, dispatches phases, monitors progress.</p></header>
           <div class="body">
             <pre><code># .orch/workflows/angular-migration.yaml
 phases:
@@ -909,7 +909,7 @@ phases:
             <div>
               <div style="font-size: var(--fs-tiny); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin-bottom: var(--sp-2);">Orchestrator (2 agents)</div>
               <div class="agent-grid" style="grid-template-columns: 1fr 1fr;">
-                <div class="agent-card"><div class="name" style="color: var(--fg-accent);">@orch</div><div class="role">Master orchestrator</div><div class="desc">Routes requests to domain agents. Shared presentation skills. Full workflow coordination.</div></div>
+                <div class="agent-card"><div class="name" style="color: var(--fg-accent);">@orch</div><div class="role">Universal entry point</div><div class="desc">Auto-detects domain from project files, runs pre-flight, composes plans (including multi-domain), monitors workflows. One command &mdash; same result whether you use @orch or @angular.</div></div>
                 <div class="agent-card"><div class="name" style="color: var(--fg-accent);">@orch-preflight</div><div class="role">Readiness checks</div><div class="desc">Validates build baseline, doc freshness, and environment before any workflow begins.</div></div>
               </div>
             </div>
@@ -938,7 +938,81 @@ phases:
         </div>
       </section>
 
-      <!-- 14b — Version-Aware Stack Resolution -->
+      <!-- 14b — ORCH Architecture Diagram -->
+      <section>
+        <header><h2>ORCH Architecture</h2><p>@orch at the top. Auto-detects domain. Routes to the right agent.</p></header>
+        <div class="body">
+          <pre><code>┌─────────────────────────────────────────────────────────────┐
+│                         VS Code                              │
+│  ┌──────────────────────────┐  ┌──────────────────────────┐  │
+│  │   Copilot Chat           │  │  .vscode/settings        │  │
+│  │   @orch (universal entry)│  │  autopilot: true          │  │
+│  │   @angular (fast path)   │  │  terminal: auto            │  │
+│  └────────────┬─────────────┘  └──────────────────────────┘  │
+│               │                                               │
+│  ┌────────────▼──────────────────────────────────────────┐   │
+│  │  @orch orchestration layer                             │   │
+│  │  detect-domains.js → routes to domain agents           │   │
+│  │  compose-plan.js   → dynamic multi-domain plans        │   │
+│  │  pre-flight        → git clean, deps, build baseline   │   │
+│  └────────────┬──────────────────────────────────────────┘   │
+│               │  publishes events                             │
+│  ┌────────────▼──────────────────────────────────────────┐   │
+│  │           Event-Driven Relay                           │   │
+│  │  ┌──────────┐  ┌────────────┐  ┌────────────────┐     │   │
+│  │  │Publisher  │  │  Relay.js  │  │   Monitor      │     │   │
+│  │  │YAML→evts │  │poll→dispatch│  │progress→report │     │   │
+│  │  └──────────┘  └────────────┘  └────────────────┘     │   │
+│  │  Scripts: spawn()       AI: code chat                  │   │
+│  │  Parallel (4x)          Sequential (1x)                │   │
+│  └────────────┬──────────────────────────────────────────┘   │
+│               │  dispatches to domain agents                  │
+│  ┌────────────▼──────────────────────────────────────────┐   │
+│  │  Domain Agents: @angular │ @springboot │ @python (future)│ │
+│  └────────────────────────────────────────────────────────┘   │
+│  ┌────────────────────────────────────────────────────────┐   │
+│  │               .orch/ (Knowledge Base)                   │   │
+│  │  config.yaml   │  resolver.yaml   │  references/        │   │
+│  │  hooks/        │  templates/      │  scripts/           │   │
+│  │  workflows/    │  runs/           │  reports/            │   │
+│  │  boundaries    │  cache/          │  audit/              │   │
+│  └────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+          <p style="font-size: var(--fs-caption); color: var(--fg-muted); text-align: center;">@orch auto-detects domain, composes plans, runs pre-flight. @angular is the fast path &mdash; skip pre-flight, go direct. Both produce the same events. Same relay. Same result.</p>
+        </div>
+      </section>
+
+      <!-- 14c — Why Not Request-Response? -->
+      <section>
+        <header><h2>Why Not Request-Response?</h2><p>The typical agent loop breaks at scale. Event-driven execution solves it.</p></header>
+        <div class="body">
+          <div class="split split-2">
+            <div>
+              <h3>Request-Response (typical)</h3>
+              <ul>
+                <li><strong>Context bloats:</strong> 30K+ tokens by phase 5</li>
+                <li><strong>User types</strong> "continue" 10 times</li>
+                <li><strong>No parallelism</strong> &mdash; one tool at a time</li>
+                <li><strong>Crash = start over</strong> &mdash; no state persistence</li>
+                <li><strong>Tools run out</strong> (25&ndash;100 per turn)</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Event-Driven (ORCH)</h3>
+              <ul>
+                <li><strong>Fresh context</strong> per phase (~2K tokens)</li>
+                <li><strong>Scripts run automatically</strong> (zero tokens)</li>
+                <li><strong>Parallel scan phases</strong> (4x faster)</li>
+                <li><strong>Crash-resilient</strong> &mdash; file-based state</li>
+                <li><strong>Full tool budget</strong> per AI phase</li>
+              </ul>
+            </div>
+          </div>
+          <p class="callout">In a 10-phase migration, request-response burns ~300K tokens with degrading quality. Event-driven uses ~20K total with consistent quality per phase.</p>
+        </div>
+      </section>
+
+      <!-- 14d — Version-Aware Stack Resolution -->
       <section>
         <header><h2>Version-Aware Stack Resolution</h2><p>Right docs for the right version. Automatically.</p></header>
         <div class="body">
@@ -984,6 +1058,73 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"</code></pre></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15b — Governance & Safety -->
+      <section>
+        <header><h2>Governance &amp; Safety</h2><p>Two-layer enforcement. What makes ORCH enterprise-ready, not just a developer tool.</p></header>
+        <div class="body">
+          <div class="split split-2" style="margin-bottom: var(--sp-4);">
+            <div>
+              <h3>Two-layer enforcement</h3>
+              <ul>
+                <li><strong>VS Code settings.json (HARD):</strong> terminal commands allowlist, file edit patterns, autopilot limits</li>
+                <li><strong>ORCH boundaries.yaml (SOFT + hooks):</strong> per-agent tool restrictions, file scope, blocked commands</li>
+                <li><strong>Audit trail:</strong> every tool call, file edit, token logged to <code>.orch/runs/</code></li>
+              </ul>
+            </div>
+            <div>
+              <h3>What's enforced</h3>
+              <table>
+                <thead><tr><th>Layer</th><th>Example</th><th>Enforcement</th></tr></thead>
+                <tbody>
+                  <tr><td>VS Code settings</td><td><code>rm: false</code> in terminal.autoApprove</td><td>Platform blocks it</td></tr>
+                  <tr><td>ORCH hooks</td><td>Planner tries edit tool &rarr; preToolUse hook exits 1</td><td>Hook blocks it</td></tr>
+                  <tr><td>ORCH boundaries</td><td>Engineer writes outside <code>src/</code> &rarr; postToolUse logs violation</td><td>Logged + scored</td></tr>
+                  <tr><td>ORCH instructions</td><td>"Never run DROP TABLE"</td><td>LLM compliance</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p class="callout">Hard boundaries cannot be bypassed. Soft boundaries are logged and scored. Instructions rely on LLM compliance &mdash; but hooks catch violations.</p>
+        </div>
+      </section>
+
+      <!-- 15c — Safe by Default -->
+      <section>
+        <header><h2>Safe by Default</h2><p>One command. Auto-detect. Plan review. Then execute.</p></header>
+        <div class="body">
+          <pre><code>@orch upgrade this project
+  ↓
+Pre-flight: ✓ git clean, deps installed
+Domain: Angular 16.2 (detected from package.json)
+Plan: angular-migration (10 phases)
+  ↓
+Safe mode: "Review plan. @orch approve or approve-all"
+Auto mode: relay starts immediately</code></pre>
+          <div class="split split-2" style="margin-top: var(--sp-4);">
+            <div>
+              <h3>Safe mode (default)</h3>
+              <ul>
+                <li><code>@orch upgrade this project</code></li>
+                <li>Pre-flight runs: git clean, deps check</li>
+                <li>Domain auto-detected from project files</li>
+                <li>Plan shown to user before execution starts</li>
+                <li>Approve one phase or approve-all remaining</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Full auto mode</h3>
+              <ul>
+                <li><code>@orch upgrade this project --auto</code></li>
+                <li>Same detection and pre-flight, then relay starts immediately</li>
+                <li>Zero human interaction required</li>
+                <li>Every action still logged to <code>.orch/runs/</code></li>
+                <li>Rollback available via git checkpoints</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
@@ -1188,6 +1329,14 @@ If auto_mode is "step-by-step": pause at every step.</code></pre>
         <header><h2>The Numbers</h2></header>
         <div class="body">
           <div class="stat-row">
+            <div class="stat accent"><div class="val">61</div><div class="lbl">Skills</div></div>
+            <div class="stat teal"><div class="val">44</div><div class="lbl">Automation scripts</div></div>
+            <div class="stat"><div class="val">92</div><div class="lbl">Example files</div></div>
+            <div class="stat"><div class="val">5</div><div class="lbl">Shared lib modules</div></div>
+            <div class="stat teal"><div class="val">3</div><div class="lbl">Event-driven workflows</div></div>
+            <div class="stat"><div class="val">56</div><div class="lbl">Reference docs</div></div>
+          </div>
+          <div class="stat-row">
             <div class="stat accent"><div class="val">90%+</div><div class="lbl">Pattern adherence</div></div>
             <div class="stat teal"><div class="val">&minus;40%</div><div class="lbl">Onboarding time</div></div>
             <div class="stat teal"><div class="val">&minus;30%</div><div class="lbl">Review turnaround</div></div>
@@ -1210,9 +1359,10 @@ orch new nx-angular my-app    # new project
 orch init                      # existing project
 orch doctor
 
-# In VS Code
-@orch upgrade this app to Angular 21
-@angular recap this project
+# In VS Code — @orch detects your stack automatically
+@orch upgrade this project           # detects Angular, composes plan
+@orch recap this project              # same command, domain auto-detected
+@angular recap this project           # fast path — skip pre-flight
 @audit /audit-usage this week</code></pre>
           <table><thead><tr><th>Phase</th><th>What ships</th><th>Status</th></tr></thead><tbody>
             <tr><td><strong class="accent-text">Phase 1</strong></td><td>Audit framework + docs pipeline + Angular domain + pilot</td><td><span class="tag tag-teal">available</span></td></tr>
@@ -1232,12 +1382,12 @@ orch doctor
               <thead><tr><th>Asset</th><th>Count</th><th>Purpose</th></tr></thead>
               <tbody>
                 <tr><td><strong>Agents</strong></td><td>11</td><td>Role-based AI personas with tool boundaries</td></tr>
-                <tr><td><strong>Skills</strong></td><td>60</td><td>Reusable task definitions with references, scripts, examples</td></tr>
+                <tr><td><strong>Skills</strong></td><td>61</td><td>Reusable task definitions with references, scripts, examples</td></tr>
                 <tr><td><strong>Scripts</strong></td><td>44</td><td>Automation helpers (scanners, detectors, scaffolders)</td></tr>
                 <tr><td><strong>Examples</strong></td><td>92</td><td>Before/after code, report samples, config templates</td></tr>
                 <tr><td><strong>Reference docs</strong></td><td>56</td><td>Curated knowledge (Angular, Nx, PrimeNG, AG Grid, internal)</td></tr>
                 <tr><td><strong>Shared libs</strong></td><td>5</td><td>ts-scanner, template-scanner, scss-scanner, git-utils, report</td></tr>
-                <tr><td><strong>Workflows</strong></td><td>3</td><td>Declarative YAML: migration, new-feature, project-recap</td></tr>
+                <tr><td><strong>Workflows</strong></td><td>3</td><td>Declarative YAML with event-driven execution: migration, new-feature, project-recap</td></tr>
                 <tr><td><strong>Hooks</strong></td><td>2</td><td>check-stack.js (version detection), resolve-references.js</td></tr>
               </tbody>
             </table>
@@ -1299,7 +1449,7 @@ orch doctor
   scripts/lib/          # shared Node.js utilities
 .github/
   agents/               # 11 agent definitions
-  skills/               # 60 skill directories (SKILL.md, scripts/, examples/)
+  skills/               # 61 skill directories (SKILL.md, scripts/, examples/)
   copilot-instructions.md  # global safety rules</code></pre>
           </div>
         </section>
@@ -1454,7 +1604,7 @@ orch doctor
       <section class="closing">
         <div class="mark"></div>
         <h1>Coding agents are powerful. <span class="highlight-text">ORCH</span> makes them yours.</h1>
-        <p>Your standards. Your patterns. Your audit trail. Any agent. Full control.</p>
+        <p>Event-driven. Boundary-enforced. Your standards. Your audit trail. Any agent. Full control.</p>
         <div class="cta">npm install -g @orch/cli</div>
       </section>
 

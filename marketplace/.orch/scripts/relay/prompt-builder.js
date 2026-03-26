@@ -59,6 +59,58 @@ function extractStackVersion(stackContent, key) {
 }
 
 // ---------------------------------------------------------------------------
+// Read context management config from .orch/config.yaml
+// ---------------------------------------------------------------------------
+
+function readContextConfig(projectRoot) {
+  const defaults = { batch_size: 10, prompt_style: 'lazy', soft_budget_tokens: 8000, max_inherited_phases: 5 };
+  try {
+    const content = fs.readFileSync(path.join(projectRoot, '.orch/config.yaml'), 'utf8');
+    const contextMatch = content.match(/context:([\s\S]*?)(?=\n\w|\n$|$)/);
+    if (contextMatch) {
+      const block = contextMatch[1];
+      const extract = (key, fallback) => {
+        const re = new RegExp(`${key}:\\s*(.+?)\\s*$`, 'm');
+        const m = block.match(re);
+        return m ? m[1].trim() : fallback;
+      };
+      defaults.batch_size = parseInt(extract('batch_size', defaults.batch_size), 10);
+      defaults.prompt_style = extract('prompt_style', defaults.prompt_style);
+      defaults.soft_budget_tokens = parseInt(extract('soft_budget_tokens', defaults.soft_budget_tokens), 10);
+      defaults.max_inherited_phases = parseInt(extract('max_inherited_phases', defaults.max_inherited_phases), 10);
+    }
+  } catch (err) {
+    // Config file not found — use defaults
+  }
+  return defaults;
+}
+
+// ---------------------------------------------------------------------------
+// Sanitize collected data to strip potential prompt injection patterns
+// ---------------------------------------------------------------------------
+
+function sanitizeCollectedData(data) {
+  if (typeof data === 'string') {
+    // Strip patterns that look like prompt injection
+    return data
+      .replace(/ignore\s+(all\s+)?(previous|prior|above)\s+instructions/gi, '[REDACTED]')
+      .replace(/delete\s+all/gi, '[REDACTED]')
+      .replace(/drop\s+table/gi, '[REDACTED]')
+      .replace(/override\s+(all\s+)?rules/gi, '[REDACTED]')
+      .replace(/system\s*:\s*/gi, '[REDACTED]');
+  }
+  if (Array.isArray(data)) return data.map(sanitizeCollectedData);
+  if (data && typeof data === 'object') {
+    const result = {};
+    for (const [key, value] of Object.entries(data)) {
+      result[key] = sanitizeCollectedData(value);
+    }
+    return result;
+  }
+  return data;
+}
+
+// ---------------------------------------------------------------------------
 // Collect inherited data from completed dependency events
 // ---------------------------------------------------------------------------
 
@@ -72,7 +124,11 @@ function collectDependencyData(event, runDir) {
     const completeFile = path.join(runDir, `${depId}.complete.json`);
     try {
       const data = JSON.parse(fs.readFileSync(completeFile, 'utf8'));
-      results.push({ event_id: depId, collected: data.collected || {}, summary: data.summary || '' });
+      results.push({
+        event_id: depId,
+        collected: sanitizeCollectedData(data.collected || {}),
+        summary: sanitizeCollectedData(data.summary || '')
+      });
     } catch (err) {
       // Dependency hasn't completed yet or file missing — skip
     }
@@ -85,12 +141,12 @@ function collectDependencyData(event, runDir) {
         // Merge if we didn't get it from complete.json
         const existing = results.find(r => r.event_id === depId);
         if (existing && Object.keys(existing.collected).length === 0) {
-          existing.collected = depEvent.result.collected;
+          existing.collected = sanitizeCollectedData(depEvent.result.collected);
         } else if (!existing) {
           results.push({
             event_id: depId,
-            collected: depEvent.result.collected,
-            summary: depEvent.result.summary || ''
+            collected: sanitizeCollectedData(depEvent.result.collected),
+            summary: sanitizeCollectedData(depEvent.result.summary || '')
           });
         }
       }
@@ -141,6 +197,10 @@ function buildPrompt(event, runDir, projectRoot) {
   const { event_id, workflow_name, phase_name, skill, agent } = event.identity;
   const runId = event.identity.run_id;
 
+  // Read context management config
+  const ctxConfig = readContextConfig(projectRoot);
+  const isLazy = ctxConfig.prompt_style === 'lazy';
+
   // Read SKILL.md (handles both single skill and skills: plural list)
   const { stepsSection, contextSection } = readSkillSections(event, projectRoot);
 
@@ -149,11 +209,11 @@ function buildPrompt(event, runDir, projectRoot) {
   const angularVersion = extractStackVersion(stackContent, 'angular');
   const nodeVersion = extractStackVersion(stackContent, 'node');
 
-  // Read resolver info
-  const resolverInfo = readResolverInfo(skill, projectRoot);
+  // Read resolver info (only inline in non-lazy mode)
+  const resolverInfo = isLazy ? null : readResolverInfo(skill, projectRoot);
 
-  // Collect dependency data
-  const depData = collectDependencyData(event, runDir);
+  // Collect dependency data (only inline in non-lazy mode)
+  const depData = isLazy ? [] : collectDependencyData(event, runDir);
 
   // Build the prompt
   const lines = [];
@@ -205,18 +265,64 @@ function buildPrompt(event, runDir, projectRoot) {
     lines.push('');
   }
 
-  if (depData.length > 0) {
-    lines.push('## Inputs from Previous Phases');
-    for (const dep of depData) {
-      lines.push(`### Phase ${dep.event_id}`);
-      if (dep.summary) lines.push(`Summary: ${dep.summary}`);
-      if (dep.collected && Object.keys(dep.collected).length > 0) {
-        for (const [key, value] of Object.entries(dep.collected)) {
-          const display = typeof value === 'string' ? value : JSON.stringify(value);
-          lines.push(`- **${key}**: ${display}`);
+  if (isLazy) {
+    // Lazy mode: file pointers instead of inlined content
+    const allSkills = event.identity.skills || (skill ? [skill] : []);
+    lines.push('## References (read when needed)');
+    for (const s of allSkills) {
+      const sName = s.replace(/^\//, '');
+      lines.push(`- Skill instructions: .github/skills/${sName}/SKILL.md`);
+    }
+    // Check for resolver references
+    if (skill) {
+      const skillName = skill.replace(/^\//, '');
+      const resolverCandidates = [
+        `.orch/references/${skillName}/resolver.yaml`,
+        '.orch/references/angular/resolver.yaml'
+      ];
+      for (const rp of resolverCandidates) {
+        if (fs.existsSync(path.join(projectRoot, rp))) {
+          lines.push(`- Version resolver: ${rp}`);
+          break;
         }
       }
+    }
+    lines.push('');
+
+    // Dependency data as file pointers
+    const deps = event.dependencies && event.dependencies.depends_on
+      ? event.dependencies.depends_on : [];
+    const maxInherited = ctxConfig.max_inherited_phases || 5;
+    const recentDeps = deps.slice(-maxInherited);
+    if (recentDeps.length > 0) {
+      lines.push('## Previous phase results (read what\'s relevant)');
+      for (const depId of recentDeps) {
+        // Try to read event file for phase name
+        let phaseName = depId;
+        try {
+          const depEvent = JSON.parse(fs.readFileSync(path.join(runDir, `${depId}.event.json`), 'utf8'));
+          phaseName = depEvent.identity.phase_name || depId;
+        } catch (err) { /* use depId as fallback */ }
+        const relativePath = path.relative(projectRoot, path.join(runDir, `${depId}.complete.json`));
+        lines.push(`- Phase ${depId} (${phaseName}): ${relativePath}`);
+      }
       lines.push('');
+    }
+  } else {
+    // Inline mode: original behavior
+    if (depData.length > 0) {
+      lines.push('## Inputs from Previous Phases');
+      for (const dep of depData) {
+        lines.push(`### Phase ${dep.event_id}`);
+        if (dep.summary) lines.push(`Summary: ${dep.summary}`);
+        if (dep.collected && Object.keys(dep.collected).length > 0) {
+          for (const [key, value] of Object.entries(dep.collected)) {
+            const display = typeof value === 'string' ? value : JSON.stringify(value);
+            lines.push(`- **${key}**: ${display}`);
+          }
+        }
+        lines.push('');
+      }
     }
   }
 
@@ -227,6 +333,22 @@ function buildPrompt(event, runDir, projectRoot) {
     lines.push(`Complete the "${phase_name}" phase. Follow the skill documentation if available.`);
   }
   lines.push('');
+
+  // Pre-check / post-check instructions (if defined in workflow YAML)
+  if (event.checkpoint && event.checkpoint.pre_check) {
+    const pc = event.checkpoint.pre_check;
+    lines.push('## Pre-Check (run BEFORE starting this phase)');
+    lines.push(`Run: \`${pc.skill}\`${pc.args ? ' with args: `' + pc.args + '`' : ''}`);
+    if (pc.capture) lines.push(`Capture the output as **${pc.capture}** in your completion marker's collected data.`);
+    lines.push('');
+  }
+  if (event.checkpoint && event.checkpoint.post_check) {
+    const pc = event.checkpoint.post_check;
+    lines.push('## Post-Check (run AFTER completing this phase)');
+    lines.push(`Run: \`${pc.skill}\`${pc.args ? ' with args: `' + pc.args + '`' : ''}`);
+    if (pc.capture) lines.push(`Capture the output as **${pc.capture}** in your completion marker's collected data.`);
+    lines.push('');
+  }
 
   lines.push('## Completion Protocol');
   lines.push('When you have completed this phase, create this file:');
@@ -245,6 +367,14 @@ function buildPrompt(event, runDir, projectRoot) {
   lines.push('```');
   lines.push('');
   lines.push('If the phase fails, set status to "failed" and include the error.');
+  lines.push('');
+
+  // Soft budget context management footer
+  lines.push('## Context Management');
+  lines.push('- Prefer targeted file reads (specific line ranges) over full files.');
+  lines.push('- Read reference docs only when needed for the current step.');
+  lines.push('- After completing a sub-task, note key findings rather than re-reading files.');
+  lines.push(`- Target working context: ~${ctxConfig.soft_budget_tokens} tokens.`);
 
   // Write the prompt file
   const promptPath = path.join(runDir, `${event_id}.prompt.md`);
@@ -266,6 +396,10 @@ function buildSkeletonPrompt(event, runDir, projectRoot) {
   const { event_id, workflow_name, phase_name, skill, agent } = event.identity;
   const runId = event.identity.run_id;
 
+  // Read context management config
+  const ctxConfig = readContextConfig(projectRoot);
+  const isLazy = ctxConfig.prompt_style === 'lazy';
+
   // Read SKILL.md (handles both single skill and skills: plural list)
   const { stepsSection, contextSection } = readSkillSections(event, projectRoot);
 
@@ -274,8 +408,8 @@ function buildSkeletonPrompt(event, runDir, projectRoot) {
   const angularVersion = extractStackVersion(stackContent, 'angular');
   const nodeVersion = extractStackVersion(stackContent, 'node');
 
-  // Read resolver info
-  const resolverInfo = readResolverInfo(skill, projectRoot);
+  // Read resolver info (only inline in non-lazy mode)
+  const resolverInfo = isLazy ? null : readResolverInfo(skill, projectRoot);
 
   // Build the skeleton prompt (no dependency data)
   const lines = [];
@@ -327,10 +461,47 @@ function buildSkeletonPrompt(event, runDir, projectRoot) {
     lines.push('');
   }
 
-  // Placeholder for dependency data (will be filled at dispatch time)
-  lines.push('## Inputs from Previous Phases');
-  lines.push('*(Will be populated at dispatch time with actual data from completed dependencies.)*');
-  lines.push('');
+  if (isLazy) {
+    // Lazy mode: file pointers for references
+    const allSkills = event.identity.skills || (skill ? [skill] : []);
+    lines.push('## References (read when needed)');
+    for (const s of allSkills) {
+      const sName = s.replace(/^\//, '');
+      lines.push(`- Skill instructions: .github/skills/${sName}/SKILL.md`);
+    }
+    if (skill) {
+      const skillName = skill.replace(/^\//, '');
+      const resolverCandidates = [
+        `.orch/references/${skillName}/resolver.yaml`,
+        '.orch/references/angular/resolver.yaml'
+      ];
+      for (const rp of resolverCandidates) {
+        if (fs.existsSync(path.join(projectRoot, rp))) {
+          lines.push(`- Version resolver: ${rp}`);
+          break;
+        }
+      }
+    }
+    lines.push('');
+
+    // Dependency pointers (will point to files that don't exist yet at publish time)
+    const deps = event.dependencies && event.dependencies.depends_on
+      ? event.dependencies.depends_on : [];
+    if (deps.length > 0) {
+      lines.push('## Previous phase results (read what\'s relevant)');
+      lines.push('*(Dependency data will be available at dispatch time.)*');
+      lines.push('');
+    } else {
+      lines.push('## Inputs from Previous Phases');
+      lines.push('*(No dependencies for this phase.)*');
+      lines.push('');
+    }
+  } else {
+    // Inline mode: placeholder for dependency data
+    lines.push('## Inputs from Previous Phases');
+    lines.push('*(Will be populated at dispatch time with actual data from completed dependencies.)*');
+    lines.push('');
+  }
 
   lines.push('## Instructions');
   if (stepsSection) {
@@ -339,6 +510,22 @@ function buildSkeletonPrompt(event, runDir, projectRoot) {
     lines.push(`Complete the "${phase_name}" phase. Follow the skill documentation if available.`);
   }
   lines.push('');
+
+  // Pre-check / post-check instructions (if defined in workflow YAML)
+  if (event.checkpoint && event.checkpoint.pre_check) {
+    const pc = event.checkpoint.pre_check;
+    lines.push('## Pre-Check (run BEFORE starting this phase)');
+    lines.push(`Run: \`${pc.skill}\`${pc.args ? ' with args: `' + pc.args + '`' : ''}`);
+    if (pc.capture) lines.push(`Capture the output as **${pc.capture}** in your completion marker's collected data.`);
+    lines.push('');
+  }
+  if (event.checkpoint && event.checkpoint.post_check) {
+    const pc = event.checkpoint.post_check;
+    lines.push('## Post-Check (run AFTER completing this phase)');
+    lines.push(`Run: \`${pc.skill}\`${pc.args ? ' with args: `' + pc.args + '`' : ''}`);
+    if (pc.capture) lines.push(`Capture the output as **${pc.capture}** in your completion marker's collected data.`);
+    lines.push('');
+  }
 
   lines.push('## Completion Protocol');
   lines.push('When you have completed this phase, create this file:');
@@ -357,6 +544,14 @@ function buildSkeletonPrompt(event, runDir, projectRoot) {
   lines.push('```');
   lines.push('');
   lines.push('If the phase fails, set status to "failed" and include the error.');
+  lines.push('');
+
+  // Soft budget context management footer
+  lines.push('## Context Management');
+  lines.push('- Prefer targeted file reads (specific line ranges) over full files.');
+  lines.push('- Read reference docs only when needed for the current step.');
+  lines.push('- After completing a sub-task, note key findings rather than re-reading files.');
+  lines.push(`- Target working context: ~${ctxConfig.soft_budget_tokens} tokens.`);
 
   // Write the prompt file
   const promptPath = path.join(runDir, `${event_id}.prompt.md`);
@@ -365,4 +560,4 @@ function buildSkeletonPrompt(event, runDir, projectRoot) {
   return promptPath;
 }
 
-module.exports = { buildPrompt, buildSkeletonPrompt, extractSection };
+module.exports = { buildPrompt, buildSkeletonPrompt, extractSection, readContextConfig };
