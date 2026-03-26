@@ -12,9 +12,11 @@ report:
 phases:
   - name: Scan context (before)
     id: scan-context-before
+    phase_id: "001"
     agent: planner
     skill: /angular-scan-arch
     args: --scope {{target-path}}
+    depends_on: []
     checkpoint: false
     verify: false
     approval: none
@@ -35,8 +37,11 @@ phases:
 
   - name: Generate component
     id: generate-component
+    phase_id: "002"
     agent: engineer
     skill: /angular-generate-component
+    execution_type: ai
+    depends_on: ["001"]
     checkpoint: true
     verify: false
     approval: auto=safe
@@ -49,8 +54,11 @@ phases:
 
   - name: Generate service
     id: generate-service
+    phase_id: "003"
     agent: engineer
     skill: /angular-generate-service
+    execution_type: ai
+    depends_on: ["002"]
     checkpoint: true
     verify: false
     approval: auto=safe
@@ -63,8 +71,11 @@ phases:
 
   - name: Generate route
     id: generate-route
+    phase_id: "004"
     agent: engineer
     skill: /angular-generate-route
+    execution_type: ai
+    depends_on: ["003"]
     checkpoint: true
     verify: false
     approval: auto=safe
@@ -77,9 +88,11 @@ phases:
 
   - name: Setup mock server (if API-dependent)
     id: mock-setup
+    phase_id: "005"
     agent: local
     skill: /local-mock-generate
     args: --from src/app/models/ --mode synthetic
+    depends_on: ["004"]
     checkpoint: false
     verify: false
     approval: auto=safe
@@ -90,8 +103,11 @@ phases:
 
   - name: Apply HDS design system
     id: hds-apply
+    phase_id: "006"
     agent: engineer
     skill: /angular-hds-generate
+    execution_type: ai
+    depends_on: ["004"]
     checkpoint: true
     verify: false
     approval: none
@@ -103,9 +119,12 @@ phases:
 
   - name: Integrate elevate services
     id: elevate-integrate
+    phase_id: "007"
     agent: engineer
     skill: /angular-elevate-generate
+    execution_type: ai
     args: --uses auto-detect
+    depends_on: ["004"]
     checkpoint: true
     verify: false
     approval: none
@@ -117,9 +136,11 @@ phases:
 
   - name: Generate tests
     id: generate-tests
+    phase_id: "008"
     agent: verifier
     skills:
       - /angular-test-unit
+    depends_on: ["005","006","007"]
     checkpoint: true
     verify: false
     approval: none
@@ -132,6 +153,7 @@ phases:
 
   - name: Final verification
     id: final-verify
+    phase_id: "009"
     agent: verifier
     skills:
       - /angular-test-unit
@@ -139,6 +161,7 @@ phases:
       - /angular-review
       - /angular-hds-audit
       - /angular-elevate-audit
+    depends_on: ["008"]
     checkpoint: false
     verify: false
     approval: none
@@ -154,9 +177,11 @@ phases:
 
   - name: Post-scan (after)
     id: scan-context-after
+    phase_id: "010"
     agent: planner
     skill: /angular-scan-arch
     args: --scope {{target-path}} --counts-only
+    depends_on: ["009"]
     checkpoint: false
     verify: false
     approval: none

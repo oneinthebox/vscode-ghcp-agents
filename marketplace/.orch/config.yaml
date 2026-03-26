@@ -92,3 +92,22 @@ dependencies:
 #   .orch/workflow-state/  — active workflow state YAML files (polled by VS Code extension)
 #   .orch/cache/           — cached stack profile and resolved references
 #   .orch/hooks/           — audit hook scripts (pre/post execution)
+
+# ═══════════════════════════════════════════════════════════════
+# EVENT-DRIVEN RELAY
+# ═══════════════════════════════════════════════════════════════
+
+relay:
+  poll_interval_ms: 5000        # How often the relay checks for ready events
+  max_concurrent_scripts: 4     # Parallel script executions
+  max_concurrent_ai: 1          # AI phases (Copilot Chat is single-threaded)
+  script_timeout_sec: 300       # 5 min timeout for scripts
+  ai_timeout_sec: 600           # 10 min timeout for AI phases
+  retry_backoff_sec: [10, 30, 60]  # Backoff between retries
+  ai_dispatch: code-chat        # code-chat | prompt-file
+  verbose: false
+
+events:
+  store_path: .orch/workflow-state/events
+  retention_days: 30
+  legacy_compat: true           # Write legacy workflow-state YAML for backward compat

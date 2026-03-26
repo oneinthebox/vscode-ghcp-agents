@@ -15,8 +15,10 @@ phases:
   # ── Phase 1: Architecture ──────────────────────────────────────
   - name: Scan architecture
     id: scan-arch
+    phase_id: "001"
     agent: planner
     skill: /angular-scan-arch
+    depends_on: []
     checkpoint: false
     verify: false
     approval: none
@@ -38,8 +40,10 @@ phases:
   # ── Phase 2: Features ──────────────────────────────────────────
   - name: Scan features
     id: scan-features
+    phase_id: "002"
     agent: planner
     skill: /angular-scan-features
+    depends_on: []
     checkpoint: false
     verify: false
     approval: none
@@ -58,8 +62,10 @@ phases:
   # ── Phase 3: Dependencies ──────────────────────────────────────
   - name: Scan dependencies
     id: scan-deps
+    phase_id: "003"
     agent: planner
     skill: /angular-scan-deps
+    depends_on: []
     checkpoint: false
     verify: false
     approval: none
@@ -76,8 +82,10 @@ phases:
   # ── Phase 4: Compatibility check ───────────────────────────────
   - name: Check compatibility
     id: check-compat
+    phase_id: "004"
     agent: planner
     skill: /angular-compatibility
+    depends_on: []
     checkpoint: false
     verify: false
     approval: none
@@ -91,8 +99,10 @@ phases:
   # ── Phase 5: Test Coverage ─────────────────────────────────────
   - name: Scan tests
     id: scan-tests
+    phase_id: "005"
     agent: planner
     skill: /angular-scan-tests
+    depends_on: []
     checkpoint: false
     verify: false
     approval: none
@@ -109,8 +119,10 @@ phases:
   # ── Phase 6: Code Quality ──────────────────────────────────────
   - name: Scan quality
     id: scan-quality
+    phase_id: "006"
     agent: planner
     skill: /angular-scan-quality
+    depends_on: []
     checkpoint: false
     verify: false
     approval: none
@@ -127,8 +139,10 @@ phases:
   # ── Phase 7: Documentation Health ──────────────────────────────
   - name: Scan documentation
     id: scan-docs
+    phase_id: "007"
     agent: planner
     skill: /angular-scan-docs
+    depends_on: []
     checkpoint: false
     verify: false
     approval: none
@@ -145,8 +159,10 @@ phases:
   # ── Phase 8: Git History ───────────────────────────────────────
   - name: Scan git history
     id: scan-git
+    phase_id: "008"
     agent: planner
     skill: /angular-scan-git
+    depends_on: []
     checkpoint: false
     verify: false
     approval: none
@@ -165,8 +181,10 @@ phases:
   # ── Phase 9: Deployment ────────────────────────────────────────
   - name: Scan deployment
     id: scan-deploy
+    phase_id: "009"
     agent: planner
     skill: /angular-scan-deploy
+    depends_on: []
     checkpoint: false
     verify: false
     approval: none
@@ -183,9 +201,11 @@ phases:
   # ── Phase 10: Project Explanation ──────────────────────────────
   - name: Generate project explanation
     id: explain
+    phase_id: "010"
     agent: planner
     skill: /angular-explain
     args: --depth overview
+    depends_on: ["001","002","003","004","005","006","007","008","009"]
     checkpoint: false
     verify: false
     approval: none
@@ -202,9 +222,11 @@ phases:
   # ── Phase 11: Generate Report ──────────────────────────────────
   - name: Generate recap report
     id: generate-report
+    phase_id: "011"
     agent: orch
     skill: /present-report
     args: --format all
+    depends_on: ["010"]
     checkpoint: false
     verify: false
     approval: none

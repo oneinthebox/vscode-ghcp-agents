@@ -1,0 +1,41 @@
+{
+  "chat.agent.enabled": true,
+  "chat.autopilot.enabled": true,
+  "chat.agent.maxRequests": 100,
+  "chat.tools.terminal.enableAutoApprove": true,
+  "chat.tools.terminal.autoApprove": {
+    "ng": true,
+    "nx": true,
+    "npm": true,
+    "npx": true,
+    "node": true,
+    "git add": true,
+    "git commit": true,
+    "git status": true,
+    "git diff": true,
+    "git log": true,
+    "rm": false,
+    "rmdir": false,
+    "kill": false,
+    "git push": false,
+    "git reset --hard": false,
+    "docker system prune": false
+  },
+  "chat.tools.edits.autoApprove": {
+    "src/**": true,
+    "libs/**": true,
+    "apps/**": true,
+    "**/.env": false,
+    "**/.orch/config.yaml": false,
+    "**/.orch/audit/config/**": false
+  },
+  "chat.editing.autoAcceptDelay": 3000,
+  "chat.tools.terminal.autoReplyToPrompts": true,
+  "chat.tools.terminal.blockDetectedFileWrites": "outsideWorkspace",
+  "chat.customAgentInSubagent.enabled": true,
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.agent.autoFix": true,
+  "chat.checkpoints.enabled": true,
+  "github.copilot.chat.agent.thinkingTool": true,
+  "chat.agent.thinking.collapsedTools": "always"
+}

@@ -13,8 +13,10 @@ report:
 phases:
   - name: Scan dependencies
     id: scan-deps
+    phase_id: "001"
     agent: planner
     skill: /angular-scan-deps
+    depends_on: []
     checkpoint: false
     verify: false
     approval: none
@@ -25,8 +27,10 @@ phases:
 
   - name: Compatibility check
     id: compat
+    phase_id: "002"
     agent: planner
     skill: /angular-compatibility
+    depends_on: ["001"]
     checkpoint: false
     verify: false
     approval: auto=safe
@@ -38,9 +42,12 @@ phases:
 
   - name: Upgrade TypeScript
     id: upgrade-ts
+    phase_id: "003"
     agent: engineer
     skill: /angular-migrate-version
+    execution_type: ai
     args: --scope typescript-only
+    depends_on: ["002"]
     checkpoint: true
     verify: true
     approval: auto=safe
@@ -54,9 +61,12 @@ phases:
 
   - name: Upgrade Angular core
     id: upgrade-angular
+    phase_id: "004"
     agent: engineer
     skill: /angular-migrate-version
+    execution_type: ai
     args: --scope angular-core
+    depends_on: ["003"]
     checkpoint: true
     verify: true
     approval: auto=safe
@@ -70,8 +80,11 @@ phases:
 
   - name: Standalone migration
     id: standalone
+    phase_id: "005"
     agent: engineer
     skill: /angular-migrate-standalone
+    execution_type: ai
+    depends_on: ["004"]
     pre-check:
       skill: /angular-scan-arch
       args: --counts-only
@@ -92,8 +105,11 @@ phases:
 
   - name: Control flow migration
     id: control-flow
+    phase_id: "006"
     agent: engineer
     skill: /angular-migrate-control-flow
+    execution_type: ai
+    depends_on: ["005"]
     pre-check:
       skill: /angular-scan-arch
       args: --counts-only
@@ -114,8 +130,11 @@ phases:
 
   - name: Signals migration
     id: signals
+    phase_id: "007"
     agent: engineer
     skill: /angular-migrate-signals
+    execution_type: ai
+    depends_on: ["006"]
     pre-check:
       skill: /angular-scan-arch
       args: --counts-only
@@ -136,9 +155,12 @@ phases:
 
   - name: Third-party compatibility
     id: third-party
+    phase_id: "008"
     agent: engineer
     skill: /angular-migrate-version
+    execution_type: ai
     args: --scope third-party
+    depends_on: ["007"]
     checkpoint: true
     verify: true
     approval: auto=safe
@@ -150,7 +172,9 @@ phases:
 
   - name: Final verification
     id: final-verify
+    phase_id: "009"
     agent: verifier
+    depends_on: ["008"]
     skills:
       - /angular-test-unit
       - /angular-test-e2e
@@ -170,8 +194,10 @@ phases:
 
   - name: Post-scan
     id: post-scan
+    phase_id: "010"
     agent: planner
     skill: /angular-scan-deps
+    depends_on: ["009"]
     checkpoint: false
     verify: false
     approval: none

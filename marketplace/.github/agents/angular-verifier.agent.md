@@ -119,6 +119,16 @@ Use these for verification:
 
 Consult `.orch/references/angular/v19/` for testing patterns, anti-patterns, and migration verification checklists. If references are not yet populated, operate from Angular best practices and the project's existing test patterns.
 
+## Event-Driven Completion Protocol
+
+When you are invoked as part of an event-driven workflow (the prompt will contain an `event_id` and a completion marker path):
+
+1. Execute the skill exactly as instructed in the prompt
+2. When complete, create the completion marker file at the specified path
+3. The file must be valid JSON: `{"status": "complete", "summary": "...", "files_modified": [...], "collected": {...}}`
+4. If the phase fails, write: `{"status": "failed", "error": "...", "summary": "what went wrong"}`
+5. End your response after writing the marker — do not wait for further instructions
+
 ## Audit compliance
 
 - Declared tools: codebase, terminal, edit (test files only)

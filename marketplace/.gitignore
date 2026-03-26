@@ -17,6 +17,10 @@
 .orch/mocks/node_modules/
 .orch/mocks/db.json
 
+# Event store runtime
+.orch/workflow-state/events/run-*/
+.orch/workflow-state/active-run.json
+
 # ORCH runtime dependencies (installed by orch init)
 .orch/node_modules/
 .orch/package-lock.json
