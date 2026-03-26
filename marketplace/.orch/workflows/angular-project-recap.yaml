@@ -220,17 +220,20 @@ phases:
     on-failure: continue
 
   # ── Phase 11: Generate Report ──────────────────────────────────
+  # Report is generated automatically by monitor.js (recap-report-builder.js)
+  # when all phases complete. This phase is a synthetic marker that auto-completes
+  # once phase 010 finishes, signaling the monitor to generate the report.
   - name: Generate recap report
     id: generate-report
     phase_id: "011"
     agent: orch
     skill: /present-report
-    args: --format all
+    execution_type: synthetic
     depends_on: ["010"]
     checkpoint: false
     verify: false
     approval: none
     uses-collected:
-      - all                           # Consume all collected data from phases 1-10
+      - all
     report-section: "Full Report"
     on-failure: report-as-partial

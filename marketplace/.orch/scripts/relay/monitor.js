@@ -28,6 +28,16 @@ module.exports = {
    */
   isWorkflowComplete(events) {
     if (events.length === 0) return false;
+    // Safety: never consider complete if any events are still active
+    var hasActive = events.some(function (e) {
+      return e.lifecycle.status === 'ready' ||
+             e.lifecycle.status === 'running' ||
+             e.lifecycle.status === 'queued' ||
+             e.lifecycle.status === 'retrying' ||
+             e.lifecycle.status === 'awaiting-ai' ||
+             e.lifecycle.status === 'awaiting-approval';
+    });
+    if (hasActive) return false;
     return events.every(function (e) {
       return e.lifecycle.status === 'complete' ||
              e.lifecycle.status === 'dead' ||
