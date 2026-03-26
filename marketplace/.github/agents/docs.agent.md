@@ -84,7 +84,7 @@ If related skills exist, include them as a one-line informational note inside th
 
 ## Workflow awareness (informational only)
 
-If `.orch/workflow/` has active workflows, note the current stage in the execution summary. Do **not** warn, prompt, or block based on workflow state. Just include it as context in the output.
+If `.orch/workflow-state/` has active workflows, note the current stage in the execution summary. Do **not** warn, prompt, or block based on workflow state. Just include it as context in the output.
 
 ## Context health monitoring
 

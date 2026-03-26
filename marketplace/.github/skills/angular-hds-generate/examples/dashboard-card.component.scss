@@ -1,0 +1,50 @@
+// Example output from /angular-hds-generate — see SKILL.md for usage
+// All visual properties use HDS design tokens exclusively.
+
+.dashboard-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hds-spacing-sm);
+  padding: var(--hds-spacing-lg);
+  border: 1px solid var(--hds-border-default);
+  border-radius: var(--hds-radius-md);
+  background-color: var(--hds-surface-primary);
+  transition: box-shadow var(--hds-duration-fast) var(--hds-easing-standard);
+
+  &:hover {
+    box-shadow: var(--hds-shadow-md);
+    cursor: pointer;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      font: var(--hds-font-heading-sm);
+      color: var(--hds-text-primary);
+      margin: 0;
+    }
+  }
+
+  &__value {
+    font: var(--hds-font-display-md);
+    color: var(--hds-text-primary);
+  }
+
+  &__meta {
+    display: flex;
+    gap: var(--hds-spacing-md);
+    font: var(--hds-font-body-sm);
+    color: var(--hds-text-secondary);
+  }
+
+  &__footer {
+    border-top: 1px solid var(--hds-border-subtle);
+    padding-top: var(--hds-spacing-sm);
+    margin-top: var(--hds-spacing-xs);
+    font: var(--hds-font-body-xs);
+    color: var(--hds-text-tertiary);
+  }
+}

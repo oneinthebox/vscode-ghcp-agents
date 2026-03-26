@@ -62,7 +62,7 @@ All benchmark comparisons produce:
 
 | Source | Location | What it contains |
 |--------|----------|-----------------|
-| Session records | `.orch/audit/sessions/{date}/` | One JSON per session: identity, prompts, tools, files, tokens, boundaries, adherence |
+| Session records | `.orch/runs/{date}/` | One JSON per session: identity, prompts, tools, files, tokens, boundaries, adherence |
 | Violations | `.orch/audit/violations.jsonl` | Append-only log of tool boundary + file scope violations |
 | Token estimates | `.orch/audit/tokens/{date}/` | Token usage by agent, model, skill |
 | Metrics | `.orch/audit/metrics/daily/` | Aggregated daily/weekly rollups |

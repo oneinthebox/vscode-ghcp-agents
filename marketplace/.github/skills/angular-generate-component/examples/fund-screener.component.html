@@ -1,0 +1,53 @@
+<!-- Example output from /angular-generate-component — see SKILL.md for usage -->
+<section class="fund-screener">
+  <header class="fund-screener__header">
+    <h2>Fund Screener — {{ category() }}</h2>
+    <input
+      type="text"
+      placeholder="Search by name or ticker…"
+      [value]="searchTerm()"
+      (input)="searchTerm.set($any($event.target).value)"
+      class="fund-screener__search"
+    />
+    <button (click)="loadFunds()" [disabled]="loading()">Refresh</button>
+  </header>
+
+  @if (loading()) {
+    <app-spinner label="Loading funds…" />
+  } @else {
+    <p class="fund-screener__summary">{{ resultSummary() }}</p>
+
+    @if (filteredFunds().length === 0) {
+      <p class="fund-screener__empty">No funds match your criteria.</p>
+    } @else {
+      <table class="fund-screener__table" role="grid">
+        <thead>
+          <tr>
+            <th scope="col">Ticker</th>
+            <th scope="col">Name</th>
+            <th scope="col">AUM ($M)</th>
+            <th scope="col">YTD Return</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fund of filteredFunds(); track fund.id) {
+            <tr
+              class="fund-screener__row"
+              role="row"
+              tabindex="0"
+              (click)="selectFund(fund)"
+              (keydown.enter)="selectFund(fund)"
+            >
+              <td>{{ fund.ticker }}</td>
+              <td>{{ fund.name }}</td>
+              <td>{{ fund.aum | number: '1.0-0' }}</td>
+              <td [class.positive]="fund.ytdReturn >= 0">
+                {{ fund.ytdReturn | percent: '1.2-2' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+</section>

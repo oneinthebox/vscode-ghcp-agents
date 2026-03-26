@@ -1,0 +1,128 @@
+{
+  "_comment": "Curated ESLint configuration for Angular projects. Each rule includes a comment explaining why it is set to its severity level.",
+  "root": true,
+  "ignorePatterns": ["dist/", "node_modules/", "coverage/", "*.spec.ts"],
+  "overrides": [
+    {
+      "_comment_ts": "TypeScript source files — Angular components, services, directives, pipes, guards, etc.",
+      "files": ["*.ts"],
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@angular-eslint/recommended"
+      ],
+      "rules": {
+        "_comment_angular_section": "=== Angular-specific rules ===",
+
+        "@angular-eslint/component-selector": [
+          "error",
+          { "type": "element", "prefix": "app", "style": "kebab-case" }
+        ],
+        "_why_component_selector": "Enforces consistent element selectors with the 'app' prefix. Prevents collisions with third-party components and HTML elements. Error because selector naming is foundational.",
+
+        "@angular-eslint/directive-selector": [
+          "error",
+          { "type": "attribute", "prefix": "app", "style": "camelCase" }
+        ],
+        "_why_directive_selector": "Ensures directive attribute selectors use the 'app' prefix in camelCase. Prevents ambiguity with native HTML attributes. Error for the same consistency reasons as component-selector.",
+
+        "@angular-eslint/prefer-standalone": "warn",
+        "_why_prefer_standalone": "Angular 19+ defaults to standalone components. Warn (not error) to allow gradual migration from NgModule-based architecture.",
+
+        "@angular-eslint/prefer-on-push-component-change-detection": "warn",
+        "_why_prefer_on_push": "OnPush change detection improves performance by reducing unnecessary change detection cycles. Warn because not all components benefit equally — some legitimately need Default strategy.",
+
+        "@angular-eslint/use-lifecycle-interface": "error",
+        "_why_use_lifecycle_interface": "Implementing the lifecycle interface (e.g., OnInit, OnDestroy) makes the contract explicit and enables compile-time checking. Error because missing interfaces silently break if the method name is misspelled.",
+
+        "@angular-eslint/no-empty-lifecycle-method": "warn",
+        "_why_no_empty_lifecycle": "Empty lifecycle hooks add noise and suggest incomplete implementation. Warn because sometimes an empty hook is intentionally left as a placeholder during development.",
+
+        "@angular-eslint/no-input-rename": "error",
+        "_why_no_input_rename": "Renaming inputs creates a disconnect between the property name and the binding name, making templates harder to understand. Error because this is a maintainability hazard.",
+
+        "@angular-eslint/no-output-rename": "error",
+        "_why_no_output_rename": "Same rationale as no-input-rename — output renaming creates confusing mismatches between class properties and template event bindings.",
+
+        "@angular-eslint/relative-url-prefix": "error",
+        "_why_relative_url_prefix": "Ensures templateUrl and styleUrls use relative paths (./ prefix), which is required for component portability and AOT compilation.",
+
+        "@angular-eslint/no-forward-ref": "warn",
+        "_why_no_forward_ref": "forwardRef is rarely needed and usually indicates circular dependencies or poor module structure. Warn to flag it for review without blocking builds.",
+
+        "_comment_typescript_section": "=== TypeScript rules ===",
+
+        "@typescript-eslint/no-explicit-any": "warn",
+        "_why_no_explicit_any": "Using 'any' defeats TypeScript's type safety. Warn (not error) because legacy code and third-party typings sometimes require escape hatches during migration.",
+
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+        ],
+        "_why_no_unused_vars": "Dead code clutters the codebase and creates confusion. Error with underscore exceptions: prefixing with _ signals intentional non-use (e.g., _event in callbacks).",
+
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "_why_explicit_return_type": "Turned off because Angular heavily uses inline arrow functions in templates and RxJS pipes where return types are inferred. Enforcing explicit returns adds verbosity without proportional safety gains.",
+
+        "@typescript-eslint/no-floating-promises": "error",
+        "_why_no_floating_promises": "Unhandled promises silently swallow errors. Error because this is a common source of bugs in async Angular services and resolvers.",
+
+        "@typescript-eslint/no-inferrable-types": "warn",
+        "_why_no_inferrable_types": "Explicit types on obviously typed values (e.g., const x: number = 5) add noise. Warn to encourage cleaner code without blocking builds.",
+
+        "@typescript-eslint/consistent-type-imports": [
+          "warn",
+          { "prefer": "type-imports" }
+        ],
+        "_why_consistent_type_imports": "Type-only imports are erased at compile time and make the dependency graph clearer. Warn to encourage adoption without requiring immediate refactoring.",
+
+        "_comment_general_section": "=== General code quality rules ===",
+
+        "no-console": "warn",
+        "_why_no_console": "Console statements should not ship to production. Warn so developers see them during development but can consciously keep debug logging if needed.",
+
+        "eqeqeq": ["error", "always"],
+        "_why_eqeqeq": "Strict equality (===) prevents subtle type coercion bugs. Error because loose equality is almost never intentional in TypeScript code.",
+
+        "no-var": "error",
+        "_why_no_var": "var has function scope and hoisting issues. Error because let/const should always be used in modern TypeScript.",
+
+        "prefer-const": "warn",
+        "_why_prefer_const": "Using const for variables that are never reassigned communicates intent and prevents accidental mutation. Warn to avoid blocking builds on minor style issues.",
+
+        "complexity": ["warn", 15],
+        "_why_complexity": "Functions with cyclomatic complexity above 15 are hard to test and maintain. Warn to flag them for refactoring without blocking CI."
+      }
+    },
+    {
+      "_comment_html": "Angular HTML templates — accessibility and template safety rules.",
+      "files": ["*.html"],
+      "extends": [
+        "plugin:@angular-eslint/template/recommended",
+        "plugin:@angular-eslint/template/accessibility"
+      ],
+      "rules": {
+        "@angular-eslint/template/alt-text": "error",
+        "_why_alt_text": "Images without alt text are inaccessible to screen readers. Error because this is a WCAG 2.1 Level A requirement — the lowest accessibility bar.",
+
+        "@angular-eslint/template/elements-content": "error",
+        "_why_elements_content": "Interactive elements (buttons, links) without text content are invisible to assistive technology. Error for the same WCAG Level A compliance reasons.",
+
+        "@angular-eslint/template/label-has-associated-control": "error",
+        "_why_label_associated_control": "Form controls without associated labels are unusable for screen reader users. Error because this is a fundamental accessibility requirement.",
+
+        "@angular-eslint/template/click-events-have-key-events": "warn",
+        "_why_click_key_events": "Click-only handlers exclude keyboard users. Warn (not error) because some click handlers are on inherently interactive elements (buttons) that already have keyboard support.",
+
+        "@angular-eslint/template/no-positive-tabindex": "error",
+        "_why_no_positive_tabindex": "Positive tabindex values break the natural tab order and create confusing navigation for keyboard users. Error because this is never the right approach.",
+
+        "@angular-eslint/template/no-negated-async": "warn",
+        "_why_no_negated_async": "Negating an async pipe expression (*ngIf=\"!(obs$ | async)\") is error-prone because the falsy check triggers on both null (not-yet-emitted) and actual false values. Warn to flag ambiguous patterns.",
+
+        "@angular-eslint/template/no-any": "warn",
+        "_why_template_no_any": "Using $any() in templates bypasses type checking. Warn to discourage it while allowing escape hatches for complex template expressions during migration."
+      }
+    }
+  ]
+}

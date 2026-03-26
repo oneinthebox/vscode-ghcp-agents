@@ -1,0 +1,214 @@
+# ORCH Workflow: Angular Project Recap
+# Runs all scan skills in sequence to produce a comprehensive project overview.
+# Triggered by: "@angular recap this project" or "@angular explain everything"
+
+name: angular-project-recap
+description: "Full project recap — architecture, features, dependencies, tests, quality, git history, docs, deployment"
+trigger: "recap|explain|overview|onboard|walkthrough|what is this project"
+report:
+  template: recap-report
+  title: "Project Recap — {{project-name}}"
+  attribution: "@angular → @angular-planner (all scan skills)"
+
+phases:
+
+  # ── Phase 1: Architecture ──────────────────────────────────────
+  - name: Scan architecture
+    id: scan-arch
+    agent: planner
+    skill: /angular-scan-arch
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - system-context-diagram        # C4 Level 1
+      - container-diagram             # C4 Level 2
+      - module-library-graph          # Mermaid: modules/libs and their imports
+      - component-tree                # Mermaid: parent-child component hierarchy
+      - route-map                     # Table: all routes with lazy/guard/resolver
+      - service-injection-graph       # Table: services and their dependencies
+      - nx-project-graph              # Table: Nx projects, tags, dependencies (if Nx)
+      - pattern-adoption              # Table: standalone %, OnPush %, signals %, inject() %
+      - component-count
+      - service-count
+      - route-count
+    report-section: "Architecture"
+    on-failure: continue
+
+  # ── Phase 2: Features ──────────────────────────────────────────
+  - name: Scan features
+    id: scan-features
+    agent: planner
+    skill: /angular-scan-features
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - feature-map                   # Table: features with routes, components, APIs, complexity
+      - route-to-component-map        # Full route → component mapping
+      - external-api-surface          # Table: all HTTP endpoints consumed
+      - http-interceptors             # Table: interceptors and their purpose
+      - ui-feature-inventory          # Table: forms, grids, charts, dialogs, etc.
+      - shared-components             # Table: components used by 2+ features
+      - feature-dependency-graph      # Mermaid: feature interdependencies
+      - user-journeys                 # Mermaid: key user flow sequence diagrams
+    report-section: "Features & API Surface"
+    on-failure: continue
+
+  # ── Phase 3: Dependencies ──────────────────────────────────────
+  - name: Scan dependencies
+    id: scan-deps
+    agent: planner
+    skill: /angular-scan-deps
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - angular-version
+      - typescript-version
+      - dependency-classification     # Table: angular-core, CDK, RxJS, Nx, PrimeNG, AG Grid, etc.
+      - version-mismatches            # Table: packages on wrong versions
+      - outdated-patterns             # Table: deprecated packages
+      - upgrade-recommendations       # Table: what to upgrade and why
+    report-section: "Dependencies & Compatibility"
+    on-failure: continue
+
+  # ── Phase 4: Compatibility check ───────────────────────────────
+  - name: Check compatibility
+    id: check-compat
+    agent: planner
+    skill: /angular-compatibility
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - compatibility-matrix-check    # Table: current versions vs matrix
+      - incompatibilities             # Table: conflicts found
+      - resolution-commands           # List: commands to fix conflicts
+    report-section: "Version Compatibility"
+    on-failure: continue
+
+  # ── Phase 5: Test Coverage ─────────────────────────────────────
+  - name: Scan tests
+    id: scan-tests
+    agent: planner
+    skill: /angular-scan-tests
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - test-summary                  # Table: total tests, pass/fail, coverage %
+      - coverage-by-module            # Table: line/branch/function per module
+      - untested-files                # Table: files without .spec.ts
+      - untested-public-methods       # Table: specific methods without test cases
+      - test-quality-issues           # Table: skipped, focused, empty assertions
+      - framework-config              # Table: Jest/Karma/Playwright/Cypress status
+    report-section: "Test Coverage"
+    on-failure: continue
+
+  # ── Phase 6: Code Quality ──────────────────────────────────────
+  - name: Scan quality
+    id: scan-quality
+    agent: planner
+    skill: /angular-scan-quality
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - quality-scorecard             # Table: overall score with dimension breakdown
+      - lint-results                  # Table: violations by category
+      - bundle-analysis               # Table: chunk sizes, transfer sizes
+      - budget-compliance             # Table: budgets vs actuals
+      - accessibility-issues          # Table: a11y violations by WCAG criterion
+      - lighthouse-scores             # Table: Performance, A11y, BP, SEO
+    report-section: "Code Quality"
+    on-failure: continue
+
+  # ── Phase 7: Documentation Health ──────────────────────────────
+  - name: Scan documentation
+    id: scan-docs
+    agent: planner
+    skill: /angular-scan-docs
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - readme-assessment             # Table: section-by-section README score
+      - tsdoc-coverage                # Table: coverage % by module
+      - undocumented-apis             # Table: public APIs without TSDoc
+      - comment-quality-issues        # Table: TODOs, commented-out code, empty docs
+      - doc-tooling                   # Table: Compodoc, Storybook, Typedoc config status
+      - doc-format-consistency        # Table: TSDoc vs JSDoc usage split
+    report-section: "Documentation Health"
+    on-failure: continue
+
+  # ── Phase 8: Git History ───────────────────────────────────────
+  - name: Scan git history
+    id: scan-git
+    agent: planner
+    skill: /angular-scan-git
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - commit-frequency              # ASCII chart: commits per month
+      - commit-patterns               # Table: feat/fix/refactor/chore breakdown
+      - active-contributors           # Table: top contributors with primary areas
+      - release-history               # Table: recent releases with cadence
+      - hotspot-files                 # Table: most-changed files with risk score
+      - dead-zones                    # Table: files not touched in 6+ months
+      - bus-factor                    # Number: how many contributors own 80%
+      - branch-strategy               # Table: branching model with evidence
+    report-section: "Git History & Team"
+    on-failure: continue
+
+  # ── Phase 9: Deployment ────────────────────────────────────────
+  - name: Scan deployment
+    id: scan-deploy
+    agent: planner
+    skill: /angular-scan-deploy
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - pipeline-stages               # Table: CI/CD stages with caching
+      - environment-inventory         # Table: dev/staging/prod with URLs (no secrets)
+      - environment-variables         # Table: variable names and purposes
+      - deployment-targets            # Table: where the app deploys
+      - build-optimizations           # Table: Nx affected, remote cache, budgets
+      - pipeline-flow-diagram         # Mermaid: CI/CD pipeline flow
+    report-section: "Deployment & CI/CD"
+    on-failure: continue
+
+  # ── Phase 10: Project Explanation ──────────────────────────────
+  - name: Generate project explanation
+    id: explain
+    agent: planner
+    skill: /angular-explain
+    args: --depth overview
+    checkpoint: false
+    verify: false
+    approval: none
+    collect:
+      - c4-level1                     # Mermaid: system context
+      - c4-level2                     # Mermaid: containers
+      - tech-stack                    # Table: libraries with how/where used
+      - angular-health                # Table: version currency, migration readiness
+      - cross-reference-map           # Table: key services with injects/used-by
+      - executive-summary             # Prose: 3-5 sentence project overview
+    report-section: "Project Overview"
+    on-failure: continue
+
+  # ── Phase 11: Generate Report ──────────────────────────────────
+  - name: Generate recap report
+    id: generate-report
+    agent: orch
+    skill: /present-report
+    args: --format all
+    checkpoint: false
+    verify: false
+    approval: none
+    uses-collected:
+      - all                           # Consume all collected data from phases 1-10
+    report-section: "Full Report"
+    on-failure: report-as-partial

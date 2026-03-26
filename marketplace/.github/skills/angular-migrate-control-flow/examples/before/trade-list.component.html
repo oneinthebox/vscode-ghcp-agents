@@ -1,0 +1,50 @@
+<!-- Example input for /angular-migrate-control-flow — see SKILL.md for usage -->
+<!-- BEFORE: uses *ngIf, *ngFor, *ngSwitch structural directives -->
+<div class="trade-list-container">
+  <div *ngIf="loading$ | async; else content">
+    <div class="spinner">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading trades...</p>
+    </div>
+  </div>
+
+  <ng-template #content>
+    <div *ngIf="error$ | async as error; else tradeTable">
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ error }}</span>
+        <button mat-button (click)="retry()">Retry</button>
+      </div>
+    </div>
+
+    <ng-template #tradeTable>
+      <table class="trade-table">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Side</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let trade of trades$ | async; trackBy: trackByTradeId"
+              [class.selected]="trade.id === selectedTradeId"
+              (click)="selectTrade(trade)">
+            <td>{{ trade.symbol }}</td>
+            <td>{{ trade.side }}</td>
+            <td>{{ trade.quantity | number }}</td>
+            <td>{{ trade.price | currency:trade.currency }}</td>
+            <td [ngSwitch]="trade.status">
+              <span *ngSwitchCase="'filled'" class="badge-success">Filled</span>
+              <span *ngSwitchCase="'pending'" class="badge-warning">Pending</span>
+              <span *ngSwitchCase="'cancelled'" class="badge-danger">Cancelled</span>
+              <span *ngSwitchDefault class="badge-secondary">{{ trade.status }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-template>
+  </ng-template>
+</div>

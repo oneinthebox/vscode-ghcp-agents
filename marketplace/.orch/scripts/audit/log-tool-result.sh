@@ -13,7 +13,7 @@ SUCCESS=$(echo "$INPUT" | jq -r '.success // true')
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 DATE_DIR=$(date -u +"%Y-%m-%d")
 
-AUDIT_DIR=".orch/audit/sessions/${DATE_DIR}"
+AUDIT_DIR=".orch/runs/${DATE_DIR}"
 SESSION_FILE="${AUDIT_DIR}/${SESSION_ID}.json"
 
 if [ ! -f "$SESSION_FILE" ]; then

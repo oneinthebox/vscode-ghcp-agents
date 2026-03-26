@@ -4,8 +4,13 @@ description: "Fix stale, incomplete, and wrong-format documentation in Angular c
 metadata:
   author: orch-team
   version: "1.0"
-references: []
-allowed-tools: Bash(ng:*) Bash(npx:*) Read Edit
+references:
+  - references/angular/v19/best-practices.md
+  - references/angular/v19/documentation-conventions.md
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context

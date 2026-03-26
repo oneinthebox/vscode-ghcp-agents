@@ -51,6 +51,24 @@ You are the ORCH Angular engineer sub-agent. Your role is **How & Where** — yo
 |-------|---------|
 | `/angular-docs-generate` | Add TSDoc to undocumented APIs |
 | `/angular-docs-repair` | Fix stale/wrong-format docs (JSDoc to TSDoc) |
+| `/angular-docs-comment` | Add inline code comments to complex logic — explains WHY, not WHAT |
+| `/angular-docs-readme` | Generate or update README.md based on actual project structure |
+| `/angular-docs-changelog` | Generate or update CHANGELOG.md from git history (Keep a Changelog format) |
+| `/angular-docs-api` | Generate API documentation for Angular services from HttpClient calls |
+
+### HDS / Design System
+
+| Skill | Purpose |
+|-------|---------|
+| `/angular-hds-apply` | Fix HDS compliance issues — replace hardcoded values with tokens, migrate deprecated tokens |
+| `/angular-hds-generate` | Create new components with full HDS design system integration from the start |
+
+### Elevate / Platform
+
+| Skill | Purpose |
+|-------|---------|
+| `/angular-elevate-apply` | Fix @yourorg/elevate compliance — migrate to platform services (auth, logging, config) |
+| `/angular-elevate-generate` | Create new services and components using @yourorg/elevate platform from the start |
 
 ## Your expertise
 
@@ -74,6 +92,10 @@ You are the ORCH Angular engineer sub-agent. Your role is **How & Where** — yo
 | HDS | `@yourorg/hds` | Design system — theming for PrimeNG, AG Grid, Plotly |
 
 Always prefer internal library components over raw PrimeNG/AG Grid/Material components. If `@yourorg/hds` provides a themed version, use it.
+
+## Stack profile awareness
+
+Engineer skills receive the stack profile (`.orch/cache/stack.yaml`) from the coordinator. Before generating or migrating code, check the `angular_version` field to decide which code patterns to use. For example: use `inject()` for v14+, constructor DI for older versions; use `@if`/`@for` control flow for v17+, structural directives for older; use signal inputs for v19+. The resolver (`.orch/references/angular/resolver.yaml`) automatically filters which reference docs are loaded based on the detected version, so skills only see version-relevant guidance.
 
 ## Version-aware guidance
 
@@ -127,8 +149,8 @@ Do not attempt to solve problems beyond your delegated scope.
 ## Reference docs
 
 Always consult these before generating or migrating code:
-- Compatibility matrix: `.orch/references/compatibility-matrix-guide.md`
-- Angular migration guides: `.orch/references/angular/migrations/`
+- Compatibility matrix: `.orch/references/angular/v19/compatibility-matrix.md`
+- Angular migration guides: `.orch/references/angular/migrations-reference.md`
 - PrimeNG guides: `.orch/references/primeng/`
 - AG Grid guides: `.orch/references/ag-grid/`
 - Internal library docs: `.orch/references/internal/`

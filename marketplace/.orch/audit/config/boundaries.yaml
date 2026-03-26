@@ -2,11 +2,28 @@
 # Defines allowed tools and file scope per agent.
 # The audit framework enforces these at runtime via hooks.
 
+# Global blocked commands — enforced for ALL agents (from copilot-instructions safety rules).
+# Each agent's blocked_commands list below includes these plus any agent-specific additions.
+# Shared dangerous commands:
+#   - "rm -rf"
+#   - "git push --force"
+#   - "git push --force-with-lease"
+#   - "git reset --hard"
+#   - "npm publish"
+#   - "yarn publish"
+#   - "docker rm -f"
+#   - "docker system prune"
+#   - "DROP TABLE"
+#   - "TRUNCATE TABLE"
+#   - "kubectl delete namespace"
+
 agents:
   orch:
     # Master orchestrator — routes to domain agents, runs pre-flight
     allowed_tools:
       - codebase
+      - edit
+      - terminal
     allowed_scope:
       - ".orch/**"
       - ".github/agents/**"
@@ -17,9 +34,15 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   angular:
     # Coordinator — routes to sub-agents, writes workflow state, runs git checkpoints
@@ -38,13 +61,19 @@ agents:
       - "package.json"
       - ".orch/references/**"
       - ".orch/mocks/**"
-      - ".orch/workflow/**"
+      - ".orch/workflow-state/**"
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   angular-planner:
     allowed_tools:
@@ -67,9 +96,15 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   angular-engineer:
     allowed_tools:
@@ -82,17 +117,30 @@ agents:
       - "src/**/*.scss"
       - "src/**/*.spec.ts"
       - ".orch/mocks/**"
+      - "angular.json"
+      - "tsconfig*.json"
+      - "nx.json"
+      - "project.json"
+      - "package.json"
+      - "package-lock.json"
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   angular-verifier:
     allowed_tools:
       - codebase
       - terminal
+      - edit
     allowed_scope:
       # Read-only source, write test files only
       - "src/**"
@@ -106,25 +154,41 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   orch-preflight:
     allowed_tools:
       - codebase
       - terminal
     allowed_scope:
-      # Read-only: .orch/**, package.json, angular.json
+      # Read-only: .orch/**, package.json, angular.json, and build/CI config
       - ".orch/**"
       - "package.json"
       - "angular.json"
+      - ".github/**"
+      - "package-lock.json"
+      - "nx.json"
+      - "node_modules/"
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   docs:
     allowed_tools:
@@ -138,23 +202,36 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   audit:
     allowed_tools:
       - codebase
       - terminal
+      - edit
     allowed_scope:
       - ".orch/audit/**"
       - ".github/skills/*/SKILL.md"    # read skill definitions for benchmark
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   local:
     allowed_tools:
@@ -177,8 +254,15 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
+      - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   # ── Sub-Agent Workers (internal, not user-invocable) ──
 
@@ -201,9 +285,15 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   doc-convert-worker:
     allowed_tools:
@@ -220,9 +310,15 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   # ── Future Domain Agents ──
 
@@ -241,9 +337,15 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   backend-fastapi:
     allowed_tools:
@@ -259,9 +361,15 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   ops-ci:
     allowed_tools:
@@ -276,9 +384,15 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
 
   ops-cd:
     allowed_tools:
@@ -293,7 +407,13 @@ agents:
     blocked_commands:
       - "rm -rf"
       - "git push --force"
+      - "git push --force-with-lease"
       - "git reset --hard"
       - "npm publish"
       - "yarn publish"
+      - "docker rm -f"
+      - "docker system prune"
+      - "DROP TABLE"
+      - "TRUNCATE TABLE"
+      - "kubectl delete namespace"
       - "kubectl delete"

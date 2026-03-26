@@ -1,0 +1,68 @@
+{
+  "report": "agent-token-consumption",
+  "generated_at": "2026-03-25T14:30:00Z",
+  "period": {
+    "from": "2026-03-18T00:00:00Z",
+    "to": "2026-03-25T00:00:00Z"
+  },
+  "total_tokens": 2450000,
+  "total_cost_usd": 12.45,
+  "by_agent": {
+    "angular": {
+      "sessions": 45,
+      "input_tokens": 800000,
+      "output_tokens": 400000,
+      "total_tokens": 1200000,
+      "cost_usd": 6.10
+    },
+    "angular-review": {
+      "sessions": 22,
+      "input_tokens": 350000,
+      "output_tokens": 150000,
+      "total_tokens": 500000,
+      "cost_usd": 2.55
+    },
+    "angular-test-unit": {
+      "sessions": 38,
+      "input_tokens": 280000,
+      "output_tokens": 120000,
+      "total_tokens": 400000,
+      "cost_usd": 2.00
+    },
+    "angular-planner": {
+      "sessions": 30,
+      "input_tokens": 200000,
+      "output_tokens": 150000,
+      "total_tokens": 350000,
+      "cost_usd": 1.80
+    }
+  },
+  "by_model": {
+    "gpt-4o": {
+      "total_tokens": 2000000,
+      "cost_usd": 10.50,
+      "sessions": 110
+    },
+    "gpt-4o-mini": {
+      "total_tokens": 450000,
+      "cost_usd": 1.95,
+      "sessions": 25
+    }
+  },
+  "efficiency": {
+    "avg_tokens_per_session": 18150,
+    "avg_tokens_per_file_generated": 4500,
+    "avg_tokens_per_successful_task": 18000,
+    "avg_cost_per_session_usd": 0.092
+  },
+  "daily_breakdown": [
+    { "date": "2026-03-18", "tokens": 320000, "cost_usd": 1.62 },
+    { "date": "2026-03-19", "tokens": 380000, "cost_usd": 1.94 },
+    { "date": "2026-03-20", "tokens": 410000, "cost_usd": 2.08 },
+    { "date": "2026-03-21", "tokens": 350000, "cost_usd": 1.78 },
+    { "date": "2026-03-22", "tokens": 150000, "cost_usd": 0.76 },
+    { "date": "2026-03-23", "tokens": 120000, "cost_usd": 0.61 },
+    { "date": "2026-03-24", "tokens": 370000, "cost_usd": 1.88 },
+    { "date": "2026-03-25", "tokens": 350000, "cost_usd": 1.78 }
+  ]
+}

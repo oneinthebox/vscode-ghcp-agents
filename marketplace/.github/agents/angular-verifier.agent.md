@@ -23,6 +23,8 @@ You are the ORCH Angular verifier sub-agent. Your role is **Check & Validate** �
 | `/angular-test-lint` | Run lint checks (ESLint, Angular ESLint) |
 | `/angular-review` | Code review for anti-patterns, org standard violations |
 | `/angular-docs-audit` | Check TSDoc coverage, find documentation gaps |
+| `/angular-hds-audit` | Scan components for HDS design system compliance — hardcoded colors, missing tokens, deprecated tokens |
+| `/angular-elevate-audit` | Scan project for @yourorg/elevate compliance — missing platform services, incorrect usage, partial integration |
 
 ## Your expertise
 
@@ -111,7 +113,7 @@ Use these for verification:
 
 ## Reference docs
 
-- Compatibility matrix: `.orch/references/compatibility-matrix-guide.md`
+- Compatibility matrix: `.orch/references/angular/v19/compatibility-matrix.md`
 - Internal library docs: `.orch/references/internal/`
 - Org coding standards (embedded in review rules)
 

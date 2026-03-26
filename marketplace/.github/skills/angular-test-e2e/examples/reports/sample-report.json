@@ -1,0 +1,205 @@
+[
+  {
+    "keyword": "Feature",
+    "name": "Trade Execution",
+    "uri": "e2e/features/trade-execution.feature",
+    "elements": [
+      {
+        "keyword": "Scenario",
+        "name": "Submit a market buy order",
+        "tags": [{ "name": "@trading" }, { "name": "@smoke" }],
+        "steps": [
+          {
+            "keyword": "Given ",
+            "name": "I am logged in as a trader",
+            "result": { "status": "passed", "duration": 145000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "the market is open",
+            "result": { "status": "passed", "duration": 12000000 }
+          },
+          {
+            "keyword": "Given ",
+            "name": "I navigate to the trading page",
+            "result": { "status": "passed", "duration": 820000000 }
+          },
+          {
+            "keyword": "When ",
+            "name": "I select symbol \"AAPL\"",
+            "result": { "status": "passed", "duration": 95000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "I enter quantity \"100\"",
+            "result": { "status": "passed", "duration": 78000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "I select order type \"Market\"",
+            "result": { "status": "passed", "duration": 62000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "I click \"Submit Order\"",
+            "result": { "status": "passed", "duration": 410000000 }
+          },
+          {
+            "keyword": "Then ",
+            "name": "I should see confirmation \"Order submitted\"",
+            "result": { "status": "passed", "duration": 230000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "the order should appear in the blotter with status \"Pending\"",
+            "result": { "status": "passed", "duration": 185000000 }
+          }
+        ]
+      },
+      {
+        "keyword": "Scenario",
+        "name": "Cancel a pending order",
+        "tags": [{ "name": "@trading" }, { "name": "@smoke" }],
+        "steps": [
+          {
+            "keyword": "Given ",
+            "name": "I am logged in as a trader",
+            "result": { "status": "passed", "duration": 132000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "the market is open",
+            "result": { "status": "passed", "duration": 10000000 }
+          },
+          {
+            "keyword": "Given ",
+            "name": "I have a pending order for \"AAPL\"",
+            "result": { "status": "passed", "duration": 650000000 }
+          },
+          {
+            "keyword": "When ",
+            "name": "I click cancel on the order",
+            "result": { "status": "passed", "duration": 320000000 }
+          },
+          {
+            "keyword": "Then ",
+            "name": "the order status should change to \"Cancelled\"",
+            "result": { "status": "passed", "duration": 210000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "I should see notification \"Order cancelled successfully\"",
+            "result": { "status": "passed", "duration": 140000000 }
+          }
+        ]
+      },
+      {
+        "keyword": "Scenario",
+        "name": "Validate order form inputs — quantity=0",
+        "tags": [{ "name": "@trading" }, { "name": "@smoke" }, { "name": "@regression" }],
+        "steps": [
+          {
+            "keyword": "Given ",
+            "name": "I am logged in as a trader",
+            "result": { "status": "passed", "duration": 128000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "the market is open",
+            "result": { "status": "passed", "duration": 9000000 }
+          },
+          {
+            "keyword": "Given ",
+            "name": "I navigate to the trading page",
+            "result": { "status": "passed", "duration": 780000000 }
+          },
+          {
+            "keyword": "When ",
+            "name": "I enter quantity \"0\"",
+            "result": { "status": "passed", "duration": 65000000 }
+          },
+          {
+            "keyword": "Then ",
+            "name": "I should see validation message \"Quantity must be > 0\"",
+            "result": { "status": "passed", "duration": 110000000 }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "keyword": "Feature",
+    "name": "Portfolio Overview",
+    "uri": "e2e/features/portfolio-overview.feature",
+    "elements": [
+      {
+        "keyword": "Scenario",
+        "name": "View portfolio summary",
+        "tags": [{ "name": "@portfolio" }, { "name": "@smoke" }],
+        "steps": [
+          {
+            "keyword": "Given ",
+            "name": "I am logged in as a portfolio manager",
+            "result": { "status": "passed", "duration": 142000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "I navigate to the portfolio page",
+            "result": { "status": "passed", "duration": 910000000 }
+          },
+          {
+            "keyword": "Then ",
+            "name": "I should see the portfolio value displayed",
+            "result": { "status": "passed", "duration": 85000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "I should see at least 1 position in the table",
+            "result": { "status": "passed", "duration": 72000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "the total P&L should be visible",
+            "result": { "status": "passed", "duration": 48000000 }
+          }
+        ]
+      },
+      {
+        "keyword": "Scenario",
+        "name": "Filter positions by asset class",
+        "tags": [{ "name": "@portfolio" }],
+        "steps": [
+          {
+            "keyword": "Given ",
+            "name": "I am logged in as a portfolio manager",
+            "result": { "status": "passed", "duration": 138000000 }
+          },
+          {
+            "keyword": "And ",
+            "name": "I navigate to the portfolio page",
+            "result": { "status": "passed", "duration": 880000000 }
+          },
+          {
+            "keyword": "When ",
+            "name": "I select asset class filter \"Equities\"",
+            "result": { "status": "passed", "duration": 320000000 }
+          },
+          {
+            "keyword": "Then ",
+            "name": "all displayed positions should have asset class \"Equities\"",
+            "result": {
+              "status": "failed",
+              "duration": 2100000000,
+              "error_message": "AssertionError: Expected 'Fixed Income' to be 'Equities'\n    at portfolio.steps.ts:42:7"
+            }
+          },
+          {
+            "keyword": "And ",
+            "name": "the position count should update",
+            "result": { "status": "skipped", "duration": 0 }
+          }
+        ]
+      }
+    ]
+  }
+]

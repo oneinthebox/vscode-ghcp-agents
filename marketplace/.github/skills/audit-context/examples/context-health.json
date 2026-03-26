@@ -1,0 +1,108 @@
+{
+  "report": "context-health",
+  "generated_at": "2026-03-25T14:30:00Z",
+  "period": {
+    "from": "2026-03-18T00:00:00Z",
+    "to": "2026-03-25T00:00:00Z"
+  },
+  "model_context_limit": 128000,
+  "agents": {
+    "angular": {
+      "avg_context_tokens": 42300,
+      "max_context_tokens": 98500,
+      "utilization_percent": 33.0,
+      "peak_utilization_percent": 77.0,
+      "truncation_events": 2,
+      "truncation_details": [
+        {
+          "session": "sess-a1b2c3",
+          "tokens_requested": 134200,
+          "tokens_delivered": 128000,
+          "tokens_dropped": 6200,
+          "dropped_content": "Earliest tool results from readFile calls"
+        },
+        {
+          "session": "sess-d4e5f6",
+          "tokens_requested": 131800,
+          "tokens_delivered": 128000,
+          "tokens_dropped": 3800,
+          "dropped_content": "Prior conversation turns (oldest 3 turns)"
+        }
+      ],
+      "pressure_zones": [
+        {
+          "skill": "angular-generate-component",
+          "avg_context_percent": 58.2,
+          "reason": "Large template files included as context"
+        }
+      ]
+    },
+    "angular-review": {
+      "avg_context_tokens": 28900,
+      "max_context_tokens": 61200,
+      "utilization_percent": 22.6,
+      "peak_utilization_percent": 47.8,
+      "truncation_events": 0,
+      "truncation_details": [],
+      "pressure_zones": []
+    },
+    "angular-test-unit": {
+      "avg_context_tokens": 52100,
+      "max_context_tokens": 118400,
+      "utilization_percent": 40.7,
+      "peak_utilization_percent": 92.5,
+      "truncation_events": 5,
+      "truncation_details": [
+        {
+          "session": "sess-m3n4o5",
+          "tokens_requested": 142000,
+          "tokens_delivered": 128000,
+          "tokens_dropped": 14000,
+          "dropped_content": "Full source of 3 dependency files"
+        }
+      ],
+      "pressure_zones": [
+        {
+          "skill": "angular-test-unit",
+          "avg_context_percent": 72.4,
+          "reason": "Source file + existing tests + dependencies loaded simultaneously"
+        }
+      ]
+    },
+    "angular-planner": {
+      "avg_context_tokens": 18400,
+      "max_context_tokens": 34200,
+      "utilization_percent": 14.4,
+      "peak_utilization_percent": 26.7,
+      "truncation_events": 0,
+      "truncation_details": [],
+      "pressure_zones": []
+    }
+  },
+  "summary": {
+    "total_truncation_events": 7,
+    "agents_with_truncation": ["angular", "angular-test-unit"],
+    "highest_utilization_agent": "angular-test-unit",
+    "lowest_utilization_agent": "angular-planner"
+  },
+  "recommendations": [
+    {
+      "agent": "angular-test-unit",
+      "priority": "high",
+      "action": "Implement incremental context loading — load dependency files only on demand rather than pre-loading all imports",
+      "expected_reduction_percent": 25
+    },
+    {
+      "agent": "angular",
+      "priority": "medium",
+      "action": "Summarize large template files before including them in context — extract only relevant sections",
+      "expected_reduction_percent": 15
+    },
+    {
+      "agent": "angular-test-unit",
+      "priority": "medium",
+      "action": "Strip existing test file boilerplate before including in context — only include describe/it blocks relevant to the target function",
+      "expected_reduction_percent": 10
+    }
+  ]
+}

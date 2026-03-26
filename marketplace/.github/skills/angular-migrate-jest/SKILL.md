@@ -6,7 +6,11 @@ metadata:
   version: "1.0"
 references:
   - references/angular/v19/jest-migration.md
-allowed-tools: Bash(ng:*) Bash(nx:*) Bash(npx:*) Bash(npm:*) Bash(git:*) Read Edit
+  - references/angular/v19/karma-to-jest-migration.md
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context
@@ -18,6 +22,14 @@ Migrates Angular projects from Karma + Jasmine test runner to Jest. This involve
 - **Scope** — Entire project or specific app in an Nx workspace.
 - **Mode** (optional) — `--branch-only` (default) or `--worktree`.
 - **Preserve Jasmine syntax** (optional) — `--keep-jasmine` to use `jest-jasmine2` runner instead of converting syntax.
+
+### Helper Script
+
+Run the detection script before executing steps manually:
+```bash
+node scripts/detect-karma-config.js [project-root]
+```
+The script outputs JSON to stdout with Karma/Jasmine setup details and migration effort scope (spec file count, Jasmine-specific APIs). Use this data to inform the steps below.
 
 ## Steps
 
@@ -32,7 +44,7 @@ Migrates Angular projects from Karma + Jasmine test runner to Jest. This involve
    - Count `.spec.ts` files.
    - Identify Jasmine-specific APIs in use: `jasmine.createSpy`, `jasmine.SpyObj`, `jasmine.clock()`, custom matchers.
 
-3. **Load reference.** Read [references/angular/v19/jest-migration.md](references/angular/v19/jest-migration.md) for migration steps and common pitfalls.
+3. **Load reference.** Read [references/angular/v19/jest-migration.md](references/angular/v19/jest-migration.md) and [references/angular/v19/karma-to-jest-migration.md](references/angular/v19/karma-to-jest-migration.md) for migration steps and common pitfalls.
 
 4. **Phase 1: Install Jest dependencies.**
    - Install: `jest`, `@types/jest`, `jest-preset-angular`, `ts-jest`.

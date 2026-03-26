@@ -1,0 +1,72 @@
+{
+  "report": "agent-compliance-audit",
+  "generated_at": "2026-03-25T14:30:00Z",
+  "period": {
+    "from": "2026-03-18T00:00:00Z",
+    "to": "2026-03-25T00:00:00Z"
+  },
+  "agents": {
+    "angular": {
+      "sessions": 45,
+      "adherence_score": 0.94,
+      "violations": [
+        {
+          "rule": "inject-over-constructor",
+          "count": 2,
+          "severity": "medium",
+          "example_session": "sess-a1b2c3",
+          "description": "Generated service used constructor injection instead of inject() function"
+        },
+        {
+          "rule": "standalone-components",
+          "count": 1,
+          "severity": "low",
+          "example_session": "sess-d4e5f6",
+          "description": "Component generated without standalone: true flag"
+        }
+      ]
+    },
+    "angular-planner": {
+      "sessions": 30,
+      "adherence_score": 0.98,
+      "violations": []
+    },
+    "angular-review": {
+      "sessions": 22,
+      "adherence_score": 0.96,
+      "violations": [
+        {
+          "rule": "accessibility-check",
+          "count": 1,
+          "severity": "low",
+          "example_session": "sess-g7h8i9",
+          "description": "Review omitted ARIA attribute check on interactive table"
+        }
+      ]
+    },
+    "angular-test-unit": {
+      "sessions": 38,
+      "adherence_score": 0.92,
+      "violations": [
+        {
+          "rule": "httpClientTestingModule",
+          "count": 3,
+          "severity": "medium",
+          "example_session": "sess-j0k1l2",
+          "description": "Tests used real HTTP client instead of HttpClientTestingModule"
+        }
+      ]
+    }
+  },
+  "overall_score": 0.95,
+  "trend": "stable",
+  "trend_detail": {
+    "previous_period_score": 0.94,
+    "delta": 0.01,
+    "direction": "improving"
+  },
+  "recommendations": [
+    "Reinforce inject() function usage in angular agent system prompt",
+    "Add HttpClientTestingModule check to angular-test-unit pre-validation"
+  ]
+}

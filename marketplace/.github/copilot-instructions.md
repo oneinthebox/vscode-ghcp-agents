@@ -21,7 +21,7 @@ These rules are locked. No agent, skill, or configuration can override them.
 - Ask the user before deleting any file.
 - Ask the user before running destructive git operations (rebase, reset, force-push).
 - Ask the user before modifying files outside the agent's declared scope in `.orch/audit/config/boundaries.yaml`.
-- **Override**: If `auto_mode: true` in `.orch/config.yaml`, skip confirmations and execute end-to-end. Domain skills may also override confirmation behavior for their specific scope.
+- **Override**: If `auto_mode: all` in `.orch/config.yaml`, skip confirmations and execute end-to-end. Valid values: `auto_mode: safe` (default), `auto_mode: step-by-step`, `auto_mode: all`. Domain skills may also override confirmation behavior for their specific scope.
 
 ## Audit (non-overridable)
 

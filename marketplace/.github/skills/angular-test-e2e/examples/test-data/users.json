@@ -1,0 +1,23 @@
+{
+  "trader": {
+    "username": "trader@acme-trading.com",
+    "password": "Test@Trader123",
+    "role": "trader",
+    "displayName": "Jane Trader",
+    "permissions": ["trade:execute", "trade:cancel", "blotter:view"]
+  },
+  "portfolioManager": {
+    "username": "pm@acme-trading.com",
+    "password": "Test@PM123",
+    "role": "portfolio_manager",
+    "displayName": "John Portfolio",
+    "permissions": ["portfolio:view", "portfolio:export", "positions:view", "trade:view"]
+  },
+  "readOnly": {
+    "username": "viewer@acme-trading.com",
+    "password": "Test@Viewer123",
+    "role": "viewer",
+    "displayName": "Read Only User",
+    "permissions": ["portfolio:view", "blotter:view"]
+  }
+}

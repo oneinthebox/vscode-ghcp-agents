@@ -1,0 +1,18 @@
+# ORCH runtime (auto-generated, machine-specific)
+.orch/cache/*
+!.orch/cache/.gitkeep
+.orch/runs/*
+!.orch/runs/.gitkeep
+.orch/reports/*
+!.orch/reports/.gitkeep
+.orch/workflow-state/*
+!.orch/workflow-state/.gitkeep
+.orch/audit/sessions/
+.orch/audit/session-status.json
+.orch/audit/violations.jsonl
+.orch/audit/tokens/
+.orch/audit/metrics/daily/
+.orch/audit/metrics/weekly/
+.orch/audit/benchmarks/
+.orch/mocks/node_modules/
+.orch/mocks/db.json

@@ -17,7 +17,7 @@ BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 HOSTNAME_VAL=$(hostname 2>/dev/null || echo "unknown")
 
 # Create session directory
-AUDIT_DIR=".orch/audit/sessions/${DATE_DIR}"
+AUDIT_DIR=".orch/runs/${DATE_DIR}"
 mkdir -p "$AUDIT_DIR"
 
 # Write initial session record

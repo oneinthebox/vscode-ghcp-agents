@@ -6,7 +6,10 @@ metadata:
   version: "1.0"
 references:
   - references/angular/v19/routing-guide.md
-allowed-tools: Bash(ng:*) Bash(nx:*) Bash(npx:*) Read Edit
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context

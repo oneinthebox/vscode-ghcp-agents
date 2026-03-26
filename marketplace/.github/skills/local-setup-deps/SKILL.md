@@ -10,119 +10,191 @@ references: []
 
 ## Context
 
-Ensures all project dependencies are correctly installed and consistent with their lockfiles. Detects the package manager(s) in use by examining project configuration files, runs the appropriate install commands, verifies that installed versions match lockfile expectations, and checks for known security vulnerabilities. Supports polyglot projects with multiple package managers active simultaneously.
+Manages dependency installation and verification across polyglot projects. Supports three primary ecosystems — Node.js, Java, and Python — each with their own configuration files, lock files, install commands, and corporate Artifactory integration patterns.
 
-## Inputs
+---
 
-- **--manager {npm|yarn|pnpm|maven|gradle|pip|poetry|all}** — which package manager to target (default: `all` detected from project files)
-- Optional: `--frozen` — enforce frozen lockfile mode (fail if lockfile would change)
-- Optional: `--audit` — run vulnerability audit after install (default: true)
-- Optional: `--clean` — remove existing dependency directories before installing (e.g., `node_modules/`, `.venv/`, `target/`)
+## Node.js
 
-## Steps
+### Configuration
 
-1. **Detect package managers in use**
-   a. Scan project root for marker files:
-      - `package-lock.json` -> npm
-      - `yarn.lock` -> yarn
-      - `pnpm-lock.yaml` -> pnpm
-      - `pom.xml` -> maven
-      - `build.gradle` or `build.gradle.kts` -> gradle
-      - `requirements.txt` or `setup.py` -> pip
-      - `poetry.lock` or `pyproject.toml` (with `[tool.poetry]`) -> poetry
-   b. If multiple managers detected, process each in order: Node.js managers first, then JVM, then Python.
-   c. If `--manager` is specified, only process that manager.
+- **`.npmrc`** — controls registry URL, auth token, scope mapping, and cache settings
+- Location: project root (per-project) or `~/.npmrc` (global)
+- Key fields: `registry`, `//registry.npmjs.org/:_authToken`, `@scope:registry`
 
-2. **Verify package manager is installed**
-   a. For each detected manager, check it is available on PATH:
-      - `npm --version`, `yarn --version`, `pnpm --version`
-      - `mvn --version`, `gradle --version`
-      - `pip --version`, `poetry --version`
-   b. If a manager is missing, attempt to install it:
-      - npm: bundled with Node.js (suggest running `/local-setup-env` first)
-      - yarn: `corepack enable && corepack prepare yarn@stable --activate`
-      - pnpm: `corepack enable && corepack prepare pnpm@latest --activate`
-      - maven: `brew install maven` (macOS) / `sdk install maven` / distro package
-      - gradle: `sdk install gradle` or Gradle wrapper (`./gradlew`)
-      - pip: bundled with Python (suggest running `/local-setup-env` first)
-      - poetry: `pip install poetry` or `pipx install poetry`
+### Discovery
 
-3. **Clean existing dependencies (if --clean)**
-   a. **Node.js**: Remove `node_modules/` directory.
-   b. **Java/Maven**: Remove `target/` directory.
-   c. **Java/Gradle**: Run `./gradlew clean` or remove `build/` directory.
-   d. **Python/pip**: Remove `.venv/` or deactivate virtualenv.
-   e. **Python/poetry**: Run `poetry env remove --all`.
+- `package.json` contains `dependencies` and `devDependencies`
 
-4. **Install dependencies**
-   a. **npm**: `npm ci` (if lockfile exists and `--frozen`) or `npm install`.
-   b. **yarn**: `yarn install --frozen-lockfile` (if `--frozen`) or `yarn install`.
-   c. **pnpm**: `pnpm install --frozen-lockfile` (if `--frozen`) or `pnpm install`.
-   d. **maven**: `mvn dependency:resolve` or `mvn install -DskipTests`.
-   e. **gradle**: `./gradlew dependencies` or `./gradlew build -x test`.
-   f. **pip**: Create virtualenv if not active, then `pip install -r requirements.txt`.
-   g. **poetry**: `poetry install`.
+### Lock Files
 
-5. **Verify installed versions match lockfile**
-   a. **npm**: Run `npm ls --depth=0` and check for `WARN` or `ERR` entries.
-   b. **yarn**: Run `yarn check --verify-tree` (yarn 1) or `yarn install --check-cache` (yarn 3+).
-   c. **pnpm**: Run `pnpm ls --depth=0` and check for issues.
-   d. **maven**: Run `mvn dependency:tree` and compare against expected versions.
-   e. **gradle**: Run `./gradlew dependencies` and check for version conflicts.
-   f. **pip**: Run `pip check` to verify compatibility.
-   g. **poetry**: Run `poetry check` to verify lockfile consistency.
+| Package Manager | Lock File |
+|----------------|-----------|
+| npm | `package-lock.json` |
+| yarn | `yarn.lock` |
+| pnpm | `pnpm-lock.yaml` |
 
-6. **Scan for vulnerability advisories (if --audit is true)**
-   a. **npm**: `npm audit --production` (or `npm audit` for all).
-   b. **yarn**: `yarn audit` (yarn 1) or `yarn npm audit` (yarn 3+).
-   c. **pnpm**: `pnpm audit`.
-   d. **maven**: Check for `org.owasp:dependency-check-maven` plugin, run if available.
-   e. **pip**: `pip-audit` (install if not available: `pip install pip-audit`).
-   f. **poetry**: `poetry audit` or `pip-audit` on the virtualenv.
-   g. Classify vulnerabilities: critical, high, moderate, low.
+### Install Commands
+
+- **CI (clean install):** `npm ci` — installs exactly from lock file, removes existing `node_modules`
+- **Development:** `npm install` — resolves and installs, may update lock file
+- **yarn:** `yarn install --frozen-lockfile` (CI) or `yarn install` (dev)
+- **pnpm:** `pnpm install --frozen-lockfile` (CI) or `pnpm install` (dev)
+
+### Artifactory Integration
+
+Set the registry in `.npmrc` to point to your organization's Artifactory instance:
+
+```
+registry=https://artifactory.yourorg.com/api/npm/npm-virtual/
+//artifactory.yourorg.com/api/npm/npm-virtual/:_authToken=${NPM_TOKEN}
+```
+
+### Verification
+
+```bash
+npm ls --all          # Check for peer dependency conflicts and missing packages
+npm audit             # Scan for known vulnerabilities
+```
+
+---
+
+## Java
+
+### Configuration
+
+- **`~/.m2/settings.xml`** — Maven repositories, mirrors, server authentication, profiles
+- **`gradle.properties`** — Gradle project-level or user-level (`~/.gradle/gradle.properties`) properties
+
+### Discovery
+
+| Build Tool | Config File |
+|-----------|-------------|
+| Maven | `pom.xml` |
+| Gradle | `build.gradle` or `build.gradle.kts` |
+
+### Install Commands
+
+- **Maven:** `mvn dependency:resolve` — downloads all dependencies without building
+- **Maven (full):** `mvn install -DskipTests` — install with all transitive deps
+- **Gradle:** `gradle dependencies` or `./gradlew dependencies`
+
+### Artifactory Integration
+
+Add a `<mirror>` element in `~/.m2/settings.xml`:
+
+```xml
+<mirror>
+  <id>artifactory</id>
+  <mirrorOf>*</mirrorOf>
+  <url>https://artifactory.yourorg.com/artifactory/maven-virtual</url>
+</mirror>
+```
+
+### Verification
+
+```bash
+mvn dependency:tree            # Full dependency tree with conflict resolution
+gradle dependencies --scan     # Dependency report with build scan
+```
+
+---
+
+## Python
+
+### Configuration
+
+- **`pyproject.toml`** — used by uv, poetry, and modern pip for project metadata and dependencies
+- **`pip.conf`** or **`~/.pip/pip.conf`** — pip configuration for index URL and trusted hosts
+- **`~/.config/uv/uv.toml`** — uv-specific configuration
+
+### Discovery
+
+| Tool | Config File |
+|------|-------------|
+| pip | `requirements.txt` |
+| poetry | `pyproject.toml` (with `[tool.poetry]`) |
+| uv | `pyproject.toml` (with `[project]`) |
+| setuptools | `setup.py` |
+| pipenv | `Pipfile` |
+
+### Install Commands
+
+- **uv:** `uv sync` — installs from `uv.lock`, creating virtualenv automatically
+- **poetry:** `poetry install` — installs from `poetry.lock`
+- **pip:** `pip install -r requirements.txt` — installs from requirements file
+
+### Artifactory Integration
+
+Set the index URL in pip or uv configuration:
+
+```
+--index-url https://artifactory.yourorg.com/api/pypi/pypi-virtual/simple
+--trusted-host artifactory.yourorg.com
+```
+
+For `pyproject.toml` (poetry):
+
+```toml
+[[tool.poetry.source]]
+name = "artifactory"
+url = "https://artifactory.yourorg.com/api/pypi/pypi-virtual/simple"
+priority = "primary"
+```
+
+### Verification
+
+```bash
+pip check              # Verify installed packages have compatible dependencies
+uv pip check           # Same check via uv
+poetry check           # Validate pyproject.toml and lock file consistency
+```
+
+---
+
+## Multi-Ecosystem Workflow
+
+1. **Detect** — scan project root for `package.json`, `pom.xml`, `build.gradle`, `pyproject.toml`, `requirements.txt`
+2. **Check config** — verify `.npmrc`, `settings.xml`, or `pyproject.toml` exists with correct registry settings
+3. **Check lock file** — confirm lock file is present and committed to version control
+4. **Install** — run the appropriate install command for each ecosystem
+5. **Verify** — run verification commands to confirm no conflicts or missing dependencies
 
 ## Output
 
-```markdown
-## Dependency Installation Report
-
-### Detected Package Managers
-| Manager | Version | Lockfile | Status |
-|---------|---------|----------|--------|
-| {name} | {version} | {lockfile path} | OK/INSTALLED/MISSING |
-
-### Installation Results
-| Manager | Dependencies | Time | Status |
-|---------|-------------|------|--------|
-| {name} | {count} packages | {duration} | OK/FAILED |
-
-### Version Verification
-| Manager | Check | Status | Issues |
-|---------|-------|--------|--------|
-| {name} | lockfile consistency | PASS/WARN/FAIL | {details} |
-
-### Vulnerability Audit
-| Manager | Critical | High | Moderate | Low | Status |
-|---------|----------|------|----------|-----|--------|
-| {name} | {n} | {n} | {n} | {n} | CLEAN/WARNINGS/CRITICAL |
-
-### Critical Vulnerabilities (if any)
-| Package | Severity | Advisory | Fix Available |
-|---------|----------|----------|--------------|
-| {name} | {level} | {CVE or advisory URL} | {yes/no, fix version} |
-
-### Actions Taken
-- [list of actions performed]
-
-### Manual Steps Required
-- [list of things the developer must do manually, if any]
+```json
+{
+  "ecosystems": [
+    {
+      "type": "node",
+      "configFound": true,
+      "lockFileFound": true,
+      "installResult": "success",
+      "verifyResult": "no issues"
+    },
+    {
+      "type": "java",
+      "configFound": true,
+      "lockFileFound": false,
+      "installResult": "success",
+      "verifyResult": "2 version conflicts"
+    },
+    {
+      "type": "python",
+      "configFound": true,
+      "lockFileFound": true,
+      "installResult": "success",
+      "verifyResult": "no issues"
+    }
+  ]
+}
 ```
 
 ## Validation
 
-- All detected package managers are installed and functional
-- Dependency install command completed with exit code 0 for each manager
-- `npm ls` / `yarn check` / `pnpm ls` / `pip check` / `poetry check` reports no errors
-- Lockfile was not modified (in `--frozen` mode)
-- No critical vulnerabilities remain unacknowledged
+- All detected ecosystems have their config files in place
+- Lock files exist and are consistent with dependency declarations
+- Install commands complete with exit code 0
+- Verification commands report no critical conflicts or missing packages
+- Artifactory URLs resolve correctly (if configured)
 - No application source files were modified

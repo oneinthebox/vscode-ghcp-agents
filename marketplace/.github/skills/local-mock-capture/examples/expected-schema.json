@@ -1,0 +1,40 @@
+{
+  "funds": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "fields": {
+        "id": { "type": "number", "example": 1 },
+        "symbol": { "type": "string", "example": "FXAIX" },
+        "name": { "type": "string", "example": "Fidelity 500 Index Fund" },
+        "category": { "type": "string", "example": "Large Cap Blend" },
+        "morningstarRating": { "type": "number", "example": 5 },
+        "expenseRatio": { "type": "number", "example": 0.015 },
+        "ytdReturn": { "type": "number", "example": 12.34 },
+        "nav": { "type": "number", "example": 189.42 }
+      }
+    },
+    "count": 25
+  },
+  "fundDetail": {
+    "type": "object",
+    "fields": {
+      "id": { "type": "number" },
+      "symbol": { "type": "string" },
+      "name": { "type": "string" },
+      "managerName": { "type": "string" },
+      "top10Holdings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "fields": {
+            "symbol": { "type": "string" },
+            "name": { "type": "string" },
+            "weight": { "type": "number" },
+            "sector": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

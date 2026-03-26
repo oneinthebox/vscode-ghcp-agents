@@ -1,7 +1,9 @@
 ---
 name: angular-mock-wire
 description: "Generate Angular services, TypeScript interfaces, environment config, and contract tests from mock server schema. Services use ConfigService for URL switching — flip from mock to real API with one config change. Contract tests verify real API matches the mock contract."
-references: []
+references:
+  - references/orch/mock-server-reference.md
+  - references/angular/v19/service-patterns.md
 allowed-tools:
   - codebase
   - terminal
@@ -18,6 +20,7 @@ Wire an Angular app to consume the mock server. Generates everything needed so t
 - `--from api-spec.yaml` — generate from an OpenAPI spec directly
 - `--services-path src/app/services/` — directory for generated Angular services (default: `src/app/services/`)
 - `--models-path src/app/models/` — directory for generated TypeScript interfaces (default: `src/app/models/`)
+- `--mocks-dir .orch/mocks/fund-app/` — directory containing mock files to read from (default: `.orch/mocks/`)
 
 ## Steps
 

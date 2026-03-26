@@ -1,7 +1,8 @@
 ---
 name: local-mock-generate
 description: "Generate mock data from any source — HAR capture, OpenAPI/Swagger YAML, TypeScript interfaces, or manual description. Outputs json-server compatible db.json with relationships, routes, and WebSocket replay data. Modes: captured (real data) or synthetic (faker-style fake data matching schema)."
-references: []
+references:
+  - references/orch/mock-server-reference.md
 allowed-tools:
   - codebase
   - terminal
@@ -12,6 +13,8 @@ allowed-tools:
 
 The main mock data generation engine. Takes schema from any source and produces a complete mock database. Supports four input sources: HAR capture output, OpenAPI/Swagger specs, TypeScript interfaces, or a plain-text manual description. Two generation modes: captured (use real data as-is) or synthetic (generate realistic fake data matching the schema). Output is always json-server compatible.
 
+**Executable script:** Run `node .github/skills/local-mock-generate/scripts/generate.js --from <source> [options]` — this implements the full generation logic. The agent should invoke this script via terminal rather than re-implementing.
+
 ## Inputs
 
 - `--from .orch/mocks/schema.json` — use schema from HAR capture
@@ -20,6 +23,7 @@ The main mock data generation engine. Takes schema from any source and produces 
 - `"50 trades with symbol, price, quantity, status"` — manual plain-text description
 - `--mode captured|synthetic` (default: `synthetic`) — use real captured data or generate fake data
 - `--count 50` — number of records to generate per collection
+- `--mocks-dir .orch/mocks/fund-app/` — output directory for mock files (default: `.orch/mocks/`)
 
 ## Steps
 

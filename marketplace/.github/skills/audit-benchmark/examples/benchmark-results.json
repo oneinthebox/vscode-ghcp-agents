@@ -1,0 +1,81 @@
+{
+  "report": "model-benchmark",
+  "generated_at": "2026-03-25T14:30:00Z",
+  "benchmark_config": {
+    "task_count": 50,
+    "task_categories": ["generate-component", "write-test", "review-code", "explain-arch", "fix-bug"],
+    "tasks_per_category": 10,
+    "runs_per_model": 3,
+    "temperature": 0.1
+  },
+  "models": {
+    "gpt-4o": {
+      "composite_score": 82.4,
+      "scores_by_category": {
+        "generate-component": { "accuracy": 88.0, "completeness": 85.0, "speed_ms": 8200, "tokens_used": 14500 },
+        "write-test": { "accuracy": 79.0, "completeness": 82.0, "speed_ms": 11400, "tokens_used": 18200 },
+        "review-code": { "accuracy": 85.0, "completeness": 80.0, "speed_ms": 6100, "tokens_used": 9800 },
+        "explain-arch": { "accuracy": 78.0, "completeness": 90.0, "speed_ms": 7300, "tokens_used": 12100 },
+        "fix-bug": { "accuracy": 82.0, "completeness": 76.0, "speed_ms": 9800, "tokens_used": 16400 }
+      },
+      "avg_latency_ms": 8560,
+      "avg_tokens_per_task": 14200,
+      "cost_per_task_usd": 0.107,
+      "total_cost_usd": 16.05,
+      "failure_rate_percent": 4.0
+    },
+    "claude-sonnet": {
+      "composite_score": 84.1,
+      "scores_by_category": {
+        "generate-component": { "accuracy": 90.0, "completeness": 87.0, "speed_ms": 9100, "tokens_used": 13200 },
+        "write-test": { "accuracy": 82.0, "completeness": 84.0, "speed_ms": 12800, "tokens_used": 16800 },
+        "review-code": { "accuracy": 88.0, "completeness": 83.0, "speed_ms": 7200, "tokens_used": 10400 },
+        "explain-arch": { "accuracy": 80.0, "completeness": 92.0, "speed_ms": 8500, "tokens_used": 11600 },
+        "fix-bug": { "accuracy": 85.0, "completeness": 78.0, "speed_ms": 10200, "tokens_used": 15100 }
+      },
+      "avg_latency_ms": 9560,
+      "avg_tokens_per_task": 13420,
+      "cost_per_task_usd": 0.121,
+      "total_cost_usd": 18.15,
+      "failure_rate_percent": 2.7
+    },
+    "gpt-4o-mini": {
+      "composite_score": 71.8,
+      "scores_by_category": {
+        "generate-component": { "accuracy": 78.0, "completeness": 72.0, "speed_ms": 3200, "tokens_used": 11800 },
+        "write-test": { "accuracy": 65.0, "completeness": 68.0, "speed_ms": 4800, "tokens_used": 14200 },
+        "review-code": { "accuracy": 74.0, "completeness": 70.0, "speed_ms": 2900, "tokens_used": 8100 },
+        "explain-arch": { "accuracy": 70.0, "completeness": 78.0, "speed_ms": 3400, "tokens_used": 9600 },
+        "fix-bug": { "accuracy": 68.0, "completeness": 62.0, "speed_ms": 4100, "tokens_used": 12500 }
+      },
+      "avg_latency_ms": 3680,
+      "avg_tokens_per_task": 11240,
+      "cost_per_task_usd": 0.005,
+      "total_cost_usd": 0.75,
+      "failure_rate_percent": 10.0
+    }
+  },
+  "comparison": {
+    "best_overall": "claude-sonnet",
+    "best_cost_efficiency": "gpt-4o-mini",
+    "best_speed": "gpt-4o-mini",
+    "best_accuracy": "claude-sonnet",
+    "recommended_primary": "gpt-4o",
+    "recommended_fallback": "claude-sonnet"
+  },
+  "statistical_notes": {
+    "confidence_level": "95%",
+    "gpt4o_vs_claude_sonnet": {
+      "composite_delta": -1.7,
+      "p_value": 0.12,
+      "significant": false,
+      "note": "Difference is not statistically significant at p<0.05. Both models perform comparably on this task set."
+    },
+    "gpt4o_vs_gpt4o_mini": {
+      "composite_delta": 10.6,
+      "p_value": 0.001,
+      "significant": true,
+      "note": "gpt-4o significantly outperforms gpt-4o-mini across all categories. Mini is suitable for low-stakes tasks where cost matters more than accuracy."
+    }
+  }
+}

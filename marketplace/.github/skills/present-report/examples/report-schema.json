@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://orch.dev/schemas/report-data-v1.json",
+  "title": "ORCH Report Data",
+  "description": "Schema for structured report data consumed by render-report.js. Compatible with CI tools for pass/fail gating.",
+  "type": "object",
+  "required": ["title", "date", "format", "version"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Report title displayed in header"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Report generation date (YYYY-MM-DD)"
+    },
+    "agent": {
+      "type": "string",
+      "description": "Agent that generated the report (e.g., @audit, @orch)"
+    },
+    "format": {
+      "type": "string",
+      "const": "json",
+      "description": "Always 'json' for this schema"
+    },
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version for forward compatibility"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "WARN", "FAIL"],
+          "description": "Overall report status for CI gating"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Numeric score (0-100)"
+        },
+        "bullets": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "maxItems": 5,
+          "description": "Executive summary bullet points"
+        }
+      },
+      "required": ["status", "bullets"]
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "value"],
+        "properties": {
+          "label": { "type": "string", "description": "Metric display name" },
+          "value": { "type": "number", "description": "Metric value" },
+          "unit": { "type": "string", "description": "Unit of measurement (%, KB, etc.)" },
+          "trend": { "type": "string", "enum": ["up", "down", "flat"], "description": "Direction of change" },
+          "previous": { "type": ["number", "null"], "description": "Previous value for comparison" }
+        }
+      },
+      "description": "Key performance indicators"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "type", "content"],
+        "properties": {
+          "title": { "type": "string" },
+          "type": { "type": "string", "enum": ["text", "table", "code", "diagram"] },
+          "language": { "type": "string", "description": "Language hint for code blocks" },
+          "content": { "type": "string", "description": "Section content (Markdown for tables, raw text for code/diagram)" }
+        }
+      },
+      "description": "Report body sections"
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["priority", "action"],
+        "properties": {
+          "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+          "action": { "type": "string", "description": "Recommended action" },
+          "skill": { "type": "string", "description": "ORCH skill reference (e.g., /angular-signals)" }
+        }
+      },
+      "description": "Prioritized action items"
+    },
+    "coverage": {
+      "type": "object",
+      "description": "Code coverage data (Istanbul/lcov format)",
+      "properties": {
+        "total": {
+          "type": "object",
+          "properties": {
+            "lines":      { "$ref": "#/$defs/coverageCategory" },
+            "branches":   { "$ref": "#/$defs/coverageCategory" },
+            "functions":  { "$ref": "#/$defs/coverageCategory" },
+            "statements": { "$ref": "#/$defs/coverageCategory" }
+          }
+        },
+        "files": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "lines":      { "$ref": "#/$defs/coverageCategory" },
+              "branches":   { "$ref": "#/$defs/coverageCategory" },
+              "functions":  { "$ref": "#/$defs/coverageCategory" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "coverageCategory": {
+      "type": "object",
+      "required": ["total", "covered", "pct"],
+      "properties": {
+        "total":   { "type": "integer", "minimum": 0 },
+        "covered": { "type": "integer", "minimum": 0 },
+        "skipped": { "type": "integer", "minimum": 0 },
+        "pct":     { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+<!-- Example output from /angular-hds-generate — see SKILL.md for usage -->
+<hds-card class="dashboard-card" (click)="onCardClick()" role="button" tabindex="0">
+  <div class="dashboard-card__header">
+    <h3>{{ portfolio().name }}</h3>
+    <hds-badge [variant]="pnlVariant()" [label]="pnlDisplay()" />
+  </div>
+
+  <div class="dashboard-card__value">
+    {{ portfolio().totalValue | currency: 'USD':'symbol':'1.0-0' }}
+  </div>
+
+  <div class="dashboard-card__meta">
+    <span>{{ portfolio().holdingsCount }} holdings</span>
+    <span>{{ portfolio().assetClass }}</span>
+    <span>Updated {{ portfolio().lastUpdated | date: 'short' }}</span>
+  </div>
+
+  @if (loading()) {
+    <div class="dashboard-card__footer">Refreshing data…</div>
+  } @else {
+    <div class="dashboard-card__footer">
+      YTD Return: {{ portfolio().ytdReturn | percent: '1.2-2' }}
+    </div>
+  }
+</hds-card>

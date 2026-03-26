@@ -1,0 +1,23 @@
+[project]
+name = "my-service"
+version = "1.0.0"
+description = "Example Python project with custom index configuration"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn>=0.27.0",
+    "pydantic>=2.5.0",
+    "httpx>=0.26.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8.0",
+]
+
+# uv / pip index configuration — point to corporate Artifactory
+[[tool.uv.index]]
+name = "artifactory"
+url = "https://artifactory.yourorg.com/api/pypi/pypi-virtual/simple"

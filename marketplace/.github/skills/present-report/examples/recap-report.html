@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Recap — 2026-03-24</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── HDS Design Tokens (oklch, deep blue hue 240) ── */
+    :root {
+      --hds-surface:          oklch(0.16 0.02 240);
+      --hds-surface-raised:   oklch(0.20 0.02 240);
+      --hds-surface-card:     oklch(0.24 0.025 240);
+      --hds-surface-overlay:  oklch(0.14 0.015 240);
+      --hds-text:             oklch(0.95 0.01 240);
+      --hds-text-muted:       oklch(0.70 0.02 240);
+      --hds-text-dim:         oklch(0.55 0.02 240);
+      --hds-accent:           oklch(0.65 0.15 240);
+      --hds-accent-light:     oklch(0.75 0.10 240);
+      --hds-accent-subtle:    oklch(0.30 0.05 240);
+      --hds-border:           oklch(0.30 0.02 240);
+      --hds-border-light:     oklch(0.25 0.015 240);
+      --hds-pass:             #22c55e;
+      --hds-warn:             #f59e0b;
+      --hds-fail:             #ef4444;
+      --hds-info:             #3b82f6;
+      --font-heading:         'Newsreader', Georgia, serif;
+      --font-body:            'Outfit', system-ui, -apple-system, sans-serif;
+      --font-mono:            'IBM Plex Mono', 'Fira Code', monospace;
+      --radius:               8px;
+      --radius-sm:            4px;
+    }
+
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--hds-surface);
+      color: var(--hds-text);
+      line-height: 1.65;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      font-size: 15px;
+    }
+    a { color: var(--hds-accent-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Typography ── */
+    h1, h2, h3 { font-family: var(--font-heading); font-weight: 600; letter-spacing: -0.01em; }
+    h1 { font-size: 2.2rem; line-height: 1.2; }
+    h2 { font-size: 1.35rem; margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--hds-border); }
+    h3 { font-size: 1.1rem; margin: 1.5rem 0 0.75rem; }
+    p { margin-bottom: 0.75rem; }
+
+    /* ── Report Header ── */
+    .report-header {
+      border-bottom: 2px solid var(--hds-accent);
+      padding-bottom: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .report-header .overline {
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--hds-accent);
+      margin-bottom: 0.25rem;
+    }
+    .report-header .dateline {
+      color: var(--hds-text-muted);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.65rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .badge-pass { background: var(--hds-pass); color: #000; }
+    .badge-warn { background: var(--hds-warn); color: #000; }
+    .badge-fail { background: var(--hds-fail); color: #fff; }
+    .badge-info { background: var(--hds-info); color: #fff; }
+
+    /* ── Table of Contents ── */
+    .toc {
+      background: var(--hds-surface-raised);
+      border: 1px solid var(--hds-border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .toc h3 { margin: 0 0 0.75rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--hds-text-muted); }
+    .toc ol { padding-left: 1.25rem; }
+    .toc li { margin-bottom: 0.3rem; font-size: 0.9rem; }
+
+    /* ── Executive Summary ── */
+    .exec-summary {
+      background: var(--hds-surface-raised);
+      border-left: 4px solid var(--hds-accent);
+      padding: 1.5rem 1.75rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 1.5rem 0 2rem;
+    }
+    .exec-summary ul { padding-left: 1.2rem; }
+    .exec-summary li { margin-bottom: 0.5rem; }
+
+    /* ── KPI Cards / Stat Strip ── */
+    .stat-strip { margin: 2rem 0; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .kpi-card {
+      background: var(--hds-surface-card);
+      border: 1px solid var(--hds-border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1rem;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .kpi-card:hover { border-color: var(--hds-accent); }
+    .kpi-value { font-size: 1.9rem; font-weight: 600; font-family: var(--font-heading); line-height: 1.1; }
+    .kpi-label { color: var(--hds-text-muted); font-size: 0.8rem; margin-top: 0.3rem; }
+    .kpi-trend { font-size: 0.75rem; margin-top: 0.4rem; }
+    .trend-up { color: var(--hds-pass); }
+    .trend-down { color: var(--hds-fail); }
+    .trend-flat { color: var(--hds-text-muted); }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+    thead th {
+      text-align: left;
+      padding: 0.6rem 0.8rem;
+      border-bottom: 2px solid var(--hds-border);
+      color: var(--hds-text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 500;
+    }
+    tbody td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--hds-border-light); }
+    tbody tr:hover { background: var(--hds-surface-raised); }
+
+    /* ── Progress Bars ── */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--hds-surface);
+      border-radius: 4px;
+      overflow: hidden;
+      min-width: 80px;
+    }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+    /* ── Code Blocks ── */
+    pre.code-block {
+      background: var(--hds-surface-overlay);
+      border: 1px solid var(--hds-border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.55;
+      margin: 1rem 0;
+    }
+
+    /* ── Diagrams ── */
+    .diagram {
+      margin: 1.5rem 0;
+      background: var(--hds-surface-raised);
+      border: 1px solid var(--hds-border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .diagram-title { font-weight: 600; font-size: 0.85rem; color: var(--hds-text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .diagram-caption { font-size: 0.8rem; color: var(--hds-text-dim); margin-top: 0.75rem; font-style: italic; }
+
+    /* ── Recommendations ── */
+    .recommendations ol { padding-left: 1.5rem; }
+    .recommendations li { margin-bottom: 0.65rem; line-height: 1.5; }
+    .recommendations code { background: var(--hds-surface-card); padding: 0.15rem 0.4rem; border-radius: 3px; font-family: var(--font-mono); font-size: 0.82rem; }
+
+    /* ── Collapsible Details ── */
+    details { margin: 1rem 0; }
+    summary {
+      cursor: pointer;
+      color: var(--hds-accent-light);
+      font-weight: 500;
+      padding: 0.5rem 0;
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    details[open] summary { margin-bottom: 0.5rem; }
+    details .detail-content { padding: 0.5rem 1rem; background: var(--hds-surface-raised); border-radius: var(--radius); }
+
+    /* ── Footer ── */
+    .report-footer {
+      margin-top: 3rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--hds-border);
+      color: var(--hds-text-dim);
+      font-size: 0.78rem;
+      text-align: center;
+    }
+
+    /* ── Print Styles ── */
+    @media print {
+      body {
+        background: #fff;
+        color: #111;
+        max-width: 100%;
+        padding: 1cm;
+        font-size: 11pt;
+      }
+      .report-header { border-bottom-color: #333; }
+      h2 { border-bottom-color: #ccc; page-break-after: avoid; }
+      .exec-summary { background: #f7f7f7; border-left-color: #333; }
+      .kpi-card { background: #f9f9f9; border-color: #ddd; }
+      .badge-pass { background: #d1fae5; color: #000; }
+      .badge-warn { background: #fef3c7; color: #000; }
+      .badge-fail { background: #fee2e2; color: #000; }
+      pre.code-block { background: #f5f5f5; border-color: #ddd; }
+      .diagram { background: #fafafa; border-color: #ddd; }
+      tbody tr:hover { background: transparent; }
+      table { page-break-inside: avoid; }
+      .toc { page-break-after: always; }
+      a { color: #111; }
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 1rem; font-size: 14px; }
+      h1 { font-size: 1.6rem; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .exec-summary { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="report-header">
+    <div class="overline">ORCH Project Report</div>
+    <h1>Project Recap</h1>
+    <p class="dateline">
+      2026-03-24 &middot; @audit &middot;
+      <span class="badge badge-pass">PASS</span>
+      &middot; Score: 85 &middot; Branch: feature/signals-migration
+    </p>
+  </header>
+
+  <!-- ── Table of Contents ── -->
+  <nav class="toc">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#executive-summary">Executive Summary</a></li>
+      <li><a href="#metrics">Metrics</a></li>
+      <li><a href="#architecture">Architecture Overview</a></li>
+      <li><a href="#migration">Migration Summary</a></li>
+      <li><a href="#findings">Key Findings</a></li>
+      <li><a href="#coverage">Coverage Summary</a></li>
+      <li><a href="#recommendations">Recommendations</a></li>
+      <li><a href="#appendix">Appendix</a></li>
+    </ol>
+  </nav>
+
+  <!-- ── Executive Summary ── -->
+  <section class="exec-summary" id="executive-summary">
+    <h2 style="border:none;margin-top:0;padding:0;">Executive Summary</h2>
+    <ul>
+      <li>Migrated 12 Angular services from RxJS Observables to Angular Signals (100% complete)</li>
+      <li>Code coverage increased from 72.1% to 78.4% across the signals module</li>
+      <li>Bundle size reduced by 21% (312 KB to 245 KB) after tree-shaking unused RxJS operators</li>
+      <li>Zero critical vulnerabilities detected in dependency audit</li>
+      <li>Performance benchmarks show 15% faster change detection in Signal-based components</li>
+    </ul>
+  </section>
+
+  <!-- ── Metrics KPI Strip ── -->
+  <section class="stat-strip" id="metrics">
+    <h2>Metrics</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-value">78.4%</div>
+        <div class="kpi-label">Line Coverage</div>
+        <div class="kpi-trend trend-up">&#x2191; from 72.1%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">65.2%</div>
+        <div class="kpi-label">Branch Coverage</div>
+        <div class="kpi-trend trend-up">&#x2191; from 58.7%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">82.1%</div>
+        <div class="kpi-label">Function Coverage</div>
+        <div class="kpi-trend trend-up">&#x2191; from 76.3%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">245 KB</div>
+        <div class="kpi-label">Bundle Size</div>
+        <div class="kpi-trend trend-up">&#x2193; from 312 KB</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">12</div>
+        <div class="kpi-label">Services Migrated</div>
+        <div class="kpi-trend trend-up">&#x2191; from 0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">94</div>
+        <div class="kpi-label">Lighthouse Score</div>
+        <div class="kpi-trend trend-up">&#x2191; from 87</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Architecture Diagram ── -->
+  <section class="section" id="architecture">
+    <h2>Architecture Overview</h2>
+    <div class="diagram">
+      <div class="diagram-title">Signal-Based Service Architecture</div>
+      <pre class="mermaid">
+graph TD
+    A["AppComponent"] --> B["TradeService (Signal)"]
+    A --> C["PortfolioService (Signal)"]
+    B --> D["WebSocket Gateway"]
+    C --> D
+    D --> E["Trade API"]
+    B --> F["SignalStore"]
+    C --> F
+    F --> G["Component Tree (computed)"]
+      </pre>
+      <div class="diagram-caption">All services now use Angular Signals for reactive state management</div>
+    </div>
+  </section>
+
+  <!-- ── Migration Summary Table ── -->
+  <section class="section" id="migration">
+    <h2>Migration Summary</h2>
+    <table>
+      <thead>
+        <tr><th>Service</th><th>Status</th><th>Lines Changed</th><th>Tests Added</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>TradeService</td><td><span class="badge badge-pass">PASS</span></td><td>145</td><td>23</td></tr>
+        <tr><td>PortfolioService</td><td><span class="badge badge-pass">PASS</span></td><td>98</td><td>18</td></tr>
+        <tr><td>MarketDataService</td><td><span class="badge badge-pass">PASS</span></td><td>210</td><td>31</td></tr>
+        <tr><td>AuthService</td><td><span class="badge badge-pass">PASS</span></td><td>67</td><td>12</td></tr>
+        <tr><td>NotificationService</td><td><span class="badge badge-pass">PASS</span></td><td>54</td><td>9</td></tr>
+        <tr><td>PreferenceService</td><td><span class="badge badge-pass">PASS</span></td><td>43</td><td>7</td></tr>
+        <tr><td>CacheService</td><td><span class="badge badge-pass">PASS</span></td><td>89</td><td>15</td></tr>
+        <tr><td>LoggingService</td><td><span class="badge badge-pass">PASS</span></td><td>34</td><td>6</td></tr>
+        <tr><td>ThemeService</td><td><span class="badge badge-pass">PASS</span></td><td>28</td><td>5</td></tr>
+        <tr><td>FeatureFlagService</td><td><span class="badge badge-pass">PASS</span></td><td>51</td><td>8</td></tr>
+        <tr><td>AnalyticsService</td><td><span class="badge badge-pass">PASS</span></td><td>72</td><td>11</td></tr>
+        <tr><td>ConfigService</td><td><span class="badge badge-pass">PASS</span></td><td>38</td><td>7</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── Key Findings ── -->
+  <section class="section" id="findings">
+    <h2>Key Findings</h2>
+
+    <h3>Signal Performance</h3>
+    <p>Computed signals with <code>equal</code> function reduced unnecessary re-renders by 40% in the trade blotter component. The <code>effect()</code> API replaced 8 manual <code>subscribe()</code> calls with automatic dependency tracking.</p>
+
+    <h3>Bundle Impact</h3>
+    <pre class="code-block"><code>Before: 312 KB (gzipped)
+  - rxjs/operators: 45 KB
+  - rxjs/internal: 22 KB
+
+After: 245 KB (gzipped)
+  - Removed: switchMap, combineLatest, distinctUntilChanged (replaced by computed)
+  - Retained: WebSocket observable (not yet migratable)</code></pre>
+
+    <h3>Test Coverage Delta</h3>
+    <table>
+      <thead><tr><th>Category</th><th>Before</th><th>After</th><th>Delta</th><th>Progress</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Lines</td><td>72.1%</td><td>78.4%</td><td>+6.3%</td>
+          <td><div class="progress-bar"><div class="progress-fill" style="width:78.4%;background:#f59e0b"></div></div></td>
+        </tr>
+        <tr>
+          <td>Branches</td><td>58.7%</td><td>65.2%</td><td>+6.5%</td>
+          <td><div class="progress-bar"><div class="progress-fill" style="width:65.2%;background:#f59e0b"></div></div></td>
+        </tr>
+        <tr>
+          <td>Functions</td><td>76.3%</td><td>82.1%</td><td>+5.8%</td>
+          <td><div class="progress-bar"><div class="progress-fill" style="width:82.1%;background:#22c55e"></div></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── Coverage Summary ── -->
+  <section class="section" id="coverage">
+    <h2>Coverage Summary</h2>
+    <table>
+      <thead><tr><th>Category</th><th>Covered / Total</th><th>Progress</th><th>Percentage</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Lines</td><td>980 / 1,250</td>
+          <td><div class="progress-bar"><div class="progress-fill" style="width:78.4%;background:#f59e0b"></div></div></td>
+          <td>78.4%</td>
+        </tr>
+        <tr>
+          <td>Branches</td><td>326 / 500</td>
+          <td><div class="progress-bar"><div class="progress-fill" style="width:65.2%;background:#f59e0b"></div></div></td>
+          <td>65.2%</td>
+        </tr>
+        <tr>
+          <td>Functions</td><td>189 / 230</td>
+          <td><div class="progress-bar"><div class="progress-fill" style="width:82.1%;background:#22c55e"></div></div></td>
+          <td>82.1%</td>
+        </tr>
+        <tr>
+          <td>Statements</td><td>1,045 / 1,320</td>
+          <td><div class="progress-bar"><div class="progress-fill" style="width:79.2%;background:#f59e0b"></div></div></td>
+          <td>79.2%</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── Recommendations ── -->
+  <section class="recommendations" id="recommendations">
+    <h2>Recommendations</h2>
+    <ol>
+      <li><span class="badge badge-fail">HIGH</span> Migrate remaining WebSocket observable to Signal-based approach when <code>rxjs-interop</code> stabilizes <code>/angular-signals</code></li>
+      <li><span class="badge badge-fail">HIGH</span> Add integration tests for Signal-computed derivations in trade blotter <code>/audit-coverage</code></li>
+      <li><span class="badge badge-warn">MEDIUM</span> Enable strict branch coverage threshold at 70% in CI config <code>/audit-coverage</code></li>
+      <li><span class="badge badge-warn">MEDIUM</span> Refactor PortfolioService computed signals to use <code>linkedSignal</code> for bi-directional binding <code>/angular-signals</code></li>
+      <li><span class="badge badge-pass">LOW</span> Document Signal patterns in team ADR for future service migrations <code>/present-report</code></li>
+    </ol>
+  </section>
+
+  <!-- ── Appendix (collapsible) ── -->
+  <section class="section" id="appendix">
+    <h2>Appendix</h2>
+    <details>
+      <summary>Run Metadata</summary>
+      <div class="detail-content">
+        <table>
+          <tbody>
+            <tr><td>Run ID</td><td><code>orch-2026-03-24-001</code></td></tr>
+            <tr><td>Token Usage</td><td>48,200 tokens</td></tr>
+            <tr><td>Duration</td><td>3m 42s</td></tr>
+            <tr><td>Agent Version</td><td>ORCH v2.1.0</td></tr>
+            <tr><td>Branch</td><td><code>feature/signals-migration</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details>
+      <summary>Methodology Notes</summary>
+      <div class="detail-content">
+        <p>Coverage data collected via Istanbul/nyc instrumentation during <code>ng test --code-coverage</code>. Bundle analysis performed with <code>source-map-explorer</code>. Performance benchmarks measured with Chrome DevTools Performance panel (3-run average, cold start).</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="report-footer">
+    Generated by ORCH &bull; @audit &bull; 2026-03-24 &bull; 48,200 tokens &bull; 3m 42s
+  </footer>
+
+  <!-- ── Mermaid.js ── -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#3b82f6',
+        primaryTextColor: '#f0f0f0',
+        primaryBorderColor: '#64748b',
+        lineColor: '#64748b',
+        secondaryColor: '#1e293b',
+        tertiaryColor: '#0f172a',
+        fontFamily: 'Outfit, sans-serif',
+        fontSize: '14px'
+      }
+    });
+  </script>
+</body>
+</html>

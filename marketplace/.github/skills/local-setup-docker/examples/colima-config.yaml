@@ -1,0 +1,20 @@
+# Colima configuration
+# Location: ~/.colima/default/colima.yaml (auto-generated on first start)
+# Override at start time: colima start --cpu 4 --memory 8 --disk 60
+
+cpu: 4
+memory: 8
+disk: 60
+
+# Container runtime (docker is default; containerd is an alternative)
+runtime: docker
+
+# Kubernetes — disable unless needed (saves resources)
+kubernetes:
+  enabled: false
+
+# Network — use host resolver for DNS
+network:
+  address: false
+  dns: []
+  dnsHosts: {}

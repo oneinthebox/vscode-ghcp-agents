@@ -11,7 +11,7 @@ ERROR_MSG=$(echo "$INPUT" | jq -r '.error // "unknown error"')
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 DATE_DIR=$(date -u +"%Y-%m-%d")
 
-AUDIT_DIR=".orch/audit/sessions/${DATE_DIR}"
+AUDIT_DIR=".orch/runs/${DATE_DIR}"
 SESSION_FILE="${AUDIT_DIR}/${SESSION_ID}.json"
 
 # Log to session file if it exists

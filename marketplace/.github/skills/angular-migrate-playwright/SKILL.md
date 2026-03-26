@@ -6,7 +6,11 @@ metadata:
   version: "1.0"
 references:
   - references/angular/v19/playwright-migration.md
-allowed-tools: Bash(ng:*) Bash(nx:*) Bash(npx:*) Bash(npm:*) Bash(git:*) Read Edit
+  - references/angular/v19/cypress-to-playwright-migration.md
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context
@@ -18,6 +22,14 @@ Migrates Angular end-to-end tests from Cypress to Playwright. Unlike mechanical 
 - **Scope** — Entire e2e suite or specific test files.
 - **Mode** (optional) — `--branch-only` (default) or `--worktree`.
 - **Base URL** (optional) — Application URL for e2e tests. Defaults to value in Cypress config.
+
+### Helper Script
+
+Run the detection script before executing steps manually:
+```bash
+node scripts/detect-cypress-specs.js [project-root]
+```
+The script outputs JSON to stdout with Cypress spec inventory, custom commands, and support file details. Use this data to inform the steps below.
 
 ## Steps
 
@@ -32,7 +44,7 @@ Migrates Angular end-to-end tests from Cypress to Playwright. Unlike mechanical 
    - Identify Cypress-specific patterns: `cy.intercept`, `cy.fixture`, custom commands, `cy.wait`.
    - Identify page objects or support files.
 
-3. **Load reference.** Read [references/angular/v19/playwright-migration.md](references/angular/v19/playwright-migration.md) for migration patterns and API mappings.
+3. **Load reference.** Read [references/angular/v19/playwright-migration.md](references/angular/v19/playwright-migration.md) and [references/angular/v19/cypress-to-playwright-migration.md](references/angular/v19/cypress-to-playwright-migration.md) for migration patterns and API mappings.
 
 4. **Phase 1: Install Playwright.**
    - Install: `@playwright/test`.

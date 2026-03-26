@@ -6,7 +6,10 @@ metadata:
   version: "1.0"
 references:
   - references/angular/v19/control-flow-guide.md
-allowed-tools: Bash(ng:*) Bash(nx:*) Bash(npx:*) Bash(git:*) Read Edit
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context
@@ -17,6 +20,14 @@ Migrates Angular templates from structural directives (`*ngIf`, `*ngFor`, `*ngSw
 
 - **Scope** — Entire project or specific paths (e.g., `src/app/features/trade`).
 - **Mode** (optional) — `--branch-only` (default) or `--worktree`.
+
+### Helper Script
+
+Run the detection script before executing steps manually:
+```bash
+node scripts/detect-legacy-directives.js [project-root]
+```
+The script outputs JSON to stdout with counts of *ngIf, *ngFor, *ngSwitch usages and files containing legacy structural directives. Use this data to inform the steps below.
 
 ## Steps
 
@@ -51,6 +62,146 @@ Migrates Angular templates from structural directives (`*ngIf`, `*ngFor`, `*ngSw
 6. **Clean up imports.**
    - Remove `CommonModule` from component imports if only used for structural directives.
    - Remove individual directive imports (`NgIf`, `NgFor`, `NgSwitch`, `NgForOf`, `NgSwitchCase`, `NgSwitchDefault`).
+
+### Conversion Patterns — Before/After Reference
+
+**`*ngIf` to `@if`** — simple condition:
+```html
+<!-- BEFORE -->
+<div *ngIf="isLoggedIn">Welcome back!</div>
+
+<!-- AFTER -->
+@if (isLoggedIn) {
+  <div>Welcome back!</div>
+}
+```
+
+**`*ngIf` with `else`** — conditional with alternative template:
+```html
+<!-- BEFORE -->
+<div *ngIf="trades.length > 0; else noTrades">
+  <app-trade-table [trades]="trades" />
+</div>
+<ng-template #noTrades>
+  <p>No trades found.</p>
+</ng-template>
+
+<!-- AFTER -->
+@if (trades.length > 0) {
+  <div>
+    <app-trade-table [trades]="trades" />
+  </div>
+} @else {
+  <p>No trades found.</p>
+}
+```
+
+**`*ngIf` with `as`** — aliasing the truthy value (common with async pipe):
+```html
+<!-- BEFORE -->
+<div *ngIf="user$ | async as user">
+  Hello, {{ user.name }}
+</div>
+
+<!-- AFTER -->
+@if (user$ | async; as user) {
+  <div>Hello, {{ user.name }}</div>
+}
+```
+
+**`*ngFor` to `@for`** — basic iteration with required `track`:
+```html
+<!-- BEFORE -->
+<tr *ngFor="let trade of trades; trackBy: trackByTradeId">
+  <td>{{ trade.symbol }}</td>
+</tr>
+
+<!-- AFTER -->
+@for (trade of trades; track trade.id) {
+  <tr>
+    <td>{{ trade.symbol }}</td>
+  </tr>
+}
+```
+
+**`*ngFor` with `index`, `first`, `last`** — loop context variables:
+```html
+<!-- BEFORE -->
+<li *ngFor="let item of items; let i = index; let isFirst = first; let isLast = last"
+    [class.first]="isFirst" [class.last]="isLast">
+  {{ i + 1 }}. {{ item.name }}
+</li>
+
+<!-- AFTER -->
+@for (item of items; track item.id; let i = $index) {
+  <li [class.first]="$first" [class.last]="$last">
+    {{ i + 1 }}. {{ item.name }}
+  </li>
+}
+```
+Note: `$index`, `$first`, `$last`, `$even`, `$odd`, `$count` are implicit context variables in the new syntax.
+
+**`@for` with `@empty`** — handling empty collections:
+```html
+<!-- BEFORE -->
+<div *ngIf="trades.length > 0; else emptyList">
+  <div *ngFor="let trade of trades; trackBy: trackByFn">{{ trade.symbol }}</div>
+</div>
+<ng-template #emptyList><p>No trades available.</p></ng-template>
+
+<!-- AFTER -->
+@for (trade of trades; track trade.id) {
+  <div>{{ trade.symbol }}</div>
+} @empty {
+  <p>No trades available.</p>
+}
+```
+
+**`*ngSwitch` to `@switch`**:
+```html
+<!-- BEFORE -->
+<div [ngSwitch]="order.status">
+  <span *ngSwitchCase="'pending'" class="badge-warning">Pending</span>
+  <span *ngSwitchCase="'filled'" class="badge-success">Filled</span>
+  <span *ngSwitchCase="'cancelled'" class="badge-danger">Cancelled</span>
+  <span *ngSwitchDefault class="badge-secondary">Unknown</span>
+</div>
+
+<!-- AFTER -->
+@switch (order.status) {
+  @case ('pending') {
+    <span class="badge-warning">Pending</span>
+  }
+  @case ('filled') {
+    <span class="badge-success">Filled</span>
+  }
+  @case ('cancelled') {
+    <span class="badge-danger">Cancelled</span>
+  }
+  @default {
+    <span class="badge-secondary">Unknown</span>
+  }
+}
+```
+
+**Nested directives** — `*ngIf` wrapping `*ngFor` (formerly required `<ng-container>`):
+```html
+<!-- BEFORE -->
+<ng-container *ngIf="isLoaded">
+  <tr *ngFor="let trade of trades; trackBy: trackByFn">
+    <td>{{ trade.symbol }}</td>
+  </tr>
+</ng-container>
+
+<!-- AFTER -->
+@if (isLoaded) {
+  @for (trade of trades; track trade.id) {
+    <tr>
+      <td>{{ trade.symbol }}</td>
+    </tr>
+  }
+}
+```
 
 7. **Verify.**
    - Run `ng build` to confirm compilation.

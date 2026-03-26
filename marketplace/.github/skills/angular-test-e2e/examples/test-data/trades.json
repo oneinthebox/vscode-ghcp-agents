@@ -1,0 +1,81 @@
+{
+  "validOrders": [
+    {
+      "symbol": "AAPL",
+      "quantity": 100,
+      "side": "Buy",
+      "type": "Market",
+      "expectedStatus": "Pending"
+    },
+    {
+      "symbol": "GOOGL",
+      "quantity": 50,
+      "side": "Sell",
+      "type": "Limit",
+      "price": 2850.00,
+      "expectedStatus": "Pending"
+    },
+    {
+      "symbol": "MSFT",
+      "quantity": 200,
+      "side": "Buy",
+      "type": "Limit",
+      "price": 415.50,
+      "expectedStatus": "Pending"
+    },
+    {
+      "symbol": "TSLA",
+      "quantity": 25,
+      "side": "Buy",
+      "type": "Market",
+      "expectedStatus": "Pending"
+    }
+  ],
+  "invalidOrders": [
+    {
+      "symbol": "AAPL",
+      "quantity": 0,
+      "type": "Market",
+      "expectedError": "Quantity must be > 0"
+    },
+    {
+      "symbol": "AAPL",
+      "quantity": -5,
+      "type": "Market",
+      "expectedError": "Quantity must be > 0"
+    },
+    {
+      "symbol": "AAPL",
+      "quantity": "abc",
+      "type": "Market",
+      "expectedError": "Must be a number"
+    },
+    {
+      "symbol": "AAPL",
+      "quantity": 1000001,
+      "type": "Market",
+      "expectedError": "Max quantity exceeded"
+    }
+  ],
+  "pendingOrders": [
+    {
+      "orderId": "ORD-20260301-001",
+      "symbol": "AAPL",
+      "quantity": 100,
+      "side": "Buy",
+      "type": "Market",
+      "status": "Pending",
+      "timestamp": "2026-03-01T09:30:00Z"
+    },
+    {
+      "orderId": "ORD-20260301-002",
+      "symbol": "GOOGL",
+      "quantity": 50,
+      "side": "Sell",
+      "type": "Limit",
+      "price": 2850.00,
+      "status": "Pending",
+      "timestamp": "2026-03-01T10:15:00Z"
+    }
+  ]
+}

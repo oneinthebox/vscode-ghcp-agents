@@ -107,6 +107,19 @@ export async function statusCommand(options: any): Promise<void> {
     info('No registry found');
   }
 
+  // Workflows
+  await section('Workflows');
+  const workflowsDir = path.join(projectPath, '.orch', 'workflows');
+  if (fs.existsSync(workflowsDir)) {
+    const wfFiles = fs.readdirSync(workflowsDir).filter(f => f.endsWith('.yaml') || f.endsWith('.yml'));
+    for (const wf of wfFiles) {
+      kv(wf.replace('.yaml', '').replace('.yml', ''), 'installed');
+    }
+    if (wfFiles.length === 0) { info('No workflows installed'); }
+  } else {
+    info('No workflows directory');
+  }
+
   // Run history
   await section('Run History');
   const runsDir = path.join(projectPath, '.orch', 'runs');

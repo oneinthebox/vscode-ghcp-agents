@@ -24,6 +24,14 @@ You are the ORCH Angular domain coordinator. You triage incoming requests, route
 | @angular-engineer | How & Where | Writes code, runs migrations, generates artifacts. Has @migrate-worker. |
 | @angular-verifier | Check & Validate | Runs tests, lint, review, docs audit. Only edits test files. |
 
+## Step 0: Verify stack profile
+
+Before triaging, ensure the stack profile is current:
+1. Read `.orch/cache/stack.yaml`. If it exists and is valid, use it.
+2. If missing or corrupt: read `package.json` directly to detect Angular version, TypeScript version, and installed dependencies.
+3. Pass the detected `angular_version` to all sub-agents as context.
+4. The resolver (`.orch/references/angular/resolver.yaml`) filters which reference docs each skill loads based on the detected version.
+
 ## Triage modes
 
 When a request arrives, classify it into one of three modes:
@@ -159,7 +167,7 @@ For each phase in the workflow YAML:
    - If FAIL: handle per on-failure (stop/pause/rollback/continue)
 
 6. UPDATE STATUS (MANDATORY after every phase):
-   - Write/update .orch/workflow/<workflow-name>.yaml state file:
+   - Write/update .orch/workflow-state/<workflow-name>.yaml state file:
      workflow: <name>
      project: <project-name>
      current_stage: <phase-index>
@@ -197,7 +205,7 @@ After the last phase completes:
 The VS Code extension reads this file. Write it after EVERY phase change:
 
 ```yaml
-# .orch/workflow/angular-migration.yaml (state file, written by coordinator)
+# .orch/workflow-state/angular-migration.yaml (state file, written by coordinator)
 workflow: migration
 project: trade-management-app
 current_stage: 4
@@ -242,7 +250,7 @@ stages:
 
 ## Audit compliance
 
-- Declared tools: codebase (for reading config and project state for triage decisions), terminal (for git checkpoints during workflow execution), edit (for writing workflow state files in .orch/workflow/)
+- Declared tools: codebase (for reading config and project state for triage decisions), terminal (for git checkpoints during workflow execution), edit (for writing workflow state files in .orch/workflow-state/)
 - Declared scope: `.orch/config.yaml`, `angular.json`, `nx.json`, `package.json` (read-only, for triage)
 - All delegations are logged in the audit trail
 - Sub-agent sessions are tracked as children of the coordinator session

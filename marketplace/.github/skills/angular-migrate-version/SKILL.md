@@ -7,7 +7,16 @@ metadata:
 references:
   - references/angular/v19/migration-guide.md
   - references/angular/v19/compatibility-matrix.md
-allowed-tools: Bash(ng:*) Bash(nx:*) Bash(npx:*) Bash(npm:*) Bash(git:*) Read Edit
+  - references/angular/v16/whats-new.md
+  - references/angular/v17/whats-new.md
+  - references/angular/v18/whats-new.md
+  - references/angular/v19/whats-new.md
+  - references/angular/v20/whats-new.md
+  - references/angular/v21/whats-new.md
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context
@@ -20,6 +29,14 @@ Upgrades Angular applications across major versions (e.g., 17 to 18 to 19). Uses
 - **Current version** (auto-detected) — Read from `package.json`.
 - **Mode** (optional) — `--branch-only` (default) or `--worktree`.
 - **Auto mode** (optional) — `step-by-step`, `auto=safe` (default), or `auto=all`.
+
+### Helper Script
+
+Run the detection script before executing steps manually:
+```bash
+node scripts/check-upgrade-path.js [project-root]
+```
+The script outputs JSON to stdout with the current Angular version, detected packages, and a recommended upgrade path. Use this data to inform the steps below.
 
 ## Steps
 

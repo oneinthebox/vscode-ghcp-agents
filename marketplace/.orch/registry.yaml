@@ -523,6 +523,17 @@ sources:
   # PRIMENG
   # ═══════════════════════════════════════════════════════════════
 
+  - id: primeng-llms-reference
+    name: "PrimeNG LLM-Optimized Reference"
+    type: url
+    origin: https://primeng.org/llms/llms.txt
+    format: html
+    output: .orch/references/primeng/llms-reference.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
   - id: primeng-v18-install
     name: "PrimeNG v18 — Installation"
     type: url
@@ -646,6 +657,17 @@ sources:
   # ═══════════════════════════════════════════════════════════════
   # AG GRID (Angular)
   # ═══════════════════════════════════════════════════════════════
+
+  - id: ag-grid-ai-toolkit
+    name: "AG Grid — AI Toolkit Reference"
+    type: url
+    origin: https://www.ag-grid.com/angular-data-grid/ai-toolkit/
+    format: html
+    output: .orch/references/ag-grid/ai-toolkit-reference.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
 
   - id: ag-grid-quickstart
     name: "AG Grid — Angular Quick Start"
@@ -965,6 +987,545 @@ sources:
     managed_by: "pack:angular"
     last_refreshed: null
     status: draft
+
+  # ── Angular v19 Core Reference Docs ──
+
+  - id: angular-component-patterns-v19
+    name: "Angular v19 Component Patterns"
+    type: url
+    origin: https://angular.dev/guide/components
+    format: html
+    output: .orch/references/angular/v19/component-patterns.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: angular-service-patterns-v19
+    name: "Angular v19 Service Patterns"
+    type: url
+    origin: https://angular.dev/guide/di
+    format: html
+    output: .orch/references/angular/v19/service-patterns.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: angular-routing-guide-v19
+    name: "Angular v19 Routing Guide"
+    type: url
+    origin: https://angular.dev/guide/routing
+    format: html
+    output: .orch/references/angular/v19/routing-guide.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: angular-signals-guide-v19
+    name: "Angular v19 Signals Guide"
+    type: url
+    origin: https://angular.dev/guide/signals
+    format: html
+    output: .orch/references/angular/v19/signals-guide.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: angular-standalone-guide-v19
+    name: "Angular v19 Standalone Guide"
+    type: url
+    origin: https://angular.dev/reference/migrations/standalone
+    format: html
+    output: .orch/references/angular/v19/standalone-guide.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: angular-control-flow-guide-v19
+    name: "Angular v19 Control Flow Guide"
+    type: url
+    origin: https://angular.dev/guide/templates/control-flow
+    format: html
+    output: .orch/references/angular/v19/control-flow-guide.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: angular-testing-guide-v19
+    name: "Angular v19 Testing Guide"
+    type: url
+    origin: https://angular.dev/guide/testing
+    format: html
+    output: .orch/references/angular/v19/testing-guide.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: angular-best-practices-v19
+    name: "Angular v19 Best Practices"
+    type: url
+    origin: https://angular.dev/style-guide
+    format: html
+    output: .orch/references/angular/v19/best-practices.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: angular-architecture-patterns-v19
+    name: "Angular v19 Architecture Patterns"
+    type: url
+    origin: https://angular.dev/guide/architecture
+    format: html
+    output: .orch/references/angular/v19/architecture-patterns.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: angular-migration-guide-v19
+    name: "Angular v19 Migration Guide"
+    type: url
+    origin: https://angular.dev/update-guide
+    format: html
+    output: .orch/references/angular/v19/migration-guide.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: angular-anti-patterns-v19
+    name: "Angular v19 Anti-Patterns"
+    type: curated
+    origin: null
+    format: html
+    output: .orch/references/angular/v19/anti-patterns.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: angular-compatibility-matrix-v19
+    name: "Angular v19 Compatibility Matrix"
+    type: curated
+    origin: null
+    format: html
+    output: .orch/references/angular/v19/compatibility-matrix.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  # ── Third-Party Reference Docs ──
+
+  - id: material-to-primeng-migration-v19
+    name: "Angular Material to PrimeNG Migration Guide"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/angular/v19/material-to-primeng-migration.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: cypress-to-playwright-migration-v19
+    name: "Cypress to Playwright Migration Guide"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/angular/v19/cypress-to-playwright-migration.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: karma-to-jest-migration-v19
+    name: "Karma to Jest Migration Guide"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/angular/v19/karma-to-jest-migration.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: jest-migration
+    name: "Jest Migration Guide"
+    type: url
+    origin: https://jestjs.io/docs/getting-started
+    format: html
+    output: .orch/references/angular/v19/jest-migration.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: playwright-guide
+    name: "Playwright Guide"
+    type: url
+    origin: https://playwright.dev/docs/intro
+    format: html
+    output: .orch/references/angular/v19/playwright-guide.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: playwright-migration
+    name: "Playwright Migration Guide"
+    type: url
+    origin: https://playwright.dev/docs/migration
+    format: html
+    output: .orch/references/angular/v19/playwright-migration.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: ag-grid-angular-guide
+    name: "AG Grid Angular Guide"
+    type: url
+    origin: https://www.ag-grid.com/angular-data-grid/getting-started/
+    format: html
+    output: .orch/references/ag-grid/angular-guide.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: primeng-angular-guide
+    name: "PrimeNG Angular Guide"
+    type: url
+    origin: https://primeng.org/installation
+    format: html
+    output: .orch/references/primeng/angular-guide.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: plotly-angular-guide
+    name: "Plotly Angular Guide"
+    type: url
+    origin: https://plotly.com/javascript/getting-started/
+    format: html
+    output: .orch/references/plotly/angular-guide.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: nx-monorepo-guide
+    name: "Nx Monorepo Guide"
+    type: url
+    origin: https://nx.dev/getting-started/intro
+    format: html
+    output: .orch/references/nx/monorepo-guide.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: nx-angular-integration
+    name: "Nx Angular Integration"
+    type: url
+    origin: https://nx.dev/nx-api/angular
+    format: html
+    output: .orch/references/nx/angular-integration.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: nx-module-federation-guide
+    name: "Module Federation with Nx & Angular"
+    type: curated
+    origin: https://nx.dev/docs/technologies/module-federation/concepts/module-federation-and-nx
+    format: markdown
+    output: .orch/references/nx/module-federation-guide.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+    notes: "Synthesized from nx.dev, angulararchitects.io, and module-federation.io"
+
+  # ── State Management ──
+
+  - id: angular-state-management-guide
+    name: "Angular State Management — Complete Guide"
+    type: curated
+    origin: https://angular.love/mastering-state-management-in-angular-with-ngrx-and-signals-scalable-predictable-performant
+    format: markdown
+    output: .orch/references/angular/v19/state-management-guide.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+    notes: "Synthesized from 5 sources: NgRx Signal Store, Port & Adapter pattern, Resource API, Mutation API, Signal Forms"
+
+  # ── Documentation Conventions ──
+
+  - id: angular-documentation-conventions
+    name: "Angular Documentation Conventions — TSDoc, Compodoc, TypeDoc"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/angular/v19/documentation-conventions.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+    notes: "TSDoc tag reference, Compodoc setup, quality checklist, Angular-specific patterns"
+
+  # ═══════════════════════════════════════════════════════════════
+  # ANGULAR VERSION CHANGELOGS
+  # ═══════════════════════════════════════════════════════════════
+
+  - id: angular-v16-whats-new
+    name: "Angular 16 — What's New"
+    type: url
+    origin: https://angular.love/angular-16-whats-new
+    format: html
+    output: .orch/references/angular/v16/whats-new.md
+    scope: frontend-ts-angular
+    version: "16.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: angular-v17-whats-new
+    name: "Angular 17 — What's New"
+    type: url
+    origin: https://angular.love/angular-17-whats-new
+    format: html
+    output: .orch/references/angular/v17/whats-new.md
+    scope: frontend-ts-angular
+    version: "17.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: angular-v18-whats-new
+    name: "Angular 18 — What's New"
+    type: url
+    origin: https://angular.love/angular-18-whats-new
+    format: html
+    output: .orch/references/angular/v18/whats-new.md
+    scope: frontend-ts-angular
+    version: "18.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: angular-v19-whats-new
+    name: "Angular 19 — What's New"
+    type: url
+    origin: https://angular.love/angular-19-whats-new
+    format: html
+    output: .orch/references/angular/v19/whats-new.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: angular-v20-whats-new
+    name: "Angular 20 — What's New"
+    type: url
+    origin: https://angular.love/angular-20-whats-new
+    format: html
+    output: .orch/references/angular/v20/whats-new.md
+    scope: frontend-ts-angular
+    version: "20.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: angular-v21-whats-new
+    name: "Angular 21 — What's New"
+    type: url
+    origin: https://angular.love/angular-21-whats-new
+    format: html
+    output: .orch/references/angular/v21/whats-new.md
+    scope: frontend-ts-angular
+    version: "21.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: angular-style-guide-v19
+    name: "Angular Official Style Guide"
+    type: url
+    origin: https://angular.dev/style-guide
+    format: html
+    output: .orch/references/angular/v19/style-guide.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: angular-update-guide-v19
+    name: "Angular Interactive Update Guide"
+    type: url
+    origin: https://angular.dev/update-guide
+    format: html
+    output: .orch/references/angular/v19/update-guide.md
+    scope: frontend-ts-angular
+    version: "19.x"
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  - id: angular-migrations-reference
+    name: "Angular Migrations Reference (All Schematics)"
+    type: url
+    origin: https://angular.dev/reference/migrations
+    format: html
+    output: .orch/references/angular/migrations-reference.md
+    scope: frontend-ts-angular
+    managed_by: "pack:angular"
+    last_refreshed: "2026-03-25"
+    status: current
+
+  # ═══════════════════════════════════════════════════════════════
+  # ORCH PLATFORM REFERENCES
+  # ═══════════════════════════════════════════════════════════════
+
+  - id: orch-audit-record-schema
+    name: "ORCH Audit Record Schema"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/orch/audit-record-schema.md
+    scope: orch-platform
+    managed_by: "orch"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: orch-adherence-rules-reference
+    name: "ORCH Adherence Rules Reference"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/orch/adherence-rules-reference.md
+    scope: orch-platform
+    managed_by: "orch"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: orch-boundaries-reference
+    name: "ORCH Boundaries Reference"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/orch/boundaries-reference.md
+    scope: orch-platform
+    managed_by: "orch"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: orch-workflow-yaml-reference
+    name: "ORCH Workflow YAML Reference"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/orch/workflow-yaml-reference.md
+    scope: orch-platform
+    managed_by: "orch"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: orch-token-efficiency-guidelines
+    name: "ORCH Token Efficiency Guidelines"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/orch/token-efficiency-guidelines.md
+    scope: orch-platform
+    managed_by: "orch"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: orch-report-template-reference
+    name: "ORCH Report Template Reference"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/orch/report-template-reference.md
+    scope: orch-platform
+    managed_by: "orch"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: orch-registry-schema-reference
+    name: "ORCH Registry Schema Reference"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/orch/registry-schema-reference.md
+    scope: orch-platform
+    managed_by: "orch"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: orch-config-yaml-reference
+    name: "ORCH Config YAML Reference"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/orch/config-yaml-reference.md
+    scope: orch-platform
+    managed_by: "orch"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: orch-docker-angular-reference
+    name: "ORCH Docker Angular Reference"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/orch/docker-angular-reference.md
+    scope: orch-platform
+    managed_by: "orch"
+    last_refreshed: "2026-03-24"
+    status: current
+
+  - id: orch-mock-server-reference
+    name: "ORCH Mock Server Reference"
+    type: curated
+    origin: null
+    format: markdown
+    output: .orch/references/orch/mock-server-reference.md
+    scope: orch-platform
+    managed_by: "orch"
+    last_refreshed: "2026-03-24"
+    status: current
 
   # ═══════════════════════════════════════════════════════════════
   # INTERNAL / CUSTOM LIBRARIES

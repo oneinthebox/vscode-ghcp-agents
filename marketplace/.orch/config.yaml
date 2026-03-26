@@ -50,8 +50,8 @@ models:
   verifier: claude-sonnet-4
 
 presentation:
-  # Path to logo SVG. Default is a placeholder — replace with your org's logo
-  logo_path: ./assets/placeholder-logo.svg
+  # Set to your org logo path, e.g., ./assets/logo.svg
+  logo_path: null
 
   # Background color for cover slides in generated decks (CSS color value).
   cover_background: "#0a0e17"
@@ -63,7 +63,25 @@ presentation:
   # Valid values: html | pptx
   default_format: html
 
+# Stack detection — auto-detected from package.json, cached in .orch/cache/stack.yaml
+# Set to "auto" for automatic detection or pin a specific version.
+stack:
+  angular_version: auto    # auto | "16" | "17" | "18" | "19" | "20" | "21"
+  # typescript: auto       # uncomment to pin TypeScript version
+  # test_runner: auto      # auto | jest | karma | vitest
+  # e2e_runner: auto       # auto | playwright | cypress | none
+
+reports:
+  output_path: .orch/reports/  # Default output path for present-dashboard, present-deck, present-report
+
 audit:
   log_retention_days: 90     # How long to keep .orch/runs/ data
   verbosity: normal          # minimal | normal | verbose
   export_format: json        # json | csv (for enterprise observability export)
+
+# Standard directories created by `orch init`:
+#   .orch/runs/            — session telemetry and workflow run data (date-based subdirectories with session JSON files)
+#   .orch/reports/         — generated HTML reports, dashboards, and decks
+#   .orch/workflow-state/  — active workflow state YAML files (polled by VS Code extension)
+#   .orch/cache/           — cached stack profile and resolved references
+#   .orch/hooks/           — audit hook scripts (pre/post execution)

@@ -1,7 +1,8 @@
 ---
 name: local-create-workspace
 description: "Scaffold a new development workspace — Nx Angular monorepo, standalone Angular CLI app, or empty project. Configures tooling: TypeScript strict, Jest, ESLint, Prettier, Docker, CI template. Runs orch init automatically after scaffolding."
-references: []
+references:
+  - references/orch/docker-angular-reference.md
 allowed-tools:
   - codebase
   - terminal

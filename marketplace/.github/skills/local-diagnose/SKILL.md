@@ -4,7 +4,6 @@ description: "Diagnose local environment issues: port conflicts, version mismatc
 allowed-tools:
   - codebase
   - terminal
-  - edit
 references: []
 ---
 

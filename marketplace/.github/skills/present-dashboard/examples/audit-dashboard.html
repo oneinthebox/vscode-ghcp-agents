@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORCH Audit Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neutral-50:  oklch(0.98 0.005 240);
+      --neutral-100: oklch(0.96 0.006 240);
+      --neutral-200: oklch(0.91 0.008 240);
+      --neutral-300: oklch(0.85 0.008 240);
+      --neutral-400: oklch(0.68 0.01  240);
+      --neutral-600: oklch(0.45 0.012 240);
+      --neutral-800: oklch(0.25 0.01  240);
+      --neutral-900: oklch(0.15 0.008 240);
+      --neutral-950: oklch(0.10 0.006 240);
+      --brand-500: oklch(0.48 0.14 240);
+      --teal-100: oklch(0.94 0.04 175);
+      --teal-500: oklch(0.55 0.12 175);
+      --amber-100: oklch(0.94 0.04 85);
+      --amber-500: oklch(0.45 0.12 85);
+      --red-100: oklch(0.94 0.04 25);
+      --red-500: oklch(0.48 0.14 25);
+
+      --fg-primary:   var(--neutral-900);
+      --fg-secondary: var(--neutral-600);
+      --fg-muted:     var(--neutral-400);
+      --fg-accent:    var(--brand-500);
+      --bg-page:      var(--neutral-50);
+      --bg-surface:   var(--neutral-100);
+      --border-default: oklch(0 0 0 / 0.08);
+
+      --f-display: 'Newsreader', Georgia, serif;
+      --f-body:    'Outfit', -apple-system, sans-serif;
+      --f-mono:    'IBM Plex Mono', 'Menlo', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--f-body);
+      color: var(--fg-primary);
+      background: var(--bg-page);
+      line-height: 1.6;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 32px 64px;
+      font-size: 15px;
+    }
+
+    .header {
+      border-bottom: 2px solid var(--fg-primary);
+      padding-bottom: 16px;
+      margin-bottom: 32px;
+    }
+    .header .overline {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--fg-accent);
+      margin-bottom: 4px;
+    }
+    .header h1 {
+      font-family: var(--f-display);
+      font-size: 1.8rem;
+      font-weight: 400;
+      font-style: italic;
+    }
+    .header .meta {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      font-family: var(--f-mono);
+      margin-top: 4px;
+    }
+
+    /* ─── KPI Cards ─── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .kpi-card {
+      background: var(--bg-surface);
+      padding: 20px;
+      border-top: 3px solid var(--neutral-300);
+    }
+    .kpi-card.accent { border-top-color: var(--fg-accent); }
+    .kpi-card.teal   { border-top-color: var(--teal-500); }
+    .kpi-card.amber  { border-top-color: var(--amber-500); }
+    .kpi-card.red    { border-top-color: var(--red-500); }
+    .kpi-card .kpi-value {
+      font-family: var(--f-display);
+      font-size: 2rem;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .kpi-card .kpi-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-muted);
+    }
+    .kpi-card .kpi-delta {
+      font-size: 0.7rem;
+      font-family: var(--f-mono);
+      margin-top: 6px;
+    }
+    .kpi-delta.up   { color: var(--teal-500); }
+    .kpi-delta.down { color: var(--red-500); }
+
+    /* ─── Section ─── */
+    .section { margin-bottom: 40px; }
+    .section h2 {
+      font-family: var(--f-display);
+      font-size: 1.25rem;
+      margin-bottom: 16px;
+    }
+
+    /* ─── Bar Chart ─── */
+    .bar-chart { width: 100%; }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .bar-label {
+      width: 160px;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .bar-track {
+      flex: 1;
+      height: 20px;
+      background: var(--bg-surface);
+      overflow: hidden;
+      position: relative;
+    }
+    .bar-fill {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+    .bar-fill.agent-1 { fill: var(--fg-accent); background: var(--fg-accent); }
+    .bar-fill.agent-2 { fill: var(--teal-500); background: var(--teal-500); }
+    .bar-fill.agent-3 { fill: var(--amber-500); background: var(--amber-500); }
+    .bar-fill.agent-4 { fill: var(--neutral-600); background: var(--neutral-600); }
+    .bar-count {
+      width: 48px;
+      text-align: right;
+      font-family: var(--f-mono);
+      font-size: 0.8rem;
+      color: var(--fg-secondary);
+      margin-left: 8px;
+    }
+
+    /* ─── SVG Bar Chart ─── */
+    .svg-chart { margin: 12px 0; }
+
+    /* ─── Table ─── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin: 12px 0; }
+    th {
+      font-weight: 600; font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--fg-muted); padding: 6px 12px;
+      text-align: left; border-bottom: 1.5px solid var(--fg-primary);
+    }
+    td {
+      padding: 6px 12px; border-bottom: 0.5px solid var(--border-default);
+    }
+    tr:last-child td { border-bottom: 1.5px solid var(--fg-primary); }
+
+    /* ─── Status Badges ─── */
+    .badge {
+      display: inline-block;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 2px;
+      letter-spacing: 0.04em;
+    }
+    .badge-pass { background: var(--teal-100); color: var(--teal-500); }
+    .badge-warn { background: var(--amber-100); color: var(--amber-500); }
+    .badge-fail { background: var(--red-100); color: var(--red-500); }
+
+    /* ─── Footer ─── */
+    .footer {
+      border-top: 1.5px solid var(--fg-primary);
+      padding-top: 12px;
+      margin-top: 40px;
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+      font-family: var(--f-mono);
+    }
+
+    /* ─── Print ─── */
+    @media print {
+      body { max-width: 100%; padding: 16px; font-size: 12px; }
+      .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+      .badge { border: 0.5px solid currentColor; }
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 20px 16px; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      .bar-label { width: 100px; font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="overline">ORCH Orchestration Platform</div>
+    <h1>Audit Dashboard</h1>
+    <div class="meta">Period: 2026-03-18 to 2026-03-25 | Generated: 2026-03-25T14:30:00Z</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card accent">
+      <div class="kpi-value">135</div>
+      <div class="kpi-label">Total Sessions</div>
+      <div class="kpi-delta up">+18.4% vs prev week</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-value">91.1%</div>
+      <div class="kpi-label">Success Rate</div>
+      <div class="kpi-delta down">-2.4pp vs prev week</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-value">$12.45</div>
+      <div class="kpi-label">Token Cost</div>
+      <div class="kpi-delta up">+8.7% vs prev week</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-value">0.95</div>
+      <div class="kpi-label">Compliance Score</div>
+      <div class="kpi-delta up">+0.01 vs prev week</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Sessions per Agent</h2>
+    <svg class="svg-chart" width="100%" height="140" viewBox="0 0 600 140">
+      <g transform="translate(140, 0)">
+        <text x="-8" y="22" text-anchor="end" font-family="Outfit, sans-serif" font-size="12" fill="oklch(0.45 0.012 240)">angular</text>
+        <rect x="0" y="8" width="270" height="18" rx="1" fill="oklch(0.48 0.14 240)"/>
+        <text x="278" y="22" font-family="IBM Plex Mono, monospace" font-size="11" fill="oklch(0.45 0.012 240)">45</text>
+
+        <text x="-8" y="56" text-anchor="end" font-family="Outfit, sans-serif" font-size="12" fill="oklch(0.45 0.012 240)">angular-test-unit</text>
+        <rect x="0" y="42" width="228" height="18" rx="1" fill="oklch(0.55 0.12 175)"/>
+        <text x="236" y="56" font-family="IBM Plex Mono, monospace" font-size="11" fill="oklch(0.45 0.012 240)">38</text>
+
+        <text x="-8" y="90" text-anchor="end" font-family="Outfit, sans-serif" font-size="12" fill="oklch(0.45 0.012 240)">angular-planner</text>
+        <rect x="0" y="76" width="180" height="18" rx="1" fill="oklch(0.45 0.12 85)"/>
+        <text x="188" y="90" font-family="IBM Plex Mono, monospace" font-size="11" fill="oklch(0.45 0.012 240)">30</text>
+
+        <text x="-8" y="124" text-anchor="end" font-family="Outfit, sans-serif" font-size="12" fill="oklch(0.45 0.012 240)">angular-review</text>
+        <rect x="0" y="110" width="132" height="18" rx="1" fill="oklch(0.45 0.012 240)"/>
+        <text x="140" y="124" font-family="IBM Plex Mono, monospace" font-size="11" fill="oklch(0.45 0.012 240)">22</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="section">
+    <h2>Agent Status</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Agent</th>
+          <th>Sessions</th>
+          <th>Success Rate</th>
+          <th>Avg Tokens</th>
+          <th>Cost</th>
+          <th>Compliance</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>angular</td>
+          <td>45</td>
+          <td>93.3%</td>
+          <td>24,200</td>
+          <td>$6.10</td>
+          <td>0.94</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td>angular-review</td>
+          <td>22</td>
+          <td>95.5%</td>
+          <td>12,800</td>
+          <td>$2.55</td>
+          <td>0.96</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+        <tr>
+          <td>angular-test-unit</td>
+          <td>38</td>
+          <td>86.8%</td>
+          <td>22,600</td>
+          <td>$2.00</td>
+          <td>0.92</td>
+          <td><span class="badge badge-warn">WARN</span></td>
+        </tr>
+        <tr>
+          <td>angular-planner</td>
+          <td>30</td>
+          <td>90.0%</td>
+          <td>11,400</td>
+          <td>$1.80</td>
+          <td>0.98</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    Generated by /present-dashboard | Data from /audit-usage, /audit-tokens, /audit-compliance
+  </div>
+</body>
+</html>

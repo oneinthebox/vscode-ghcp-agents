@@ -1,7 +1,8 @@
 ---
 name: local-mock-server
 description: "Start a mock API server from generated data — full CRUD REST + WebSocket replay + CORS + relationship enforcement (cascade deletes, auto foreign keys). Supports both standalone script generation and immediate start."
-references: []
+references:
+  - references/orch/mock-server-reference.md
 allowed-tools:
   - codebase
   - terminal
@@ -12,6 +13,10 @@ allowed-tools:
 
 Runs a local mock server that behaves like a real API — full CRUD operations, relationship enforcement, filtering, pagination, CORS, latency simulation, and WebSocket streaming. Can either generate a standalone server script for the developer to run independently, or start the server immediately. Built on json-server with custom middleware for relationships and WebSocket support.
 
+**Executable scripts:**
+- `node .github/skills/local-mock-server/scripts/server.js [options]` — starts the mock server. The agent should copy this to `.orch/mocks/server.js` (for `--generate` mode) or run it directly (for `--start` mode).
+- `.github/skills/local-mock-server/scripts/package.json` — dependencies (json-server, ws). Copy to `.orch/mocks/package.json` and run `npm install`.
+
 ## Inputs
 
 - `--start` (default) — start the server immediately
@@ -20,6 +25,7 @@ Runs a local mock server that behaves like a real API — full CRUD operations, 
 - `--delay 200` — simulated latency in milliseconds (default: 0, no delay)
 - `--auth` — add a fake `/auth/token` endpoint that returns a JWT
 - `--errors` — randomly return HTTP 500 on approximately 5% of requests (for error handling testing)
+- `--mocks-dir .orch/mocks/fund-app/` — directory containing mock files (default: `.orch/mocks/`)
 
 ## Steps (--generate mode)
 

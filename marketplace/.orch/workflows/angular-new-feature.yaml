@@ -77,7 +77,7 @@ phases:
 
   - name: Setup mock server (if API-dependent)
     id: mock-setup
-    agent: planner
+    agent: local
     skill: /local-mock-generate
     args: --from src/app/models/ --mode synthetic
     checkpoint: false

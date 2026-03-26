@@ -1,0 +1,59 @@
+<!-- Example output from /angular-migrate-control-flow — see SKILL.md for usage -->
+<!-- AFTER: uses @if, @for, @switch built-in control flow -->
+<div class="trade-list-container">
+  @if (loading()) {
+    <div class="spinner">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading trades...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+      <button mat-button (click)="retry()">Retry</button>
+    </div>
+  } @else {
+    <table class="trade-table">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Side</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (trade of trades(); track trade.id) {
+          <tr [class.selected]="trade.id === selectedTradeId()"
+              (click)="selectTrade(trade)">
+            <td>{{ trade.symbol }}</td>
+            <td>{{ trade.side }}</td>
+            <td>{{ trade.quantity | number }}</td>
+            <td>{{ trade.price | currency:trade.currency }}</td>
+            <td>
+              @switch (trade.status) {
+                @case ('filled') {
+                  <span class="badge-success">Filled</span>
+                }
+                @case ('pending') {
+                  <span class="badge-warning">Pending</span>
+                }
+                @case ('cancelled') {
+                  <span class="badge-danger">Cancelled</span>
+                }
+                @default {
+                  <span class="badge-secondary">{{ trade.status }}</span>
+                }
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="empty-state">No trades found.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

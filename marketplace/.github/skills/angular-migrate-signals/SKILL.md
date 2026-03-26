@@ -6,7 +6,11 @@ metadata:
   version: "1.0"
 references:
   - references/angular/v19/signals-guide.md
-allowed-tools: Bash(ng:*) Bash(nx:*) Bash(npx:*) Bash(git:*) Read Edit
+  - references/angular/v19/state-management-guide.md
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context
@@ -18,6 +22,14 @@ Migrates Angular applications from RxJS-heavy and decorator-based patterns to th
 - **Scope** — Entire project, a specific feature, or individual files.
 - **Depth** (optional) — `inputs-only` (just @Input/@Output), `state-only` (just component state), or `full` (default, everything).
 - **Mode** (optional) — `--branch-only` (default) or `--worktree`.
+
+### Helper Script
+
+Run the detection script before executing steps manually:
+```bash
+node scripts/detect-signal-candidates.js [project-root]
+```
+The script outputs JSON to stdout with counts of @Input/@Output decorators, BehaviorSubjects, and subscribe() calls categorized by conversion complexity. Use this data to inform the steps below.
 
 ## Steps
 
@@ -31,7 +43,7 @@ Migrates Angular applications from RxJS-heavy and decorator-based patterns to th
      - **Mechanical** (high confidence): `@Input()` to `input()`, `@Output()` to `output()`, simple `BehaviorSubject` to `signal()`.
      - **Semantic** (needs context): complex Observable chains, `combineLatest`, `switchMap` patterns.
 
-3. **Load reference.** Read [references/angular/v19/signals-guide.md](references/angular/v19/signals-guide.md) for migration patterns and edge cases.
+3. **Load reference.** Read [references/angular/v19/signals-guide.md](references/angular/v19/signals-guide.md) and [references/angular/v19/state-management-guide.md](references/angular/v19/state-management-guide.md) for migration patterns and edge cases.
 
 4. **Phase 1: Migrate @Input/@Output** (mechanical, ts-morph).
    - Run: `npx ts-node scripts/semantic/adapters/typescript/transform.ts signals --scope {path} --phase inputs`

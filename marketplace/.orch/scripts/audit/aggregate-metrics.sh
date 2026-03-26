@@ -6,7 +6,7 @@
 set -euo pipefail
 
 DATE="${1:-$(date -u +%Y-%m-%d)}"
-SESSIONS_DIR=".orch/audit/sessions/${DATE}"
+SESSIONS_DIR=".orch/runs/${DATE}"
 METRICS_DIR=".orch/audit/metrics/daily"
 
 mkdir -p "$METRICS_DIR"

@@ -10,104 +10,167 @@ references: []
 
 ## Context
 
-Sets up the developer's local shell and language runtimes to match project requirements. Uses version manager tools (nvm for Node.js, sdkman for Java, pyenv for Python) to install and activate the correct versions. Configures environment variables and IDE settings as needed. All actions are platform-aware — commands adapt to macOS, Linux, or Windows (WSL/Git Bash).
+Sets up the developer's local environment with the correct tools, language runtimes, and shell configuration. Uses fnm (Fast Node Manager) as the recommended Node.js version manager. Provides platform-specific install commands for macOS (Homebrew), Windows (winget), and Linux.
 
-## Inputs
+---
 
-- **--runtime {node|java|python|all}** — which runtime(s) to set up (default: `all` detected from project files)
-- Optional: `--shell {bash|zsh|fish|powershell}` — target shell (auto-detected if omitted)
-- Optional: `--ide {vscode|intellij|none}` — configure IDE settings (default: `vscode` if `.vscode/` exists)
-- Optional: `--env-file {path}` — path to `.env.example` or `.env.template` to use as source
+## Node.js Version Management
 
-## Steps
+### fnm (Recommended)
 
-1. **Detect OS and shell**
-   a. Run `uname -s` to identify the platform (Darwin/Linux/MINGW).
-   b. Check `$SHELL` or `echo $0` for the active shell.
-   c. Identify the shell profile file (`~/.bashrc`, `~/.zshrc`, `~/.config/fish/config.fish`, `$PROFILE` for PowerShell).
+fnm is a fast, cross-platform Node.js version manager written in Rust.
 
-2. **Detect required runtimes from project files**
-   a. **Node.js**: Check for `.nvmrc`, `.node-version`, `.tool-versions`, or `engines.node` in `package.json`.
-   b. **Java**: Check for `.java-version`, `.sdkmanrc`, `.tool-versions`, or `java.sourceCompatibility` in `build.gradle`/`pom.xml`.
-   c. **Python**: Check for `.python-version`, `.tool-versions`, or `requires-python` in `pyproject.toml`.
-   d. If no version file found for a runtime, skip it (do not install unnecessary runtimes).
+**Installation:**
 
-3. **Install and configure Node.js (if required)**
-   a. Check if `nvm` is installed (`command -v nvm` or check `~/.nvm/nvm.sh`). If not, install it.
-   b. Run `nvm install` (reads `.nvmrc`) or `nvm install <version>` for the required version.
-   c. Run `nvm use` to activate the version.
-   d. Verify: `node --version` matches the required version.
-   e. Ensure `nvm` auto-use is configured in the shell profile if not already present.
+| Platform | Command |
+|----------|---------|
+| macOS | `brew install fnm` |
+| Windows | `winget install Schniz.fnm` |
+| Linux | `curl -fsSL https://fnm.vercel.app/install \| bash` |
 
-4. **Install and configure Java (if required)**
-   a. Check if `sdk` (SDKMAN) is installed (`command -v sdk`). If not, install it via `curl -s "https://get.sdkman.io" | bash`.
-   b. Run `sdk install java <version>` for the required version (parse from `.sdkmanrc` or `.java-version`).
-   c. Run `sdk use java <version>` to activate.
-   d. Verify: `java --version` matches the required version.
-   e. Set `JAVA_HOME` in the shell profile if not already configured.
+**Usage:**
 
-5. **Install and configure Python (if required)**
-   a. Check if `pyenv` is installed (`command -v pyenv`). If not, install it (`brew install pyenv` on macOS, or `curl https://pyenv.run | bash` on Linux).
-   b. Run `pyenv install <version>` for the required version (parse from `.python-version`).
-   c. Run `pyenv local <version>` or `pyenv global <version>` to activate.
-   d. Verify: `python --version` matches the required version.
-   e. Ensure `pyenv` init is in the shell profile.
+```bash
+fnm install 20.11.0       # Install a specific version
+fnm use 20.11.0           # Switch to that version
+fnm default 20.11.0       # Set as default version
+```
 
-6. **Configure environment variables**
-   a. If `.env.example` or `.env.template` exists, check if `.env` exists.
-   b. If `.env` is missing, copy the template to `.env` and warn the developer to fill in secret values.
-   c. If `.env` exists, compare keys against the template — warn about missing keys.
-   d. Never overwrite existing `.env` values.
+**Project version files:**
 
-7. **Configure IDE settings (if applicable)**
-   a. If `.vscode/` exists and `--ide` is `vscode`:
-      - Check for `settings.json`, `extensions.json`, `launch.json`.
-      - If `extensions.json` has recommended extensions, list them and suggest installing via `code --install-extension`.
-   b. If IntelliJ project files exist and `--ide` is `intellij`:
-      - Verify SDK paths align with installed runtimes.
+- `.node-version` — contains the exact version (e.g., `20.11.0`)
+- `.nvmrc` — contains major or exact version (e.g., `20` or `20.11.0`)
+
+**Auto-switching:**
+
+Add to your shell profile (`~/.zshrc`, `~/.bashrc`, or PowerShell `$PROFILE`):
+
+```bash
+eval "$(fnm env --use-on-cd)"
+```
+
+This automatically switches Node versions when you `cd` into a directory with `.node-version` or `.nvmrc`.
+
+### Fallback: nvm
+
+If fnm is not available, nvm can be used as a fallback:
+
+```bash
+brew install nvm    # macOS
+```
+
+Then add to shell profile:
+
+```bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+```
+
+---
+
+## Package Managers
+
+| Manager | Install Command | Notes |
+|---------|----------------|-------|
+| npm | Bundled with Node.js | Default, no extra install needed |
+| pnpm | `npm install -g pnpm` or `brew install pnpm` | Fast, disk-efficient |
+| yarn | `corepack enable && corepack prepare yarn@stable --activate` | Via Node.js corepack |
+
+---
+
+## System Tools by Platform
+
+| Tool | macOS (brew) | Windows (winget) | Why Needed |
+|------|-------------|-----------------|------------|
+| git | `brew install git` | `winget install Git.Git` | Version control |
+| jq | `brew install jq` | `winget install jqlang.jq` | JSON processing in scripts |
+| python3 | `brew install python3` | `winget install Python.Python.3.12` | Build scripts, tooling |
+| bash | Pre-installed | Git Bash (bundled with Git) | Shell scripts |
+| fnm | `brew install fnm` | `winget install Schniz.fnm` | Node.js version management |
+| colima | `brew install colima` | WSL2 (see local-setup-docker) | Docker runtime |
+
+---
+
+## Shell Profile Setup
+
+### Detect Shell
+
+| OS | Default Shell | Profile File |
+|----|--------------|--------------|
+| macOS | zsh | `~/.zshrc` |
+| Linux | bash | `~/.bashrc` |
+| Windows | PowerShell | `$PROFILE` (typically `~/.config/powershell/Microsoft.PowerShell_profile.ps1`) |
+
+### Recommended Profile Additions
+
+**fnm auto-switch (bash/zsh):**
+
+```bash
+eval "$(fnm env --use-on-cd)"
+```
+
+**PATH for global npm packages:**
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+**Completions:**
+
+```bash
+# fnm completions (zsh)
+eval "$(fnm completions --shell zsh)"
+
+# pnpm completions (zsh)
+eval "$(pnpm completion zsh)"
+```
+
+---
+
+## Python Version Management
+
+- Check for `.python-version` file in project root
+- If present, use `pyenv` or `uv` to install the specified version
+- **pyenv:** `brew install pyenv` (macOS), `curl https://pyenv.run | bash` (Linux)
+- **uv:** `brew install uv` (macOS), `pip install uv` (cross-platform)
+
+---
+
+## Workflow
+
+1. **Detect OS and shell** — determine platform, shell type, profile file path
+2. **Check required tools** — verify each tool is installed (node, git, jq, python3, docker)
+3. **Install missing tools** — output the correct install command for the detected platform
+4. **Check project version files** — read `.node-version` / `.nvmrc` and install the correct Node version via fnm
+5. **Check Python version** — read `.python-version` and suggest pyenv/uv install if needed
+6. **Update shell profile** — add fnm auto-switch, PATH entries, completions
+7. **Verify** — run version commands for all tools to confirm everything works
 
 ## Output
 
-```markdown
-## Environment Setup Report
-
-### Platform
-| Field | Value |
-|-------|-------|
-| OS | {macOS/Linux/Windows} |
-| Shell | {bash/zsh/fish/powershell} |
-| Profile | {path to shell profile} |
-
-### Runtimes
-| Runtime | Required | Installed | Status |
-|---------|----------|-----------|--------|
-| Node.js | {version} | {version} | OK/INSTALLED/FAILED |
-| Java | {version} | {version} | OK/INSTALLED/FAILED/SKIPPED |
-| Python | {version} | {version} | OK/INSTALLED/FAILED/SKIPPED |
-
-### Environment Variables
-| Status | Details |
-|--------|---------|
-| .env | {created from template / exists / N/A} |
-| Missing keys | {list or "none"} |
-
-### IDE
-| IDE | Configured | Notes |
-|-----|-----------|-------|
-| {vscode/intellij} | {yes/no/skipped} | {details} |
-
-### Actions Taken
-- [list of actions performed]
-
-### Manual Steps Required
-- [list of things the developer must do manually, if any]
+```json
+{
+  "os": "darwin",
+  "shell": "zsh",
+  "profileFile": "~/.zshrc",
+  "tools": [
+    { "name": "node", "installed": true, "version": "20.11.0", "installCmd": null },
+    { "name": "git", "installed": true, "version": "2.43.0", "installCmd": null },
+    { "name": "jq", "installed": false, "version": null, "installCmd": "brew install jq" },
+    { "name": "python3", "installed": true, "version": "3.12.1", "installCmd": null },
+    { "name": "docker", "installed": true, "version": "24.0.7", "installCmd": null }
+  ],
+  "nodeVersion": "20.11.0",
+  "pythonVersion": "3.12.1"
+}
 ```
 
 ## Validation
 
-- Each installed runtime version matches the version specified in project configuration files
-- Version managers (nvm, sdkman, pyenv) are installed and initialized in the shell profile
-- Shell profile changes are syntactically valid (source the profile and check for errors)
-- `.env` file exists if a template was found, with all required keys present
-- IDE settings are consistent with installed runtime paths
+- Each installed tool responds to its version command without error
+- Node.js version matches the version specified in `.node-version` or `.nvmrc`
+- fnm is installed and the auto-switch hook is present in the shell profile
+- Shell profile changes are syntactically valid
+- Python version matches `.python-version` if present
+- All PATH entries are valid and do not contain duplicates
 - No application source files were modified

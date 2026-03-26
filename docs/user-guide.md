@@ -20,8 +20,9 @@ A hands-on guide for developers using ORCH daily. Follow top to bottom on your f
 12. [Mock Data & Local API Server](#12-mock-data--local-api-server) — capture, generate, serve, wire
 13. [Creating a New Project](#13-creating-a-new-project) — Nx monorepo, Angular CLI, adding apps
 14. [Creating and Updating Skills](#14-creating-and-updating-skills) — SKILL.md, references, scripts
-15. [Contributing](#15-contributing)
-16. [Quick Reference Card](#quick-reference-card)
+15. [Example: Building a Fund Screener App](#15-example-building-a-fund-screener-app) — end-to-end walkthrough
+16. [Contributing](#16-contributing)
+17. [Quick Reference Card](#quick-reference-card)
 
 ---
 
@@ -423,8 +424,22 @@ Developers can now upgrade to the new version
 **For maintainers:** See [CONTRIBUTING.md](../CONTRIBUTING.md) for how to update the matrix and reference docs.
 
 **Authoritative sources** (registered in `.orch/registry.yaml`, refreshed via `@docs /docs-refresh`):
-- [Nx and Angular Version Compatibility Matrix](https://nx.dev/docs/technologies/angular/guides/angular-nx-version-matrix) — which Angular versions each Nx version supports
-- [Angular Actively Supported Versions](https://angular.dev/reference/versions) — which Angular versions are current vs LTS vs EOL
+
+| Category | Source | What it provides |
+|----------|--------|-----------------|
+| Version governance | [Nx Angular Version Matrix](https://nx.dev/docs/technologies/angular/guides/angular-nx-version-matrix) | Which Angular versions each Nx supports |
+| Version governance | [Angular Supported Versions](https://angular.dev/reference/versions) | Current vs LTS vs EOL |
+| Style & patterns | [Angular Style Guide](https://angular.dev/style-guide) | Naming, structure, do/don't rules |
+| Upgrade guide | [Angular Update Guide](https://angular.dev/update-guide) | Version-by-version upgrade steps |
+| Migration schematics | [Angular Migrations Reference](https://angular.dev/reference/migrations) | Available automated migrations |
+| Version changelogs | [Angular 16-21 What's New](https://angular.love) | Features, breaking changes per version |
+| PrimeNG | [PrimeNG LLM Reference](https://primeng.org/llms/llms.txt) | Token-optimized component API |
+| AG Grid | [AG Grid AI Toolkit](https://www.ag-grid.com/angular-data-grid/ai-toolkit/) | LLM-friendly grid API |
+| State management | [NgRx Signal Store + Signals Guide](https://angular.love/mastering-state-management-in-angular-with-ngrx-and-signals-scalable-predictable-performant) | Signal Store, Resource API, Port & Adapter |
+| Module Federation | [Nx Module Federation](https://nx.dev/docs/technologies/module-federation/concepts/module-federation-and-nx) | Host/remote setup, shared deps, dynamic loading |
+| Migration: Material→PrimeNG | Curated | Component mapping, theming, forms |
+| Migration: Cypress→Playwright | Curated | Command mapping, config, CI changes |
+| Migration: Karma→Jest | Curated | Config, API mapping, angular.json changes |
 
 ### 5.4 Boundaries (`.orch/audit/config/boundaries.yaml`)
 
@@ -1019,6 +1034,44 @@ Register → Fetch & Convert → Reference from Skill → Refresh when stale
                                  - references/...
 ```
 
+### 14.3 Populating Internal Reference Docs (HDS, Elevate)
+
+ORCH ships with template files for internal library documentation. These templates show the expected format — your team fills in the org-specific content.
+
+**Template files:**
+```
+.orch/references/internal/
+  hds/
+    tokens.md             # Design system tokens (colors, spacing, typography)
+    theming.md            # Light/dark mode setup
+    components.md         # HDS-wrapped component catalog (AG Grid, Plotly, etc.)
+    deprecated-tokens.md  # Old→new token migration map
+  elevate/
+    overview.md           # Platform services overview
+    auth.md               # Authentication service API
+    logging.md            # Logging service API
+    config.md             # Configuration service API
+```
+
+**How to populate:**
+1. Open the template file (e.g., `.orch/references/internal/hds/tokens.md`)
+2. Replace the `<!-- ADD-HERE -->` markers with your org's actual data
+3. Follow the table/code format shown in the template
+4. Keep under 500 lines (token-efficient)
+5. Commit the changes
+
+**Or use @docs to extract from source:**
+```
+@docs /docs-fetch --origin https://your-storybook.internal.com --format html
+@docs /docs-fetch --origin src/libs/hds/ --format tsdoc
+```
+
+**Skills that use these references:**
+- `/angular-hds-audit`, `/angular-hds-apply`, `/angular-hds-generate` — read hds/*.md
+- `/angular-elevate-audit`, `/angular-elevate-apply`, `/angular-elevate-generate` — read elevate/*.md
+
+Until these templates are populated, HDS and Elevate skills operate from Angular best practices and the agent's training data. With populated references, they produce org-specific output.
+
 ### 13.3 Skill File Structure
 
 A complete skill directory can contain:
@@ -1045,7 +1098,124 @@ A complete skill directory can contain:
 3. Test: invoke the skill and verify output
 4. If the skill is part of a workflow, test the full workflow too
 
-## 15. Contributing
+## 15. Example: Building a Fund Screener App
+
+A complete end-to-end walkthrough — from empty directory to running app with mock data, two pages, and contract tests.
+
+### What we're building
+
+A fund screener with two pages:
+- **Fund list** — data grid with 25 mutual funds, sortable by returns, expense ratio, rating
+- **Fund detail** — performance chart, top holdings, sector allocation, fund facts
+
+### Step 1: Create the workspace
+
+```bash
+# Terminal
+npm install -g @orch/cli
+orch new nx-angular fund-screener
+cd fund-screener
+orch doctor
+```
+
+### Step 2: Generate mock data
+
+```
+# VS Code Chat
+@local /local-mock-generate "25 mutual funds with: symbol, name, category (Large Cap Growth, Large Cap Value, Large Cap Blend, Mid Cap, Small Cap, Bond, International), morningstarRating (1-5), expenseRatio (0.01-2.0), ytdReturn, 1yrReturn, 3yrReturn, 5yrReturn, 10yrReturn, nav, totalAssets, turnover, inceptionDate, minInvestment. Second endpoint: fund detail by id with all above fields plus: managerName, top10Holdings array (holdingName, symbol, weight, sector), sectorAllocation array (sector, weight), monthlyPerformance array (date, value) for 10 years"
+```
+
+This creates `.orch/mocks/db.json` with 25 funds and linked detail data.
+
+### Step 3: Start the mock server
+
+```
+@local /local-mock-server --start
+```
+
+Now running:
+```
+REST:  http://localhost:3001/api/funds          GET (list all)
+REST:  http://localhost:3001/api/funds/:id      GET (fund detail with holdings)
+```
+
+### Step 4: Generate the fund list page
+
+```
+@angular /angular-generate-component fund-list --route /funds
+
+Create a data grid showing all funds. Columns: Name, Category, Morningstar Rating (show as stars), Expense Ratio (%), YTD Return, 1yr Return, 3yr Return, 5yr Return, 10yr Return, NAV, Total Assets. Use AG Grid. Sortable by any column. Click a row to navigate to /funds/:id. Use HDS design tokens.
+```
+
+### Step 5: Generate the fund detail page
+
+```
+@angular /angular-generate-component fund-detail --route /funds/:id
+
+Show: fund header with name, symbol, category, morningstar rating, NAV, expense ratio. Performance section with line chart (Plotly) of monthly returns toggleable between 1yr/3yr/5yr/10yr. Top 10 holdings table with name, symbol, weight%, sector. Sector allocation pie chart (Plotly). Fund facts sidebar: manager, inception date, min investment, turnover rate, total assets. Use HDS design tokens.
+```
+
+### Step 6: Wire services to the mock API
+
+```
+@angular /angular-mock-wire
+```
+
+This generates:
+- `fund.model.ts` — TypeScript interfaces matching the mock schema
+- `fund.service.ts` — Angular service with `getFunds()`, `getFund(id)` using HttpClient
+- `environment.ts` — `apiBaseUrl: http://localhost:3001/api`
+- `environment.prod.ts` — `apiBaseUrl: https://api.yourorg.com` (placeholder)
+- Contract tests — verify the real API matches the interfaces
+
+### Step 7: Verify
+
+```
+@angular /angular-test-unit           # generate + run unit tests
+@angular /angular-hds-audit           # check design system compliance
+@angular /angular-test-lint            # lint check
+```
+
+### Step 8: Run it
+
+```bash
+# Terminal
+npx nx serve fund-screener
+# Opens http://localhost:4200/funds
+```
+
+### Step 9: When the real API is available
+
+```typescript
+// Change one line in environment.prod.ts
+apiBaseUrl: 'https://api.yourorg.com/v1'
+```
+
+```bash
+# Run contract tests to verify the real API matches
+ng test --include='**/contract/**'
+```
+
+If contract tests pass — the real API returns data matching your TypeScript interfaces. Ship it.
+
+If contract tests fail — you know exactly which field changed. Update the interface, regenerate the service, fix the mock.
+
+### What ORCH did for you
+
+| Step | Without ORCH | With ORCH |
+|------|-------------|-----------|
+| Create workspace | Manual Nx setup, configure Jest, ESLint, boundaries | `orch new nx-angular fund-screener` |
+| Mock data | Write JSON by hand or set up json-server manually | `@local /local-mock-generate "description"` |
+| Mock server | Configure json-server, CORS, routes | `@local /local-mock-server --start` |
+| Components | Write from scratch, remember OnPush, standalone, signals | `@angular /angular-generate-component` with org standards |
+| Services | Write HttpClient calls manually | `@angular /angular-mock-wire` generates from schema |
+| Contract tests | Write manually or skip | Auto-generated with mock-wire |
+| Design system | Apply tokens manually, miss some | `@angular /angular-hds-audit` catches everything |
+| Real API switch | Hope it works, debug mismatches | Contract tests catch differences immediately |
+
+---
+
+## 16. Contributing
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for full details on adding domains, agents, workflows, and passing the quality bar.
 

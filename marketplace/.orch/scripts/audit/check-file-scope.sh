@@ -22,7 +22,7 @@ if [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
-AUDIT_DIR=".orch/audit/sessions/${DATE_DIR}"
+AUDIT_DIR=".orch/runs/${DATE_DIR}"
 SESSION_FILE="${AUDIT_DIR}/${SESSION_ID}.json"
 BOUNDARIES_FILE=".orch/audit/config/boundaries.yaml"
 

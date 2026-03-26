@@ -157,12 +157,27 @@ export function createAssemblyPlan(
     boundaryConfig: {},
   };
 
-  // Audit hooks + scripts + config are always included (via plan.hooks and plan.auditScripts above)
-  // But @audit AGENT is opt-in — install via: orch install @audit
+  // Shared agents — always installed, every project needs these
+  // @orch: master orchestrator + workflow coordination
+  plan.agents.push('orch.agent.md', 'orch-preflight.agent.md');
+  plan.skills.push('present-report', 'present-deck', 'present-dashboard');
 
-  // Always include docs agent — every project needs fetch, status, refresh, drift
+  // @docs: reference supply chain
   plan.agents.push('docs.agent.md', 'doc-convert-worker.agent.md');
   plan.skills.push('docs-fetch', 'docs-status', 'docs-refresh', 'docs-drift');
+
+  // @audit: observability
+  plan.agents.push('audit.agent.md');
+  plan.skills.push('audit-usage', 'audit-tokens', 'audit-compliance', 'audit-drift', 'audit-benchmark', 'audit-context');
+
+  // @local: environment setup + mock pipeline
+  plan.agents.push('local.agent.md');
+  plan.skills.push(
+    'local-setup-env', 'local-setup-docker', 'local-setup-deps', 'local-diagnose',
+    'local-mock-capture', 'local-mock-generate', 'local-mock-server', 'local-create-workspace',
+  );
+
+  // Instructions
   plan.instructions.push(
     'auto-mode.instructions.md'
   );
@@ -189,7 +204,7 @@ export function createAssemblyPlan(
           'angular-hds-audit', 'angular-hds-apply', 'angular-hds-generate',
           'angular-elevate-audit', 'angular-elevate-apply', 'angular-elevate-generate',
           'angular-docs-comment', 'angular-docs-readme', 'angular-docs-changelog', 'angular-docs-api',
-          'angular-mock-wire',
+          'angular-mock-wire', 'angular-create-app',
         );
         plan.semanticAdapters.push('typescript');
 

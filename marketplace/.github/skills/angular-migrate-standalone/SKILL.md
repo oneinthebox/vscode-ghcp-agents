@@ -6,7 +6,10 @@ metadata:
   version: "1.0"
 references:
   - references/angular/v19/standalone-guide.md
-allowed-tools: Bash(ng:*) Bash(nx:*) Bash(npx:*) Bash(git:*) Read Edit
+allowed-tools:
+  - codebase
+  - terminal
+  - edit
 ---
 
 ## Context
@@ -20,6 +23,14 @@ This is a multi-phase migration. Each phase produces a verifiable checkpoint.
 - **Scope** — Entire project, a specific module, or a list of modules (e.g., `TradeModule`, `SharedModule`).
 - **Mode** (optional) — `--branch-only` (default) or `--worktree` for isolated migration.
 - **Auto mode** (optional) — `step-by-step`, `auto=safe` (default), or `auto=all`.
+
+### Helper Script
+
+Run the detection script before executing steps manually:
+```bash
+node scripts/detect-ngmodules.js [project-root]
+```
+The script outputs JSON to stdout with all NgModules found and their migration complexity classification. Use this data to inform the steps below.
 
 ## Steps
 

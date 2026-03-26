@@ -1,0 +1,161 @@
+# Angular Feature Resolver — Version-Aware Reference Loading
+# ~150 tokens. Loaded once per session by the coordinator.
+# For each feature: category, old_pattern, new_pattern, available (usable from),
+# recommended (best practice from), requires (npm package), doc path, est. tokens
+#
+# The coordinator filters by detected angular_version:
+#   - Load features where available <= detected version
+#   - For features with "replaces": prefer the newer pattern if available
+
+version: 1
+default_version: "19"    # fallback if detection fails
+
+common_docs:              # always loaded regardless of version
+  - doc: angular/v19/best-practices.md
+    tokens: 900
+  - doc: angular/v19/testing-guide.md
+    tokens: 800
+
+features:
+  # Dependency Injection
+  - category: di
+    old_pattern: "constructor injection"
+    new_pattern: "inject() function"
+    available: ">=14"
+    recommended: ">=17"
+    replaces: null
+    doc: angular/v19/service-patterns.md
+    tokens: 600
+
+  # Components
+  - category: components
+    old_pattern: "NgModule declarations"
+    new_pattern: "standalone: true"
+    available: ">=14"
+    recommended: ">=17"
+    replaces: null
+    doc: angular/v19/standalone-guide.md
+    tokens: 500
+
+  # Template Control Flow
+  - category: templates
+    old_pattern: "*ngIf / *ngFor / *ngSwitch"
+    new_pattern: "@if / @for / @switch"
+    available: ">=17"
+    recommended: ">=18"
+    replaces: null
+    doc: angular/v19/control-flow-guide.md
+    tokens: 500
+
+  # Signals — Core
+  - category: state
+    old_pattern: "BehaviorSubject / Observable"
+    new_pattern: "signal() / computed()"
+    available: ">=16"
+    recommended: ">=19"
+    replaces: null
+    doc: angular/v19/signals-guide.md
+    tokens: 800
+
+  # Signal Inputs/Outputs
+  - category: inputs
+    old_pattern: "@Input() / @Output()"
+    new_pattern: "input() / output()"
+    available: ">=17"
+    recommended: ">=18"
+    replaces: null
+    doc: angular/v19/signals-guide.md
+    tokens: 800
+
+  # State Management
+  - category: state-management
+    old_pattern: "NgRx Store (actions/reducers/effects)"
+    new_pattern: "NgRx Signal Store (signalStore)"
+    available: ">=17"
+    recommended: ">=17"
+    requires: "@ngrx/signals"
+    doc: angular/v19/state-management-guide.md
+    tokens: 900
+
+  # Resource API
+  - category: async
+    old_pattern: "manual loading state + subscribe()"
+    new_pattern: "resource() API"
+    available: ">=19"
+    recommended: ">=19"
+    replaces: null
+    doc: angular/v19/state-management-guide.md
+    tokens: 900
+
+  # Signal Forms
+  - category: forms
+    old_pattern: "ReactiveForms"
+    new_pattern: "Signal Forms"
+    available: ">=21"
+    recommended: ">=21"
+    replaces: null
+    doc: null    # future: v21/signal-forms-guide.md
+    tokens: 0
+
+  # Build System
+  - category: build
+    old_pattern: "webpack"
+    new_pattern: "esbuild + vite"
+    available: ">=17"
+    recommended: ">=18"
+    replaces: null
+    doc: null
+    tokens: 0
+
+  # Testing — Karma to Jest
+  - category: testing
+    old_pattern: "Karma + Jasmine"
+    new_pattern: "Jest"
+    available: ">=16"
+    recommended: ">=17"
+    replaces: null
+    doc: angular/v19/karma-to-jest-migration.md
+    tokens: 600
+
+  # E2E — Cypress to Playwright
+  - category: e2e
+    old_pattern: "Cypress / Protractor"
+    new_pattern: "Playwright"
+    available: ">=16"
+    recommended: ">=17"
+    replaces: null
+    doc: angular/v19/cypress-to-playwright-migration.md
+    tokens: 500
+
+  # Architecture
+  - category: architecture
+    old_pattern: null
+    new_pattern: null
+    available: ">=16"
+    doc: angular/v19/architecture-patterns.md
+    tokens: 700
+
+  # Module Federation
+  - category: module-federation
+    old_pattern: null
+    new_pattern: "Nx Module Federation"
+    available: ">=16"
+    requires: "@nx/angular"
+    doc: nx/module-federation-guide.md
+    tokens: 600
+
+  # Routing
+  - category: routing
+    old_pattern: null
+    new_pattern: null
+    available: ">=16"
+    doc: angular/v19/routing-guide.md
+    tokens: 500
+
+  # Component Patterns
+  - category: component-patterns
+    old_pattern: null
+    new_pattern: null
+    available: ">=16"
+    doc: angular/v19/component-patterns.md
+    tokens: 600

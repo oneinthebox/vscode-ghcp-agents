@@ -1,7 +1,8 @@
 ---
 name: local-mock-capture
 description: "Import HAR file + optional Chrome snippet to extract API endpoints, response schemas, relationships, and WebSocket messages. Filters XHR only, dedupes, trims large responses, infers parent-child relationships from URL patterns and ID matching."
-references: []
+references:
+  - references/orch/mock-server-reference.md
 allowed-tools:
   - codebase
   - terminal
@@ -12,6 +13,12 @@ allowed-tools:
 
 Import recorded network data and build a mock blueprint. Takes a HAR file (and optionally a Chrome snippet JSON for click-to-endpoint mapping) and produces structured outputs describing every API endpoint, its response schema, entity relationships, and WebSocket channels. This is the first step in the mock workflow — capture real traffic, then generate mock data from it.
 
+**Executable script:** Run `node .github/skills/local-mock-capture/scripts/capture.js <har-file> [options]` — this implements the full capture logic. The agent should invoke this script via terminal rather than re-implementing the parsing logic.
+
+**Chrome snippet:** The file `.github/skills/local-mock-capture/scripts/chrome-snippet.js` can be pasted into Chrome DevTools Console to capture click-to-endpoint mapping.
+
+**Example output:** See `.github/skills/local-mock-capture/examples/expected-schema.json` for the expected schema format.
+
 ## Inputs
 
 - **HAR file path** (required) — path to the `.har` file exported from Chrome DevTools or similar
@@ -19,6 +26,7 @@ Import recorded network data and build a mock blueprint. Takes a HAR file (and o
 - `--xhr-only` (default true) — filter to XHR and fetch requests only
 - `--ignore "analytics|tracking|health"` — regex pattern for URLs to exclude
 - `--max-records 50` — maximum array items to keep in trimmed responses
+- `--mocks-dir .orch/mocks/fund-app/` — output directory for mock files (default: `.orch/mocks/`)
 
 ## Steps
 

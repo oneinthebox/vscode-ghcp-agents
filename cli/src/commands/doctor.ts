@@ -154,13 +154,29 @@ export async function doctorCommand(): Promise<void> {
   // 8. Agents + skills
   await section('Agents');
   const agentsDir = path.join(projectPath, '.github', 'agents');
+  const expectedAgents = [
+    'orch.agent.md', 'orch-preflight.agent.md',
+    'angular.agent.md', 'angular-planner.agent.md', 'angular-engineer.agent.md', 'angular-verifier.agent.md',
+    'docs.agent.md', 'doc-convert-worker.agent.md',
+    'audit.agent.md',
+    'local.agent.md',
+    'migrate-worker.agent.md',
+  ];
   if (fs.existsSync(agentsDir)) {
-    for (const file of fs.readdirSync(agentsDir).filter(f => f.endsWith('.agent.md'))) {
+    const installedAgents = fs.readdirSync(agentsDir).filter(f => f.endsWith('.agent.md'));
+    for (const file of installedAgents) {
       const content = fs.readFileSync(path.join(agentsDir, file), 'utf8');
       const isWorker = content.includes('user-invocable: false');
       const name = file.replace('.agent.md', '');
       statusRow(name, 'ok', isWorker ? 'worker (internal)' : 'coordinator');
       ok++;
+    }
+    // Check for missing expected agents
+    for (const expected of expectedAgents) {
+      if (!installedAgents.includes(expected)) {
+        statusRow(expected.replace('.agent.md', ''), 'fail', `MISSING — run orch install @${expected.split('.')[0].split('-')[0]}`);
+        issues++;
+      }
     }
   } else {
     statusRow('Agents directory', 'fail', 'MISSING — run orch init');
@@ -222,6 +238,16 @@ export async function doctorCommand(): Promise<void> {
     ok++;
   } else {
     statusRow('.orch/config.yaml', 'fail', 'MISSING');
+    issues++;
+  }
+
+  const workflowsDir = path.join(projectPath, '.orch', 'workflows');
+  if (fs.existsSync(workflowsDir)) {
+    const wfFiles = fs.readdirSync(workflowsDir).filter(f => f.endsWith('.yaml') || f.endsWith('.yml'));
+    statusRow(`.orch/workflows/ (${wfFiles.length} workflows)`, 'ok');
+    ok++;
+  } else {
+    statusRow('.orch/workflows/', 'fail', 'MISSING — run orch init');
     issues++;
   }
 
