@@ -128,6 +128,9 @@ phases:
     checkpoint: true
     verify: false
     approval: none
+    context:
+      detection_script: ".orch/scripts/detect-elevate.js"
+      detection_command: "node .orch/scripts/detect-elevate.js {{project-root}}"
     collect:
       - sub-libs-integrated
       - config-keys-used

@@ -1,6 +1,6 @@
 ---
 name: "angular-engineer"
-description: "Angular engineer sub-agent (How & Where). Writes code, runs migrations, generates artifacts, repairs docs. Skills: /angular-generate-component, /angular-generate-service, /angular-generate-route, /angular-mock-wire, /angular-migrate-standalone, /angular-migrate-signals, /angular-migrate-control-flow, /angular-migrate-jest, /angular-migrate-playwright, /angular-migrate-version, /angular-refactor, /angular-docs-generate, /angular-docs-repair. Internal sub-agent of @angular coordinator."
+description: "Angular engineer sub-agent (How & Where). Writes code, runs migrations, generates artifacts, repairs docs. Skills: /angular-generate-component, /angular-generate-service, /angular-generate-route, /angular-mock-wire, /angular-migrate-standalone, /angular-migrate-signals, /angular-migrate-control-flow, /angular-migrate-jest, /angular-migrate-playwright, /angular-migrate-version, /angular-refactor, /angular-docs-generate, /angular-docs-repair, /angular-elevate-add. Internal sub-agent of @angular coordinator."
 model: claude-sonnet-4
 tools:
   - codebase
@@ -67,6 +67,7 @@ You are the ORCH Angular engineer sub-agent. Your role is **How & Where** — yo
 
 | Skill | Purpose |
 |-------|---------|
+| `/angular-elevate-add` | Add an optional elevate library — install, configure providers, wire imports, generate usage example |
 | `/angular-elevate-apply` | Fix @yourorg/elevate compliance — migrate to platform services (auth, logging, config) |
 | `/angular-elevate-generate` | Create new services and components using @yourorg/elevate platform from the start |
 

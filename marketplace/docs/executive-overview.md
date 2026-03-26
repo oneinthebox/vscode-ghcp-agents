@@ -52,7 +52,7 @@ When a developer asks ORCH to perform a task, it follows a structured pipeline:
 
 ## Coverage
 
-ORCH includes 61 skills, 44 scripts, 92 examples, and 5 shared libraries across these categories:
+ORCH includes 62 skills, 58 scripts, 92 examples, and 5 shared libraries across these categories:
 
 - **Project scanning** -- dependencies, architecture, quality, tests, deployment, git history, documentation
 - **Code generation** -- components, services, routes with org-standard patterns and co-located tests

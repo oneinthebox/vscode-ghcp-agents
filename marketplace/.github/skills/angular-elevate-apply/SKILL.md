@@ -63,9 +63,17 @@ Run `/angular-elevate-audit` first to understand what needs fixing.
 
 ## Steps
 
-1. Read most recent `/angular-elevate-audit` report (or run audit if none exists).
-2. For each sub-lib with findings, load its reference doc. If unavailable, use the fallback patterns below.
-3. **Per sub-lib migration:**
+1. Run `node .orch/scripts/detect-elevate.js` to identify which elevate libs are installed. Only apply fixes for the installed libs — do not install new optional libs unless explicitly requested.
+
+### Helper Script
+```bash
+node .orch/scripts/detect-elevate.js [project-root]
+```
+Outputs installed elevate libs. Use this to scope the apply to only installed libraries.
+
+2. Read most recent `/angular-elevate-audit` report (or run audit if none exists).
+3. For each sub-lib with findings, load its reference doc. If unavailable, use the fallback patterns below.
+4. **Per sub-lib migration:**
 
    ---
 
@@ -398,10 +406,10 @@ Run `/angular-elevate-audit` first to understand what needs fixing.
    }
    ```
 
-4. Install any missing packages: `npm install @yourorg/elevate/{sub-lib}`.
-5. Run `ng build` to verify compilation.
-6. Run `ng test` to verify tests pass.
-7. Run `/angular-elevate-audit` again to verify compliance improved.
+5. Install any missing packages: `npm install @yourorg/elevate/{sub-lib}`.
+6. Run `ng build` to verify compilation.
+7. Run `ng test` to verify tests pass.
+8. Run `/angular-elevate-audit` again to verify compliance improved.
 
 ## Output
 

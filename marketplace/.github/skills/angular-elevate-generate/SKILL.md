@@ -46,15 +46,23 @@ Use this when building something that needs platform services wired in from day 
 
 ## Steps
 
-1. Determine which elevate sub-libs are needed based on the `--uses` flag or inferred from the component type:
+1. Run `node .orch/scripts/detect-elevate.js` to identify which elevate libs are currently installed. Use this to know which libs are available for the generated service and avoid referencing uninstalled libraries.
+
+### Helper Script
+```bash
+node .orch/scripts/detect-elevate.js [project-root]
+```
+Outputs installed elevate libs. Use this to scope generated code to only available libraries.
+
+2. Determine which elevate sub-libs are needed based on the `--uses` flag or inferred from the component type:
    - Services typically need: logging, config
    - Auth-related: auth, authorization
    - Data display: common-grid or common-chart
    - User interaction: common-dialog, preferences
-2. Load only the relevant reference docs from `.orch/references/internal/elevate/`.
+3. Load only the relevant reference docs from `.orch/references/internal/elevate/`.
    - If reference docs are unavailable, use the generic template patterns below.
 
-3. **Generate service** (if applicable):
+4. **Generate service** (if applicable):
    - Inject `LoggingService` (not `console`)
    - Inject `ConfigService` (not `environment.ts`)
    - Add `ElevateAuthService` guard if auth-protected
@@ -119,7 +127,7 @@ Use this when building something that needs platform services wired in from day 
    }
    ```
 
-4. **Generate component** (if applicable):
+5. **Generate component** (if applicable):
    - Use elevate-common components: `<elevate-grid>`, `<elevate-chart>`, `<elevate-dialog>`
    - Wire up HDS tokens for styling (delegate to `/angular-hds-generate` if design-heavy)
    - Add logging in lifecycle hooks where appropriate
@@ -236,7 +244,7 @@ Use this when building something that needs platform services wired in from day 
    }
    ```
 
-5. **Generate tests:**
+6. **Generate tests:**
    - Mock elevate services using `provideElevateTesting()` utilities
    - Test auth guard integration
    - Test logging calls
@@ -359,8 +367,8 @@ Use this when building something that needs platform services wired in from day 
    });
    ```
 
-6. Run `ng build` to verify compilation.
-7. Run `ng test` to verify tests pass.
+7. Run `ng build` to verify compilation.
+8. Run `ng test` to verify tests pass.
 
 ## Output
 

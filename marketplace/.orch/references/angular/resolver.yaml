@@ -159,3 +159,153 @@ features:
     available: ">=16"
     doc: angular/v19/component-patterns.md
     tokens: 600
+
+  # ──────────────────────────────────────────────
+  # Elevate Platform — Core
+  # ──────────────────────────────────────────────
+  - category: elevate-core
+    available: ">=16"
+    requires: "@yourorg/elevate/client-core"
+    doc: internal/elevate/client-core.md
+    tokens: 400
+
+  - category: elevate-angular-adapter
+    available: ">=16"
+    requires: "@yourorg/elevate/angular-adapter"
+    doc: internal/elevate/angular-adapter.md
+    tokens: 400
+
+  - category: elevate-auth
+    available: ">=16"
+    requires: "@yourorg/elevate/authentication"
+    doc: internal/elevate/auth.md
+    tokens: 500
+
+  - category: elevate-authz
+    available: ">=16"
+    requires: "@yourorg/elevate/authorization"
+    doc: internal/elevate/authorization.md
+    tokens: 400
+
+  - category: elevate-config
+    available: ">=16"
+    requires: "@yourorg/elevate/configuration"
+    doc: internal/elevate/config.md
+    tokens: 400
+
+  - category: elevate-logging
+    available: ">=16"
+    requires: "@yourorg/elevate/logging"
+    doc: internal/elevate/logging.md
+    tokens: 400
+
+  - category: elevate-prefs
+    available: ">=16"
+    requires: "@yourorg/elevate/user-preferences"
+    doc: internal/elevate/preferences.md
+    tokens: 400
+
+  # ──────────────────────────────────────────────
+  # Elevate Platform — Optional Components
+  # ──────────────────────────────────────────────
+  - category: elevate-grid
+    available: ">=16"
+    requires: "@yourorg/elevate-components/common-grid"
+    doc: internal/elevate/common-grid.md
+    tokens: 500
+
+  - category: elevate-chart
+    available: ">=16"
+    requires: "@yourorg/elevate-components/common-chart"
+    doc: internal/elevate/common-chart.md
+    tokens: 400
+
+  - category: elevate-search
+    available: ">=16"
+    requires: "@yourorg/elevate-components/common-search"
+    doc: internal/elevate/common-search.md
+    tokens: 400
+
+  - category: elevate-chat
+    available: ">=16"
+    requires: "@yourorg/elevate-components/common-chat"
+    doc: internal/elevate/common-chat.md
+    tokens: 400
+
+  - category: elevate-dialog
+    available: ">=16"
+    requires: "@yourorg/elevate-components/common-dialog"
+    doc: internal/elevate/common-dialog.md
+    tokens: 400
+
+  # ──────────────────────────────────────────────
+  # Elevate Platform — Optional Services
+  # ──────────────────────────────────────────────
+  - category: elevate-interop
+    available: ">=16"
+    requires: "@yourorg/elevate/interop"
+    doc: internal/elevate/interop.md
+    tokens: 400
+
+  - category: elevate-data-connector
+    available: ">=16"
+    requires: "@yourorg/elevate/data-connector"
+    doc: internal/elevate/data-connector.md
+    tokens: 400
+
+  - category: elevate-websocket
+    available: ">=16"
+    requires: "@yourorg/elevate/websocket"
+    doc: internal/elevate/websocket.md
+    tokens: 400
+
+  - category: elevate-power-bi
+    available: ">=16"
+    requires: "@yourorg/elevate/power-bi"
+    doc: internal/elevate/power-bi.md
+    tokens: 400
+
+  - category: elevate-tableau
+    available: ">=16"
+    requires: "@yourorg/elevate/tableau"
+    doc: internal/elevate/tableau.md
+    tokens: 400
+
+  - category: elevate-document-renderer
+    available: ">=16"
+    requires: "@yourorg/elevate/document-renderer"
+    doc: internal/elevate/document-renderer.md
+    tokens: 400
+
+  - category: elevate-notification-consumer
+    available: ">=16"
+    requires: "@yourorg/elevate/notification-consumer"
+    doc: internal/elevate/notification-consumer.md
+    tokens: 400
+
+  - category: elevate-notification-publisher
+    available: ">=16"
+    requires: "@yourorg/elevate/notification-publisher"
+    doc: internal/elevate/notification-publisher.md
+    tokens: 400
+
+  - category: elevate-platform-detection
+    available: ">=16"
+    requires: "@yourorg/elevate/platform-detection"
+    doc: internal/elevate/platform-detection.md
+    tokens: 400
+
+  - category: elevate-usage-stats
+    available: ">=16"
+    requires: "@yourorg/elevate/usage-stats"
+    doc: internal/elevate/usage-stats.md
+    tokens: 400
+
+  # ──────────────────────────────────────────────
+  # HDS Design System
+  # ──────────────────────────────────────────────
+  - category: hds
+    available: ">=16"
+    requires: "@yourorg/hds"
+    doc: internal/hds/tokens.md
+    tokens: 500

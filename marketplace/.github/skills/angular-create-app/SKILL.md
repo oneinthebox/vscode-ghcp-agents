@@ -290,6 +290,37 @@ For Nx monorepos, this is common — you might have `portfolio-app` and want to 
    }
    ```
 
+### Elevate Platform Setup
+
+If `--elevate` flag is provided (or by default for org projects):
+
+1. Install core elevate libs:
+   ```bash
+   npm install @yourorg/elevate/{client-core,angular-adapter,authentication,authorization,configuration,logging,user-preferences}
+   ```
+
+2. Configure providers in `app.config.ts`:
+   ```typescript
+   import { provideElevateAuth } from '@yourorg/elevate/authentication';
+   import { provideElevateLogging } from '@yourorg/elevate/logging';
+   import { provideElevateConfig } from '@yourorg/elevate/configuration';
+   // ... in providers array
+   ```
+
+3. Ask which optional libs are needed:
+   - Grid (`@yourorg/elevate-components/common-grid`)
+   - Chart (`@yourorg/elevate-components/common-chart`)
+   - Search (`@yourorg/elevate-components/common-search`)
+   - Chat (`@yourorg/elevate-components/common-chat`)
+   - WebSocket (`@yourorg/elevate/websocket`)
+   - Others (interop, notifications, analytics)
+
+4. Install selected optional libs
+5. Run detect-elevate.js to verify installation:
+   ```bash
+   node .orch/scripts/detect-elevate.js [project-root]
+   ```
+
 9. **Configure Elevate** (if `--elevate` flag):
    - Install required `@yourorg/elevate/*` packages
    - Configure providers in `app.config.ts`

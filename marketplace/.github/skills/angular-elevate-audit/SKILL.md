@@ -69,12 +69,20 @@ The script outputs JSON to stdout with per-sub-library violation counts, console
 
 ## Steps
 
-1. Read `package.json` to detect which `@yourorg/elevate/*` and `@yourorg/elevate-common/*` packages are installed.
+1. Run `node .orch/scripts/detect-elevate.js` to identify which elevate libs are installed. Only audit the installed libs — do not flag missing optional libs as violations.
 
-2. For each installed sub-lib, load its reference doc from `.orch/references/internal/elevate/`.
+### Helper Script
+```bash
+node .orch/scripts/detect-elevate.js [project-root]
+```
+Outputs installed elevate libs. Use this to scope the audit to only installed libraries.
+
+2. Read `package.json` to detect which `@yourorg/elevate/*` and `@yourorg/elevate-common/*` packages are installed.
+
+3. For each installed sub-lib, load its reference doc from `.orch/references/internal/elevate/`.
    - If reference doc doesn't exist, note it and scan using the fallback detection patterns below.
 
-3. **Per sub-lib scan with concrete detection patterns:**
+4. **Per sub-lib scan with concrete detection patterns:**
 
    **auth** — Find custom login flows, localStorage token storage, manual JWT decode, missing AuthGuard:
    ```
@@ -187,7 +195,7 @@ The script outputs JSON to stdout with per-sub-library violation counts, console
    ```
    <!-- ADD-HERE: detection patterns for new sub-libs -->
 
-4. **Classify each finding** using this classification matrix:
+5. **Classify each finding** using this classification matrix:
 
    | Classification | Meaning | Severity |
    |---------------|---------|----------|
@@ -197,7 +205,7 @@ The script outputs JSON to stdout with per-sub-library violation counts, console
    | **Not installed** | Package not in package.json but violations suggest it should be | info |
    | **Compliant** | All usages follow elevate patterns | — |
 
-5. **Produce compliance scorecard** with per-sub-lib report:
+6. **Produce compliance scorecard** with per-sub-lib report:
 
    **Scoring formula:**
    ```

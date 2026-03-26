@@ -1,6 +1,6 @@
 # ORCH (Orchestra) for GitHub Copilot
 
-**Enterprise framework that gives GitHub Copilot your team's Angular expertise -- version-aware agents, 61 skills, 44 scripts, event-driven workflows, audit trail, and safe-by-default automation.**
+**Enterprise framework that gives GitHub Copilot your team's Angular expertise -- version-aware agents, 62 skills, 58 scripts, event-driven workflows, audit trail, and safe-by-default automation.**
 
 ---
 
@@ -70,7 +70,7 @@ Once installed, open VS Code and use the Copilot Chat panel to invoke agents:
 
 | Feature | Details |
 |---------|---------|
-| **61 skills, 44 scripts** | Scanning, generation, migration, refactoring, documentation, testing, design system, platform integration, mock data, reporting, 92 examples, 5 shared libs |
+| **62 skills, 58 scripts** | Scanning, generation, migration, refactoring, documentation, testing, design system, platform integration, mock data, reporting, 92 examples, 5 shared libs |
 | **11 agents** | 1 coordinator (@angular) + 3 sub-agents (planner, engineer, verifier) + 7 shared (orch, preflight, audit, docs, doc-convert-worker, local, migrate-worker) |
 | **3 workflows** | `angular-migration` (10 phases), `angular-new-feature` (10 phases), `angular-project-recap` (11 phases) |
 | **Event-driven relay** | File-based event system with terminal relay process. Script phases run automatically; AI phases dispatched via `code chat --mode agent` (VS Code 1.112+). Safe-by-default: pauses before AI writes for `approve` / `approve-all` / `skip`. Pass `--auto` for full autonomy. |
