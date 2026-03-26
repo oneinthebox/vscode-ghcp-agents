@@ -161,9 +161,10 @@ phases:
     phase_id: "008"
     agent: engineer
     skill: /angular-migrate-version
+    min_target_version: 16
     execution_type: ai
     args: --scope third-party
-    depends_on: ["007"]
+    depends_on: ["004"]
     checkpoint: true
     verify: true
     approval: auto=safe
@@ -177,7 +178,7 @@ phases:
     id: final-verify
     phase_id: "009"
     agent: verifier
-    depends_on: ["008"]
+    depends_on: ["005", "006", "007", "008"]
     skills:
       - /angular-test-unit
       - /angular-test-e2e

@@ -625,7 +625,7 @@ export function executeAssembly(
   }
 
   // Create standard directories (gitkeep files)
-  const standardDirs = ['.orch/runs', '.orch/reports', '.orch/workflow-state', '.orch/cache'];
+  const standardDirs = ['.orch/runs', '.orch/reports', '.orch/workflow-state', '.orch/cache', '.orch/plans'];
   for (const dir of standardDirs) {
     const dirPath = path.join(target, dir);
     fs.mkdirSync(dirPath, { recursive: true });

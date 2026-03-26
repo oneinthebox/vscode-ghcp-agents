@@ -181,6 +181,17 @@ if [ $PUBLISH_EXIT -ne 0 ]; then
   exit 0
 fi
 
+# Pre-generate deterministic plan (before relay, before AI)
+# This ensures the plan is always on disk regardless of what the AI decides to do
+if [ "$MATCHED_NAME" = "angular-migration" ] && [ -n "$TARGET_VERSION" ]; then
+  PLAN_SCRIPT=".github/skills/angular-migrate-version/scripts/generate-plan.js"
+  if [ -f "$PLAN_SCRIPT" ]; then
+    mkdir -p .orch/plans
+    node "$PLAN_SCRIPT" . --to "$TARGET_VERSION" > /dev/null 2>&1
+    echo "Migration plan generated at .orch/plans/migration-plan.md" >&2
+  fi
+fi
+
 # Extract run ID from publish output
 RUN_ID=$(echo "$PUBLISH_OUTPUT" | jq -r '.run_id // ""' 2>/dev/null || echo "")
 
@@ -205,7 +216,7 @@ cat <<EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "UserPromptSubmit",
-    "additionalContext": "ORCH WORKFLOW TRIGGERED: The ${MATCHED_NAME} workflow has been published with ${PHASE_COUNT} phases. Run ID: ${RUN_ID}. The relay is running in ${MODE_DESC} (PID: ${RELAY_PID}). DO NOT perform your own codebase analysis or scanning. DO NOT search the codebase for architecture, features, or patterns. The relay handles all of that through structured phases. Tell the user: 'Workflow **${MATCHED_NAME}** published. ${PHASE_COUNT} phases queued. Relay running ${MODE_DESC}. Script phases execute automatically. AI phases dispatched via code chat. Report will be generated at .orch/reports/${MATCHED_NAME}-report.html when complete. Relay log: /tmp/orch-relay-${SESSION_ID}.log'"
+    "additionalContext": "ORCH WORKFLOW TRIGGERED: The ${MATCHED_NAME} workflow has been published with ${PHASE_COUNT} phases. Run ID: ${RUN_ID}. The relay is running in ${MODE_DESC} (PID: ${RELAY_PID}). DO NOT perform your own codebase analysis or scanning. The relay handles all phases automatically. The migration plan has been pre-generated at .orch/plans/migration-plan.md — read it for the full step-by-step plan. Tell the user: 'Workflow **${MATCHED_NAME}** published. ${PHASE_COUNT} phases queued. Relay running ${MODE_DESC}. Migration plan at .orch/plans/migration-plan.md. Report will be generated at .orch/reports/${MATCHED_NAME}-report.html when complete.'"
   }
 }
 EOF
