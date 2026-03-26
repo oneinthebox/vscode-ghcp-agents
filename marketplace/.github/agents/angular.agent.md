@@ -63,15 +63,26 @@ When a request arrives, classify it into one of three modes:
 
 ## Triage decision tree
 
+**CRITICAL — Check workflow triggers FIRST, before anything else.**
+
+0. Does the request match a workflow trigger? Check `.orch/workflows/*.yaml` trigger patterns:
+   - `angular-project-recap.yaml` trigger: `recap|explain|overview|onboard|walkthrough|what is this project`
+   - `angular-migration.yaml` trigger: `upgrade|migrate|update angular`
+   - `angular-new-feature.yaml` trigger: `create|scaffold|generate|build|add feature|new component|new service`
+   - **If ANY trigger matches → Workflow mode. STOP. Do not continue to step 1.**
+   - This includes read-only workflows like recap — they produce reports, not just text answers.
+
 1. Does the request need file changes?
-   - **No** -> Query mode (answer directly)
-   - **Yes** -> continue
+   - **No** → Query mode (answer directly)
+   - **Yes** → continue
 2. Is the scope clear and bounded to a single file or small set?
-   - **Yes** -> Quick-fix mode
-   - **No** -> Workflow mode
+   - **Yes** → Quick-fix mode
+   - **No** → Workflow mode
 3. Is there ambiguity about what needs to change?
-   - **Yes** -> Workflow mode (planner resolves ambiguity)
-   - **No** -> Quick-fix mode
+   - **Yes** → Workflow mode (planner resolves ambiguity)
+   - **No** → Quick-fix mode
+
+**Flag parsing:** If the message contains `--auto`, extract it before triage. Pass it to the relay as the `--auto` flag. Remove it from the message before matching triggers.
 
 ## Retry loop (you own this)
 
@@ -168,6 +179,11 @@ When the triage result is **workflow mode** and a workflow YAML matches:
    - If auto mode: "All phases (scripts + AI) will run automatically via `code chat`. Watch the terminal for progress."
 
 6. Exit — your job is done. The relay handles everything from here.
+   - The relay will execute all phases (scripts automatically, AI via `code chat`)
+   - When all phases complete, the monitor generates an HTML report at `.orch/reports/{workflow-name}-report.html`
+   - The report uses the template from `.orch/templates/reports/{template-name}.md`
+
+**IMPORTANT:** Do NOT answer a workflow-triggering request with a plain text summary. The value of ORCH is the structured, multi-phase workflow execution that produces a comprehensive report — not a chatbot answer. If "recap" matches a workflow trigger, RUN THE WORKFLOW.
 
 ## Audit compliance
 

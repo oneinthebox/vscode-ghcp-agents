@@ -3,7 +3,7 @@
 # Triggered by: sessionStart hook event
 # Purpose: Creates initial audit record for the session
 
-set -euo pipefail
+set -uo pipefail
 
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.sessionId // "unknown"')

@@ -3,7 +3,7 @@
 # Triggered by: errorOccurred hook event
 # Purpose: Logs error details to session record
 
-set -euo pipefail
+set -uo pipefail
 
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.sessionId // "unknown"')

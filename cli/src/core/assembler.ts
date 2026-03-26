@@ -373,6 +373,98 @@ export function executeAssembly(
     }
   }
 
+  // Copy hook scripts (.orch/scripts/hooks/)
+  const hookScriptsDir = path.join(mp, '.orch', 'scripts', 'hooks');
+  if (fs.existsSync(hookScriptsDir)) {
+    const hookScripts = fs.readdirSync(hookScriptsDir).filter(f => f.endsWith('.sh') || f.endsWith('.js'));
+    for (const script of hookScripts) {
+      const src = path.join(hookScriptsDir, script);
+      const relativeDest = path.join('.orch', 'scripts', 'hooks', script);
+      const dest = path.join(target, relativeDest);
+      fs.mkdirSync(path.join(target, '.orch', 'scripts', 'hooks'), { recursive: true });
+      const result = safeCopy(src, dest);
+      if (result === 'copied') {
+        copied++;
+        manifest.files.push(relativeDest);
+        fs.chmodSync(dest, 0o755);
+        manifest.checksums[relativeDest] = computeChecksum(dest);
+      }
+    }
+  }
+
+  // Copy relay scripts (.orch/scripts/relay/)
+  const relayScriptsDir = path.join(mp, '.orch', 'scripts', 'relay');
+  if (fs.existsSync(relayScriptsDir)) {
+    const relayScripts = fs.readdirSync(relayScriptsDir).filter(f => f.endsWith('.js'));
+    for (const script of relayScripts) {
+      const src = path.join(relayScriptsDir, script);
+      const relativeDest = path.join('.orch', 'scripts', 'relay', script);
+      const dest = path.join(target, relativeDest);
+      fs.mkdirSync(path.join(target, '.orch', 'scripts', 'relay'), { recursive: true });
+      const result = safeCopy(src, dest);
+      if (result === 'copied') {
+        copied++;
+        manifest.files.push(relativeDest);
+        fs.chmodSync(dest, 0o755);
+        manifest.checksums[relativeDest] = computeChecksum(dest);
+      }
+    }
+  }
+
+  // Copy shared lib scripts (.orch/scripts/lib/)
+  const libScriptsDir = path.join(mp, '.orch', 'scripts', 'lib');
+  if (fs.existsSync(libScriptsDir)) {
+    const libScripts = fs.readdirSync(libScriptsDir).filter(f => f.endsWith('.js'));
+    for (const script of libScripts) {
+      const src = path.join(libScriptsDir, script);
+      const relativeDest = path.join('.orch', 'scripts', 'lib', script);
+      const dest = path.join(target, relativeDest);
+      fs.mkdirSync(path.join(target, '.orch', 'scripts', 'lib'), { recursive: true });
+      const result = safeCopy(src, dest);
+      if (result === 'copied') {
+        copied++;
+        manifest.files.push(relativeDest);
+        manifest.checksums[relativeDest] = computeChecksum(dest);
+      }
+    }
+  }
+
+  // Copy detection scripts (.orch/scripts/detect-*.js)
+  const orchScriptsDir = path.join(mp, '.orch', 'scripts');
+  if (fs.existsSync(orchScriptsDir)) {
+    const detectScripts = fs.readdirSync(orchScriptsDir).filter(f => f.startsWith('detect-') && f.endsWith('.js'));
+    for (const script of detectScripts) {
+      const src = path.join(orchScriptsDir, script);
+      const relativeDest = path.join('.orch', 'scripts', script);
+      const dest = path.join(target, relativeDest);
+      const result = safeCopy(src, dest);
+      if (result === 'copied') {
+        copied++;
+        manifest.files.push(relativeDest);
+        fs.chmodSync(dest, 0o755);
+        manifest.checksums[relativeDest] = computeChecksum(dest);
+      }
+    }
+  }
+
+  // Copy .orch/hooks/ (check-stack.js, resolve-references.js)
+  const orchHooksDir = path.join(mp, '.orch', 'hooks');
+  if (fs.existsSync(orchHooksDir)) {
+    const orchHooks = fs.readdirSync(orchHooksDir).filter(f => f.endsWith('.js'));
+    for (const hook of orchHooks) {
+      const src = path.join(orchHooksDir, hook);
+      const relativeDest = path.join('.orch', 'hooks', hook);
+      const dest = path.join(target, relativeDest);
+      fs.mkdirSync(path.join(target, '.orch', 'hooks'), { recursive: true });
+      const result = safeCopy(src, dest);
+      if (result === 'copied') {
+        copied++;
+        manifest.files.push(relativeDest);
+        manifest.checksums[relativeDest] = computeChecksum(dest);
+      }
+    }
+  }
+
   // Copy semantic adapters
   for (const adapter of plan.semanticAdapters) {
     const src = path.join(mp, '.orch', 'scripts', 'semantic', 'adapters', adapter);
@@ -459,6 +551,45 @@ export function executeAssembly(
     }
   }
 
+  // Copy .orch/package.json (isolated dependencies)
+  const orchPkgSrc = path.join(mp, '.orch', 'package.json');
+  if (fs.existsSync(orchPkgSrc)) {
+    const orchPkgRelDest = path.join('.orch', 'package.json');
+    const orchPkgDest = path.join(target, orchPkgRelDest);
+    const orchPkgResult = safeCopy(orchPkgSrc, orchPkgDest);
+    if (orchPkgResult === 'copied') { copied++; manifest.files.push(orchPkgRelDest); }
+  }
+
+  // Copy .orch/templates/ (report templates)
+  const templatesSrc = path.join(mp, '.orch', 'templates');
+  if (fs.existsSync(templatesSrc)) {
+    const templatesRelDir = path.join('.orch', 'templates');
+    const templatesDest = path.join(target, templatesRelDir);
+    const tFiles = safeCopyDir(templatesSrc, templatesDest, templatesRelDir);
+    for (const f of tFiles) { manifest.files.push(f); }
+    copied += tFiles.length;
+  }
+
+  // Copy .vscode/settings.json (recommended Copilot settings)
+  const vsSettingsSrc = path.join(mp, '.vscode', 'settings.json');
+  if (fs.existsSync(vsSettingsSrc)) {
+    const vsSettingsRelDest = path.join('.vscode', 'settings.json');
+    const vsSettingsDest = path.join(target, vsSettingsRelDest);
+    fs.mkdirSync(path.join(target, '.vscode'), { recursive: true });
+    const vsResult = safeCopy(vsSettingsSrc, vsSettingsDest);
+    if (vsResult === 'copied') { copied++; manifest.files.push(vsSettingsRelDest); }
+  }
+
+  // Copy .orch/references/angular/resolver.yaml (version-aware resolution)
+  const resolverSrc = path.join(mp, '.orch', 'references', 'angular', 'resolver.yaml');
+  if (fs.existsSync(resolverSrc)) {
+    const resolverRelDest = path.join('.orch', 'references', 'angular', 'resolver.yaml');
+    const resolverDest = path.join(target, resolverRelDest);
+    fs.mkdirSync(path.dirname(resolverDest), { recursive: true });
+    const resolverResult = safeCopy(resolverSrc, resolverDest);
+    if (resolverResult === 'copied') { copied++; manifest.files.push(resolverRelDest); }
+  }
+
   // Copy pre-converted reference docs from marketplace
   const refscopied = copyReferenceDocs(mp, target, plan.registrySources, manifest);
   copied += refscopied;
@@ -491,6 +622,31 @@ export function executeAssembly(
     copied++;
   } else if (fs.existsSync(registryDest)) {
     skipped++;
+  }
+
+  // Create standard directories (gitkeep files)
+  const standardDirs = ['.orch/runs', '.orch/reports', '.orch/workflow-state', '.orch/cache'];
+  for (const dir of standardDirs) {
+    const dirPath = path.join(target, dir);
+    fs.mkdirSync(dirPath, { recursive: true });
+    const gitkeep = path.join(dirPath, '.gitkeep');
+    if (!fs.existsSync(gitkeep)) {
+      fs.writeFileSync(gitkeep, '');
+    }
+  }
+
+  // Install ORCH runtime dependencies (ts-morph, json-server, ws)
+  const orchPkgJson = path.join(target, '.orch', 'package.json');
+  if (fs.existsSync(orchPkgJson)) {
+    try {
+      const { execSync } = require('child_process');
+      console.log('Installing ORCH runtime dependencies...');
+      execSync('npm install --prefix .orch/', { cwd: target, stdio: 'inherit', timeout: 120000 });
+      console.log('✔ ORCH dependencies installed');
+    } catch (err: any) {
+      console.warn('⚠ Failed to install ORCH dependencies. Run manually: cd .orch && npm install');
+      console.warn('  Error:', err.message?.split('\n')[0] || 'unknown');
+    }
   }
 
   // Write manifest (always overwrite — it's ORCH's own file)

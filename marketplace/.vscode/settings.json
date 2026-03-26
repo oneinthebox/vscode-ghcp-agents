@@ -1,7 +1,30 @@
 {
+  // ═══════════════════════════════════════════════════════════════
+  // ORCH — Recommended VS Code Settings
+  // These settings enable autonomous workflow execution with safety boundaries.
+  // Installed by: orch init | Removed by: orch reset
+  // ═══════════════════════════════════════════════════════════════
+
+  // ── Agent & Autopilot ──────────────────────────────────────────
   "chat.agent.enabled": true,
   "chat.autopilot.enabled": true,
   "chat.agent.maxRequests": 100,
+  "github.copilot.chat.agent.autoFix": true,
+  "github.copilot.chat.agent.thinkingTool": true,
+  "chat.agent.thinking.collapsedTools": "always",
+  "chat.customAgentInSubagent.enabled": true,
+  "github.copilot.chat.summarizeAgentConversationHistory.enabled": true,
+
+  // ── Discovery — ensure VS Code finds ORCH agents, skills, hooks ─
+  "chat.agentFilesLocations": { ".github/agents": true },
+  "chat.agentSkillsLocations": { ".github/skills": true },
+  "chat.hookFilesLocations": { ".github/hooks": true },
+  "chat.instructionsFilesLocations": { ".github/instructions": true },
+  "chat.useAgentsMdFile": true,
+  "chat.includeApplyingInstructions": true,
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+
+  // ── Terminal Auto-Approve (allowlist/blocklist) ────────────────
   "chat.tools.terminal.enableAutoApprove": true,
   "chat.tools.terminal.autoApprove": {
     "ng": true,
@@ -21,6 +44,10 @@
     "git reset --hard": false,
     "docker system prune": false
   },
+  "chat.tools.terminal.autoReplyToPrompts": true,
+  "chat.tools.terminal.blockDetectedFileWrites": "outsideWorkspace",
+
+  // ── File Edit Auto-Approve (pattern-based) ─────────────────────
   "chat.tools.edits.autoApprove": {
     "src/**": true,
     "libs/**": true,
@@ -30,12 +57,7 @@
     "**/.orch/audit/config/**": false
   },
   "chat.editing.autoAcceptDelay": 3000,
-  "chat.tools.terminal.autoReplyToPrompts": true,
-  "chat.tools.terminal.blockDetectedFileWrites": "outsideWorkspace",
-  "chat.customAgentInSubagent.enabled": true,
-  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
-  "github.copilot.chat.agent.autoFix": true,
-  "chat.checkpoints.enabled": true,
-  "github.copilot.chat.agent.thinkingTool": true,
-  "chat.agent.thinking.collapsedTools": "always"
+
+  // ── Safety & Recovery ──────────────────────────────────────────
+  "chat.checkpoints.enabled": true
 }

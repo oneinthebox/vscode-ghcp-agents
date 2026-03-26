@@ -669,7 +669,7 @@ orch init                      # existing project
 orch doctor
 orch reset</code></pre>
             <div class="split split-2">
-              <div><h3>What it creates</h3><ul><li>11 role-based agents tailored to your stack</li><li>62 skills (10 planner, 23 engineer, 6 migration, 8 local, 6 audit, 4 docs, 3 present, 1 elevate)</li><li>3 event-driven workflows + audit hooks on every lifecycle event</li><li>Styled reports &mdash; recap, migration, docs, benchmarking</li><li>Version-aware stack resolution + model benchmarking out of the box</li></ul></div>
+              <div><h3>What it creates</h3><ul><li><strong>Role-based agents</strong> &mdash; specialized AI personas with defined tools and boundaries</li><li><strong>Granular skills</strong> &mdash; focused, reusable task definitions with references and scripts</li><li><strong>Smart instructions</strong> &mdash; always-on coding standards, auto-applied per context</li><li><strong>Event-driven workflows</strong> &mdash; multi-phase execution with safe-by-default approval</li><li><strong>Structured reports</strong> &mdash; HTML, Markdown, JSON with templates and trend tracking</li><li><strong>Comprehensive audit</strong> &mdash; every tool call, file edit, and token logged and scored</li><li><strong>Version-aware resolution</strong> &mdash; detects your stack, loads appropriate patterns</li><li><strong>Platform integration</strong> &mdash; Elevate libraries and HDS design system wired in</li></ul></div>
               <div><h3>What stays in your hands</h3><ul><li>Which agents are installed</li><li>What tools each agent can access</li><li>Auto mode or approval at every step</li><li>Model selection backed by benchmark data</li><li>Clean removal with one command when needed</li></ul></div>
             </div>
           </div>
@@ -783,6 +783,8 @@ orch reset</code></pre>
       <section>
         <header><h2>One Skill, One Job</h2><p>No generic <code>/test</code>. Every skill is domain-specific, scoped, declares its own references.</p></header>
         <div class="body">
+          <p style="font-size: var(--fs-small); color: var(--fg-secondary); line-height: 1.7; margin-bottom: var(--sp-2);">A skill called <code>/test</code> would need to know Jest configuration, Playwright setup, lint rules, coverage thresholds, and snapshot testing &mdash; all in one prompt. That&rsquo;s 5,000+ tokens of context for a task that might only need lint.</p>
+          <p style="font-size: var(--fs-small); color: var(--fg-secondary); line-height: 1.7; margin-bottom: var(--sp-4);">Granular skills load only what&rsquo;s needed. <code>/angular-test-lint</code> loads ESLint rules. <code>/angular-test-unit</code> loads Jest patterns. <code>/angular-test-e2e</code> loads Playwright config. Each gets focused context, better results, and lower token cost.</p>
           <table><thead><tr><th>Role</th><th>Skill</th><th>What it does</th></tr></thead><tbody>
             <tr><td>Planner</td><td><code>/angular-scan-deps</code></td><td>Dependencies, versions, upgrade paths, compatibility</td></tr>
             <tr><td>Planner</td><td><code>/angular-scan-quality</code></td><td>Lint, Lighthouse, bundle size, a11y, performance</td></tr>
@@ -792,7 +794,7 @@ orch reset</code></pre>
             <tr><td>Verifier</td><td><code>/angular-test-unit</code></td><td>Generate Jest tests per org conventions</td></tr>
             <tr><td>Verifier</td><td><code>/angular-review</code></td><td>Review against anti-pattern checklist</td></tr>
           </tbody></table>
-          <p style="font-size: var(--fs-caption); color: var(--fg-muted); text-align: center;">62 skills: 10 planner, 23 engineer, 6 migration, 8 local, 6 audit, 4 docs, 3 present, 1 elevate. Each declares reference dependencies &mdash; only loads what it needs.</p>
+          <p style="font-size: var(--fs-caption); color: var(--fg-muted); text-align: center;">Each skill declares reference dependencies &mdash; only loads what it needs.</p>
         </div>
       </section>
 
@@ -902,37 +904,32 @@ phases:
 
       <!-- 14 -->
       <section>
-        <header><h2>The Agent Ecosystem</h2><p>11 agents. One orchestrator tier. Domain-specific agents. Full observability.</p></header>
+        <header><h2>The Agent Ecosystem</h2><p>Three clean layers. One orchestrator. Domain agents. Shared services.</p></header>
         <div class="body">
-          <div style="display: flex; flex-direction: column; gap: var(--sp-4); width: 100%;">
-            <!-- Tier 1: Orchestrator -->
-            <div>
-              <div style="font-size: var(--fs-tiny); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin-bottom: var(--sp-2);">Orchestrator (2 agents)</div>
-              <div class="agent-grid" style="grid-template-columns: 1fr 1fr;">
-                <div class="agent-card"><div class="name" style="color: var(--fg-accent);">@orch</div><div class="role">Universal entry point</div><div class="desc">Auto-detects domain from project files, runs pre-flight, composes plans (including multi-domain), monitors workflows. One command &mdash; same result whether you use @orch or @angular.</div></div>
-                <div class="agent-card"><div class="name" style="color: var(--fg-accent);">@orch-preflight</div><div class="role">Readiness checks</div><div class="desc">Validates build baseline, doc freshness, and environment before any workflow begins.</div></div>
+          <div style="display: flex; flex-direction: column; gap: var(--sp-3); width: 100%;">
+            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--fg-accent); border-radius: 8px; padding: var(--sp-3) var(--sp-5);">
+              <h3 style="margin: 0 0 var(--sp-1) 0;">Orchestrator</h3>
+              <div style="display: flex; align-items: baseline; gap: var(--sp-4);">
+                <span style="font-family: var(--f-mono); font-weight: 500; color: var(--fg-accent);">@orch</span>
+                <span style="font-size: var(--fs-small); color: var(--fg-secondary);">Auto-detects domain, pre-flight, plans, monitors</span>
               </div>
             </div>
-            <!-- Tier 2: Domain-specific -->
-            <div>
-              <div style="font-size: var(--fs-tiny); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin-bottom: var(--sp-2);">Angular domain (5 agents) &mdash; coordinator + planner + engineer + verifier + migrate-worker</div>
-              <div class="agent-grid">
-                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@angular</div><div class="role">Coordinator</div><div class="desc">39 skills: scan, generate, migrate, test, review, refactor, HDS, elevate, mock-wire.</div></div>
-                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@angular-planner</div><div class="role">Scan &amp; plan</div><div class="desc">Scans deps, arch, quality, tests. Produces structured plans.</div></div>
-                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@angular-engineer</div><div class="role">Build &amp; change</div><div class="desc">Generates, migrates, refactors. Type-safe transforms via ts-morph.</div></div>
-                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@angular-verifier</div><div class="role">Test &amp; review</div><div class="desc">Runs build, lint, unit, e2e. Reviews against anti-pattern checklist.</div></div>
-                <div class="agent-card"><div class="name" style="color: var(--fg-teal);">@migrate-worker</div><div class="role">Migration executor</div><div class="desc">Handles version upgrades, standalone conversion, control-flow, signals.</div></div>
+            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--border-default); border-radius: 8px; padding: var(--sp-3) var(--sp-5);">
+              <h3 style="margin: 0 0 var(--sp-1) 0;">Domain Agents</h3>
+              <div style="display: flex; align-items: baseline; gap: var(--sp-6); flex-wrap: wrap;">
+                <span><span style="font-family: var(--f-mono); font-weight: 500; color: var(--fg-teal);">@angular</span> <span class="tag tag-teal">active</span></span>
+                <span><span style="font-family: var(--f-mono); font-weight: 500; color: var(--fg-teal);">@springboot</span> <span class="tag tag-amber">coming</span></span>
+                <span><span style="font-family: var(--f-mono); font-weight: 500; color: var(--fg-teal);">@fastapi</span> <span class="tag tag-amber">coming</span></span>
               </div>
             </div>
-            <!-- Tier 3: Shared across domains -->
-            <div>
-              <div style="font-size: var(--fs-tiny); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin-bottom: var(--sp-2);">Shared across all domains (4 agents)</div>
-              <div class="agent-grid" style="grid-template-columns: 1fr 1fr;">
-                <div class="agent-card"><div class="name" style="color: oklch(0.5 0.1 85);">@docs</div><div class="role">Reference supply chain</div><div class="desc">Fetch, convert, track freshness, detect doc-code drift. 4 skills.</div></div>
-                <div class="agent-card"><div class="name" style="color: oklch(0.5 0.1 85);">@doc-convert-worker</div><div class="role">HTML-to-markdown</div><div class="desc">Converts fetched HTML docs to token-efficient markdown.</div></div>
-                <div class="agent-card"><div class="name" style="color: var(--neutral-500);">@audit</div><div class="role">Observability &amp; compliance</div><div class="desc">Usage, tokens, compliance, drift, model benchmarks. 6 skills.</div></div>
-                <div class="agent-card"><div class="name" style="color: var(--neutral-500);">@local</div><div class="role">Local environment setup</div><div class="desc">Setup env, dependencies, Docker, mock API servers. 8 skills.</div></div>
+            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--border-default); border-radius: 8px; padding: var(--sp-3) var(--sp-5);">
+              <h3 style="margin: 0 0 var(--sp-1) 0;">Shared Services</h3>
+              <div style="display: flex; align-items: baseline; gap: var(--sp-6); flex-wrap: wrap;">
+                <span style="font-family: var(--f-mono); font-weight: 500; color: oklch(0.5 0.1 85);">@docs</span>
+                <span style="font-family: var(--f-mono); font-weight: 500; color: var(--neutral-500);">@audit</span>
+                <span style="font-family: var(--f-mono); font-weight: 500; color: var(--neutral-500);">@local</span>
               </div>
+              <div style="font-size: var(--fs-small); color: var(--fg-secondary); margin-top: var(--sp-1);">References, compliance, environment setup</div>
             </div>
           </div>
         </div>
@@ -940,189 +937,185 @@ phases:
 
       <!-- 14b — ORCH Architecture Diagram -->
       <section>
-        <header><h2>ORCH Architecture</h2><p>@orch at the top. Auto-detects domain. Routes to the right agent.</p></header>
+        <header><h2>ORCH Architecture</h2><p>Event-driven flow. One command to autonomous execution.</p></header>
         <div class="body">
-          <pre><code>┌─────────────────────────────────────────────────────────────┐
-│                         VS Code                              │
-│  ┌──────────────────────────┐  ┌──────────────────────────┐  │
-│  │   Copilot Chat           │  │  .vscode/settings        │  │
-│  │   @orch (universal entry)│  │  autopilot: true          │  │
-│  │   @angular (fast path)   │  │  terminal: auto            │  │
-│  └────────────┬─────────────┘  └──────────────────────────┘  │
-│               │                                               │
-│  ┌────────────▼──────────────────────────────────────────┐   │
-│  │  @orch orchestration layer                             │   │
-│  │  detect-domains.js → routes to domain agents           │   │
-│  │  compose-plan.js   → dynamic multi-domain plans        │   │
-│  │  pre-flight        → git clean, deps, build baseline   │   │
-│  └────────────┬──────────────────────────────────────────┘   │
-│               │  publishes events                             │
-│  ┌────────────▼──────────────────────────────────────────┐   │
-│  │           Event-Driven Relay                           │   │
-│  │  ┌──────────┐  ┌────────────┐  ┌────────────────┐     │   │
-│  │  │Publisher  │  │  Relay.js  │  │   Monitor      │     │   │
-│  │  │YAML→evts │  │poll→dispatch│  │progress→report │     │   │
-│  │  └──────────┘  └────────────┘  └────────────────┘     │   │
-│  │  Scripts: spawn()       AI: code chat                  │   │
-│  │  Parallel (4x)          Sequential (1x)                │   │
-│  └────────────┬──────────────────────────────────────────┘   │
-│               │  dispatches to domain agents                  │
-│  ┌────────────▼──────────────────────────────────────────┐   │
-│  │  Domain Agents: @angular │ @springboot │ @python (future)│ │
-│  └────────────────────────────────────────────────────────┘   │
-│  ┌────────────────────────────────────────────────────────┐   │
-│  │               .orch/ (Knowledge Base)                   │   │
-│  │  config.yaml   │  resolver.yaml   │  references/        │   │
-│  │  hooks/        │  templates/      │  scripts/           │   │
-│  │  workflows/    │  runs/           │  reports/            │   │
-│  │  boundaries    │  cache/          │  audit/              │   │
-│  └────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘</code></pre>
-          <p style="font-size: var(--fs-caption); color: var(--fg-muted); text-align: center;">@orch auto-detects domain, composes plans, runs pre-flight. @angular is the fast path &mdash; skip pre-flight, go direct. Both produce the same events. Same relay. Same result.</p>
+          <div style="display: flex; flex-direction: column; gap: var(--sp-4); align-items: center; width: 100%;">
+
+            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--border-default); border-radius: 8px; padding: var(--sp-3) var(--sp-5); text-align: center; width: 80%;">
+              <strong>User</strong>: "@orch migrate to Angular 21"
+            </div>
+
+            <div style="color: var(--fg-muted);">&#x25BC;</div>
+
+            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--fg-accent); border-radius: 8px; padding: var(--sp-3) var(--sp-5); text-align: center; width: 80%;">
+              <strong>@orch</strong> &mdash; Pre-flight &middot; Detect domain &middot; Match workflow
+            </div>
+
+            <div style="color: var(--fg-muted);">&#x25BC;</div>
+
+            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--border-default); border-radius: 8px; padding: var(--sp-3) var(--sp-5); width: 80%;">
+              <strong>Plan</strong> &mdash; Event files created
+              <div style="display: flex; gap: var(--sp-2); margin-top: var(--sp-2); flex-wrap: wrap; justify-content: center;">
+                <span class="tag tag-teal">001 scan</span>
+                <span class="tag tag-teal">002 compat</span>
+                <span class="tag tag-amber">003 upgrade</span>
+                <span class="tag tag-amber">004 migrate</span>
+                <span class="tag">005 verify</span>
+              </div>
+              <div style="margin-top: var(--sp-2); font-size: 0.8em; color: var(--fg-muted); text-align: center;">
+                approve &middot; approve-all &middot; --auto
+              </div>
+            </div>
+
+            <div style="color: var(--fg-muted);">&#x25BC;</div>
+
+            <div style="background: var(--bg-card, var(--bg-surface)); border: 1.5px solid var(--fg-accent); border-radius: 8px; padding: var(--sp-3) var(--sp-5); text-align: center; width: 80%;">
+              <strong>Relay</strong> &mdash; Scripts: parallel (4x) &middot; AI: code chat &middot; Polls every 5s
+            </div>
+
+            <div style="color: var(--fg-muted);">&#x25BC;</div>
+
+            <div style="background: var(--teal-100, oklch(0.95 0.03 170)); border: 1.5px solid var(--teal-500, oklch(0.55 0.12 170)); border-radius: 8px; padding: var(--sp-3) var(--sp-5); text-align: center; width: 80%;">
+              <strong>Complete</strong> &mdash; Report at .orch/reports/ &middot; Git tag &middot; Trend tracked
+            </div>
+
+          </div>
         </div>
       </section>
 
-      <!-- 14c — Why Not Request-Response? -->
+      <!-- 16 — Event-Driven, Not Chat-Driven -->
       <section>
-        <header><h2>Why Not Request-Response?</h2><p>The typical agent loop breaks at scale. Event-driven execution solves it.</p></header>
+        <header><h2>Event-Driven, Not Chat-Driven</h2><p>One command replaces ten "continue" messages.</p></header>
         <div class="body">
           <div class="split split-2">
             <div>
-              <h3>Request-Response (typical)</h3>
+              <h3>Traditional (chat-driven)</h3>
               <ul>
-                <li><strong>Context bloats:</strong> 30K+ tokens by phase 5</li>
-                <li><strong>User types</strong> "continue" 10 times</li>
-                <li><strong>No parallelism</strong> &mdash; one tool at a time</li>
-                <li><strong>Crash = start over</strong> &mdash; no state persistence</li>
-                <li><strong>Tools run out</strong> (25&ndash;100 per turn)</li>
+                <li>Agent answers in chat, forgets context between turns</li>
+                <li>User types "continue" 10x to keep a workflow going</li>
+                <li>Context window bloats to 30K+ tokens &mdash; quality degrades</li>
+                <li>No parallelism &mdash; one tool call at a time</li>
+                <li>Crash = start over from scratch</li>
               </ul>
             </div>
             <div>
-              <h3>Event-Driven (ORCH)</h3>
+              <h3>ORCH (event-driven)</h3>
               <ul>
-                <li><strong>Fresh context</strong> per phase (~2K tokens)</li>
-                <li><strong>Scripts run automatically</strong> (zero tokens)</li>
-                <li><strong>Parallel scan phases</strong> (4x faster)</li>
-                <li><strong>Crash-resilient</strong> &mdash; file-based state</li>
-                <li><strong>Full tool budget</strong> per AI phase</li>
+                <li>One command &rarr; plan &rarr; relay &rarr; autonomous execution &rarr; report</li>
+                <li>Each phase gets fresh context (~2K tokens vs 30K accumulated)</li>
+                <li>Scripts run without AI &mdash; zero token cost for mechanical work</li>
+                <li>Parallel script phases (4x), sequential AI phases (1x)</li>
+                <li>Crash-resilient &mdash; file-based state, resume from last phase</li>
               </ul>
             </div>
           </div>
-          <p class="callout">In a 10-phase migration, request-response burns ~300K tokens with degrading quality. Event-driven uses ~20K total with consistent quality per phase.</p>
+          <p class="callout">In a 10-phase migration, chat-driven burns ~300K tokens with degrading quality. Event-driven uses ~20K total with consistent quality per phase.</p>
         </div>
       </section>
 
-      <!-- 14d — Version-Aware Stack Resolution -->
+      <!-- 17 — Safe by Default, Auto When Ready -->
       <section>
-        <header><h2>Version-Aware Stack Resolution</h2><p>Right docs for the right version. Automatically.</p></header>
+        <header><h2>Safe by Default, Auto When Ready</h2><p>Build confidence incrementally. Never forced into full auto.</p></header>
         <div class="body">
           <ul>
-            <li><strong>Auto-detects Angular version</strong> from <code>package.json</code> at session start</li>
-            <li><strong>Loads version-appropriate</strong> reference docs and patterns &mdash; v16 projects get NgModule/constructor patterns, v19+ get signals/standalone</li>
-            <li><strong>~50% token savings</strong> from loading only relevant docs instead of the full v16&ndash;v21 corpus</li>
-            <li><strong>Cascading fallback:</strong> cache &rarr; detect &rarr; pin &rarr; default</li>
-            <li><strong>Zero config required</strong> &mdash; works out of the box, with optional <code>.orch/config.yaml</code> version pin override</li>
+            <li><strong>Default:</strong> relay pauses before AI phases &mdash; user reviews the prompt before execution</li>
+            <li><code>@orch approve</code> &rarr; run one phase. <code>@orch approve-all</code> &rarr; run the rest of the workflow. <code>--auto</code> &rarr; everything runs unattended.</li>
+            <li><strong>Incremental trust:</strong> start with approve-per-phase, graduate to approve-all, then --auto when confident</li>
+            <li><strong>VS Code settings.json</strong> for hard enforcement: terminal command allowlists, file edit patterns, autopilot limits</li>
+            <li><strong>Every action logged</strong> regardless of mode &mdash; full audit trail in <code>.orch/runs/</code></li>
           </ul>
-          <pre><code># Automatic resolution — no manual config needed
-references/angular/v16/  → NgModule, constructor injection
-references/angular/v19/  → standalone, signals, inject()
-references/angular/v21/  → latest APIs, new test harness</code></pre>
-        </div>
-      </section>
-
-      <!-- 15 -->
-      <section>
-        <header><h2>Full Control</h2><p>Three-level rule cascade. Global &rarr; domain &rarr; skill.</p></header>
-        <div class="body">
-          <div class="split split-2">
-            <div><h3>Configuration</h3><pre><code># .orch/config.yaml
-workflow:
-  max_retries: 3
-  auto_mode: false
-models:
-  planner: claude-sonnet-4
-  engineer: claude-sonnet-4
-preflight:
-  max_stale_days: 30
-  check_build_baseline: true</code></pre></div>
-            <div><h3>Boundaries</h3><pre><code># .orch/config/boundaries.yaml
-agents:
-  angular-engineer:
-    allowed_tools:
-      - codebase
-      - terminal
-      - edit
-    allowed_scope:
-      - "src/**/*.ts"
-      - "src/**/*.html"
-    blocked_commands:
-      - "rm -rf"
-      - "git push --force"</code></pre></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 15b — Governance & Safety -->
-      <section>
-        <header><h2>Governance &amp; Safety</h2><p>Two-layer enforcement. What makes ORCH enterprise-ready, not just a developer tool.</p></header>
-        <div class="body">
-          <div class="split split-2" style="margin-bottom: var(--sp-4);">
-            <div>
-              <h3>Two-layer enforcement</h3>
-              <ul>
-                <li><strong>VS Code settings.json (HARD):</strong> terminal commands allowlist, file edit patterns, autopilot limits</li>
-                <li><strong>ORCH boundaries.yaml (SOFT + hooks):</strong> per-agent tool restrictions, file scope, blocked commands</li>
-                <li><strong>Audit trail:</strong> every tool call, file edit, token logged to <code>.orch/runs/</code></li>
-              </ul>
-            </div>
-            <div>
-              <h3>What's enforced</h3>
-              <table>
-                <thead><tr><th>Layer</th><th>Example</th><th>Enforcement</th></tr></thead>
-                <tbody>
-                  <tr><td>VS Code settings</td><td><code>rm: false</code> in terminal.autoApprove</td><td>Platform blocks it</td></tr>
-                  <tr><td>ORCH hooks</td><td>Planner tries edit tool &rarr; preToolUse hook exits 1</td><td>Hook blocks it</td></tr>
-                  <tr><td>ORCH boundaries</td><td>Engineer writes outside <code>src/</code> &rarr; postToolUse logs violation</td><td>Logged + scored</td></tr>
-                  <tr><td>ORCH instructions</td><td>"Never run DROP TABLE"</td><td>LLM compliance</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <p class="callout">Hard boundaries cannot be bypassed. Soft boundaries are logged and scored. Instructions rely on LLM compliance &mdash; but hooks catch violations.</p>
-        </div>
-      </section>
-
-      <!-- 15c — Safe by Default -->
-      <section>
-        <header><h2>Safe by Default</h2><p>One command. Auto-detect. Plan review. Then execute.</p></header>
-        <div class="body">
-          <pre><code>@orch upgrade this project
-  ↓
-Pre-flight: ✓ git clean, deps installed
-Domain: Angular 16.2 (detected from package.json)
-Plan: angular-migration (10 phases)
-  ↓
-Safe mode: "Review plan. @orch approve or approve-all"
-Auto mode: relay starts immediately</code></pre>
           <div class="split split-2" style="margin-top: var(--sp-4);">
             <div>
               <h3>Safe mode (default)</h3>
-              <ul>
-                <li><code>@orch upgrade this project</code></li>
-                <li>Pre-flight runs: git clean, deps check</li>
-                <li>Domain auto-detected from project files</li>
-                <li>Plan shown to user before execution starts</li>
-                <li>Approve one phase or approve-all remaining</li>
-              </ul>
+              <pre><code>@orch upgrade this project
+→ Plan shown. "Review plan."
+→ @orch approve       # one phase
+→ @orch approve-all   # rest</code></pre>
             </div>
             <div>
               <h3>Full auto mode</h3>
+              <pre><code>@orch upgrade this project --auto
+→ Pre-flight, plan, relay — all auto
+→ Zero human interaction needed
+→ Rollback via git checkpoints</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 18 — Version-Aware, Not One-Size-Fits-All -->
+      <section>
+        <header><h2>Version-Aware, Not One-Size-Fits-All</h2><p>Right docs for the right version. Automatically.</p></header>
+        <div class="body">
+          <ul>
+            <li><strong>Detects Angular version</strong> from <code>package.json</code> (checksum-based, cached for speed)</li>
+            <li><strong>v16 project</strong> gets NgModule patterns, constructor injection. <strong>v21 project</strong> gets signals + standalone.</li>
+            <li><strong>Resolver loads only relevant reference docs</strong> &mdash; ~50% token savings vs loading the full v16&ndash;v21 corpus</li>
+            <li><strong>Same skills, different advice per version</strong> &mdash; no manual config required</li>
+            <li><strong>Cascading fallback:</strong> cache &rarr; detect &rarr; pin &rarr; default</li>
+          </ul>
+          <pre><code># Automatic resolution — zero config needed
+references/angular/v16/  → NgModule, constructor injection
+references/angular/v19/  → standalone, signals, inject()
+references/angular/v21/  → latest APIs, new test harness
+
+# Optional override in .orch/config.yaml
+stack:
+  angular: "16.2.0"   # pin to specific version</code></pre>
+        </div>
+      </section>
+
+      <!-- 19 — Enterprise Governance Built In -->
+      <section>
+        <header><h2>Enterprise Governance Built In</h2><p>Two-layer boundaries. Full audit trail. Compliance scoring.</p></header>
+        <div class="body">
+          <ul>
+            <li><strong>Two-layer boundaries:</strong> VS Code settings (hard) + ORCH <code>boundaries.yaml</code> (soft + hooks)</li>
+            <li><strong>Per-agent tool restrictions,</strong> file scope limits, blocked commands</li>
+            <li><strong>Audit trail:</strong> every tool call, file edit, token count logged to <code>.orch/runs/</code></li>
+            <li><strong>Compliance scoring:</strong> adherence percentage per agent, per session</li>
+            <li><strong>Drift detection:</strong> pattern counts tracked across runs, trends surfaced in reports</li>
+          </ul>
+          <table>
+            <thead><tr><th>Layer</th><th>Example</th><th>Enforcement</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag tag-teal">VS Code settings</span></td><td><code>rm: false</code> in terminal.autoApprove</td><td>Platform blocks it</td></tr>
+              <tr><td><span class="tag tag-teal">ORCH hooks</span></td><td>Planner tries edit tool &rarr; preToolUse exits 1</td><td>Hook blocks it</td></tr>
+              <tr><td><span class="tag tag-amber">ORCH boundaries</span></td><td>Engineer writes outside <code>src/</code></td><td>Logged + scored</td></tr>
+              <tr><td><span class="tag tag-amber">ORCH instructions</span></td><td>"Never run DROP TABLE"</td><td>LLM compliance</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 20 — Full-Stack Platform Integration -->
+      <section>
+        <header><h2>Full-Stack Platform Integration</h2><p>Your internal platform, baked into every agent interaction.</p></header>
+        <div class="body">
+          <ul>
+            <li><strong>Elevate platform:</strong> 23 libraries auto-detected from <code>package.json</code></li>
+            <li><strong>HDS design system:</strong> tokens, theming, component wrappers &mdash; agents use them by default</li>
+            <li><strong>Core libs auto-installed</strong> on project creation via <code>orch new</code></li>
+            <li><strong>Skills audit compliance,</strong> apply fixes, generate new code with platform patterns</li>
+            <li><strong>Version-aware:</strong> HDS v1 vs v2, PrimeNG v16 vs v21 &mdash; correct imports and APIs</li>
+          </ul>
+          <div class="split split-2" style="margin-top: var(--sp-4);">
+            <div>
+              <h3>What's detected</h3>
               <ul>
-                <li><code>@orch upgrade this project --auto</code></li>
-                <li>Same detection and pre-flight, then relay starts immediately</li>
-                <li>Zero human interaction required</li>
-                <li>Every action still logged to <code>.orch/runs/</code></li>
-                <li>Rollback available via git checkpoints</li>
+                <li>HDS components, tokens, theming config</li>
+                <li>AG Grid enterprise vs community</li>
+                <li>PrimeNG modules in use</li>
+                <li>Nx workspace structure and boundaries</li>
+              </ul>
+            </div>
+            <div>
+              <h3>What agents do with it</h3>
+              <ul>
+                <li>Generate components using HDS wrappers</li>
+                <li>Apply correct design tokens in SCSS</li>
+                <li>Enforce Nx library boundaries</li>
+                <li>Score Elevate adoption in audit reports</li>
               </ul>
             </div>
           </div>
@@ -1326,16 +1319,8 @@ If auto_mode is "step-by-step": pause at every step.</code></pre>
 
       <!-- 18 -->
       <section>
-        <header><h2>The Numbers</h2></header>
+        <header><h2>The Value</h2></header>
         <div class="body">
-          <div class="stat-row">
-            <div class="stat accent"><div class="val">61</div><div class="lbl">Skills</div></div>
-            <div class="stat teal"><div class="val">44</div><div class="lbl">Automation scripts</div></div>
-            <div class="stat"><div class="val">92</div><div class="lbl">Example files</div></div>
-            <div class="stat"><div class="val">5</div><div class="lbl">Shared lib modules</div></div>
-            <div class="stat teal"><div class="val">3</div><div class="lbl">Event-driven workflows</div></div>
-            <div class="stat"><div class="val">56</div><div class="lbl">Reference docs</div></div>
-          </div>
           <div class="stat-row">
             <div class="stat accent"><div class="val">90%+</div><div class="lbl">Pattern adherence</div></div>
             <div class="stat teal"><div class="val">&minus;40%</div><div class="lbl">Onboarding time</div></div>
@@ -1458,8 +1443,8 @@ orch doctor
       <!-- EXTENSIBILITY — vertical sub-slides -->
       <section>
         <section>
-          <header><h2>Beyond Copilot — <span class="highlight-text">Agent-Agnostic</span> Architecture</h2>
-          <p>ORCH's core is not tied to VS Code or GitHub Copilot. It works with any coding agent.</p></header>
+          <header><h2>Beyond VS Code — <span class="highlight-text">Tool-Agnostic</span> Architecture</h2>
+          <p>ORCH's core works with any AI coding tool.</p></header>
           <div class="body">
             <div class="split split-3">
               <div>
@@ -1484,7 +1469,7 @@ orch doctor
                 </ul>
               </div>
               <div>
-                <h3>Target Agents</h3>
+                <h3>Supported Tools</h3>
                 <ul>
                   <li><strong>VS Code GitHub Copilot</strong> (current)</li>
                   <li><strong>GitHub Copilot CLI</strong></li>
@@ -1603,7 +1588,7 @@ orch doctor
       <!-- CLOSING -->
       <section class="closing">
         <div class="mark"></div>
-        <h1>Coding agents are powerful. <span class="highlight-text">ORCH</span> makes them yours.</h1>
+        <h1>Coding agents are powerful.<br><span class="highlight-text">ORCH</span> makes them yours.</h1>
         <p>Event-driven. Boundary-enforced. Your standards. Your audit trail. Any agent. Full control.</p>
         <div class="cta">npm install -g @orch/cli</div>
       </section>

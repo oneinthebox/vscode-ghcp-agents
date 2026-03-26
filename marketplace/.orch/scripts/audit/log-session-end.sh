@@ -3,7 +3,7 @@
 # Triggered by: sessionEnd hook event
 # Purpose: Finalizes audit record with timing, file changes, adherence checks
 
-set -euo pipefail
+set -uo pipefail
 
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.sessionId // "unknown"')

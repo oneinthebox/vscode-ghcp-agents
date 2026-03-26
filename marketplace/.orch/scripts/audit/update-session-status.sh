@@ -4,7 +4,7 @@
 # Purpose: Maintain user-facing session status with work progress
 # Output: .orch/audit/session-status.json
 
-set -euo pipefail
+set -uo pipefail
 
 SESSION_FILE="${1:-}"
 if [ -z "$SESSION_FILE" ] || [ ! -f "$SESSION_FILE" ]; then

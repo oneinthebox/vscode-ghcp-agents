@@ -4,7 +4,7 @@
 # Purpose: Blocks tool calls not in agent's declared tools list
 # Exit 0 = allow, Exit 1 = block
 
-set -euo pipefail
+set -uo pipefail
 
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.sessionId // "unknown"')

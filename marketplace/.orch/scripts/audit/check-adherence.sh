@@ -3,7 +3,7 @@
 # Called by: log-session-end.sh after session completes
 # Purpose: Grep generated/modified code against adherence rules
 
-set -euo pipefail
+set -uo pipefail
 
 SESSION_FILE="${1:-}"
 if [ -z "$SESSION_FILE" ] || [ ! -f "$SESSION_FILE" ]; then

@@ -4,7 +4,7 @@
 # Purpose: Detect context rot by tracking token accumulation and adherence drops
 # Output: Updates session-status.json with quality status
 
-set -euo pipefail
+set -uo pipefail
 
 SESSION_FILE="${1:-}"
 if [ -z "$SESSION_FILE" ] || [ ! -f "$SESSION_FILE" ]; then

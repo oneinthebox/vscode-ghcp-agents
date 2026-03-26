@@ -3,11 +3,11 @@
 # Triggered by: userPromptSubmitted hook event
 # Purpose: Logs prompt text and estimates input tokens
 
-set -euo pipefail
+set -uo pipefail
 
 INPUT=$(cat)
-SESSION_ID=$(echo "$INPUT" | jq -r '.sessionId // "unknown"')
-PROMPT_TEXT=$(echo "$INPUT" | jq -r '.prompt // ""')
+SESSION_ID=$(echo "$INPUT" | jq -r '.sessionId // "unknown"' 2>/dev/null || echo "unknown")
+PROMPT_TEXT=$(echo "$INPUT" | jq -r '.prompt // ""' 2>/dev/null || echo "")
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 DATE_DIR=$(date -u +"%Y-%m-%d")
 

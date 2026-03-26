@@ -3,7 +3,7 @@
 # Purpose: Roll up daily session data into summary metrics
 # Usage: ./aggregate-metrics.sh [date] (defaults to today)
 
-set -euo pipefail
+set -uo pipefail
 
 DATE="${1:-$(date -u +%Y-%m-%d)}"
 SESSIONS_DIR=".orch/runs/${DATE}"

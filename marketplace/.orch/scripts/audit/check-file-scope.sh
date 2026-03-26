@@ -3,11 +3,14 @@
 # Triggered by: postToolUse hook event
 # Purpose: Checks if file edits are within agent's declared scope
 
-set -euo pipefail
+set -uo pipefail
+# Note: not using -e so jq parse failures don't crash the hook
 
 INPUT=$(cat)
-SESSION_ID=$(echo "$INPUT" | jq -r '.sessionId // "unknown"')
-TOOL_NAME=$(echo "$INPUT" | jq -r '.toolName // "unknown"')
+
+# Gracefully handle malformed JSON input from VS Code
+SESSION_ID=$(echo "$INPUT" | jq -r '.sessionId // "unknown"' 2>/dev/null || echo "unknown")
+TOOL_NAME=$(echo "$INPUT" | jq -r '.toolName // "unknown"' 2>/dev/null || echo "unknown")
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 DATE_DIR=$(date -u +"%Y-%m-%d")
 
@@ -17,7 +20,7 @@ if [ "$TOOL_NAME" != "edit" ] && [ "$TOOL_NAME" != "write" ]; then
 fi
 
 # Extract file path from tool parameters
-FILE_PATH=$(echo "$INPUT" | jq -r '.toolParameters.file // .toolParameters.filePath // ""')
+FILE_PATH=$(echo "$INPUT" | jq -r '.toolParameters.file // .toolParameters.filePath // ""' 2>/dev/null || echo "")
 if [ -z "$FILE_PATH" ]; then
   exit 0
 fi

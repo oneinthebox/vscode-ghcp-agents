@@ -3,7 +3,7 @@
 # Triggered by: postToolUse hook event
 # Purpose: Logs tool usage details and estimates output tokens
 
-set -euo pipefail
+set -uo pipefail
 
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.sessionId // "unknown"')

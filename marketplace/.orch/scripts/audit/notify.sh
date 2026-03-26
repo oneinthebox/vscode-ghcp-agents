@@ -11,7 +11,7 @@
 #
 # Everything else: status bar + chat. Never interrupt for progress/milestones.
 
-set -euo pipefail
+set -uo pipefail
 
 LEVEL="${1:-info}"    # critical, warning, info
 TITLE="${2:-ORCH}"

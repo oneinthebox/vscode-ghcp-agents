@@ -129,6 +129,21 @@ export async function resetCommand(options: any): Promise<void> {
     } catch { }
   }
 
+  // Remove .vscode/settings.json if it was ORCH-installed
+  const vsSettingsPath = path.join(projectPath, '.vscode', 'settings.json');
+  if (fs.existsSync(vsSettingsPath)) {
+    try {
+      const content = fs.readFileSync(vsSettingsPath, 'utf8');
+      // Only remove if it contains ORCH-specific settings
+      if (content.includes('chat.autopilot.enabled') || content.includes('chat.agent.enabled')) {
+        makeWritable(vsSettingsPath);
+        fs.unlinkSync(vsSettingsPath);
+        removed++;
+        removeEmptyDirTree(path.join(projectPath, '.vscode'));
+      }
+    } catch { }
+  }
+
   // Remove .orch-backup files
   cleanupBackupFiles(projectPath);
 
@@ -147,6 +162,9 @@ export async function resetCommand(options: any): Promise<void> {
   await summary({ ok: removed, warn: skipped, fail: errors });
   info(`${removed} files removed, ${dirsRemoved} directories cleaned up`);
   console.log('');
+  info('Recommended: Start a fresh VS Code Copilot Chat session (Cmd+L / Ctrl+L)');
+  info('to clear any cached agent behavior from previous sessions.');
+  console.log('');
 }
 
 async function forceReset(projectPath: string, dryRun: boolean): Promise<void> {
@@ -162,6 +180,7 @@ async function forceReset(projectPath: string, dryRun: boolean): Promise<void> {
   // Known ORCH root files
   const orchFiles = [
     '.github/copilot-instructions.md',
+    '.vscode/settings.json',
   ];
 
   // Collect everything that exists
@@ -219,8 +238,14 @@ async function forceReset(projectPath: string, dryRun: boolean): Promise<void> {
   // Restore .github backup if it exists
   restoreGithubBackup(projectPath);
 
+  // Clean up empty .vscode if nothing left
+  removeEmptyDirTree(path.join(projectPath, '.vscode'));
+
   await summary({ ok: removed, warn: 0, fail: errors });
   info(`${removed} items removed`);
+  console.log('');
+  info('Recommended: Start a fresh VS Code Copilot Chat session (Cmd+L / Ctrl+L)');
+  info('to clear any cached agent behavior from previous sessions.');
   console.log('');
 }
 

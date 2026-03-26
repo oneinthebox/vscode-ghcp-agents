@@ -149,9 +149,9 @@ export async function initCommand(options: any): Promise<void> {
   );
 
   const scriptResult = await withSpinner(
-    'Copying audit scripts',
+    'Copying scripts (audit + relay + hooks + detection)',
     async () => { await sleep(300); return plan.auditScripts; },
-    { successText: `${plan.auditScripts.length} scripts` }
+    { successText: `${plan.auditScripts.length} audit + relay + hooks + detection scripts` }
   );
 
   if (plan.semanticAdapters.length > 0) {
