@@ -78,7 +78,7 @@ The Angular Update Guide is an interactive tool at https://angular.dev/update-gu
 
 ```bash
 ng version              # Check current versions
-git status              # Ensure clean state
+git status              # Check state (dirty git is not a blocker — warn only)
 ng build                # Verify build works
 ng test --no-watch      # Verify tests pass
 ```

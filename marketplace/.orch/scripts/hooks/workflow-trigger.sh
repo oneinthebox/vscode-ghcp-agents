@@ -158,6 +158,20 @@ if [ "$MATCHED_NAME" = "angular-new-feature" ]; then
   fi
 fi
 
+# Inject auto_mode into context if --auto flag was present
+if [ -n "$AUTO_FLAG" ]; then
+  # Add auto_mode to existing context JSON
+  CONTEXT=$(echo "$CONTEXT" | sed 's/}$/,"auto_mode":"auto"}/')
+  # Fix edge case of empty context
+  if [ "$CONTEXT" = '{"auto_mode":"auto"}' ] || echo "$CONTEXT" | grep -q '"auto_mode"'; then
+    : # already set
+  else
+    CONTEXT=$(echo "$CONTEXT" | sed 's/}$/,"auto_mode":"auto"}/')
+  fi
+else
+  CONTEXT=$(echo "$CONTEXT" | sed 's/}$/,"auto_mode":"safe"}/')
+fi
+
 # Publish the workflow events
 PUBLISH_OUTPUT=$(node .orch/scripts/relay/publish.js "$MATCHED_WORKFLOW" "$CONTEXT" 2>/dev/null)
 PUBLISH_EXIT=$?
@@ -170,9 +184,15 @@ fi
 # Extract run ID from publish output
 RUN_ID=$(echo "$PUBLISH_OUTPUT" | jq -r '.run_id // ""' 2>/dev/null || echo "")
 
-# Start the relay in background
-nohup node .orch/scripts/relay/relay.js $AUTO_FLAG > /tmp/orch-relay-${SESSION_ID}.log 2>&1 &
-RELAY_PID=$!
+# Start the relay in background — but only if one isn't already running
+EXISTING_RELAY=$(pgrep -f "relay.js" 2>/dev/null || echo "")
+if [ -z "$EXISTING_RELAY" ]; then
+  nohup node .orch/scripts/relay/relay.js $AUTO_FLAG > /tmp/orch-relay-${SESSION_ID}.log 2>&1 &
+  RELAY_PID=$!
+else
+  RELAY_PID="$EXISTING_RELAY"
+  echo "Relay already running (PID: $RELAY_PID) — reusing" >&2
+fi
 
 # ─── PUNCH 2: Inject context for the LLM ───────────────────────────────────
 

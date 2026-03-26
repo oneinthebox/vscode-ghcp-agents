@@ -1641,7 +1641,7 @@ preflight:
   check_references: true
   max_stale_days: 30
   check_build_baseline: true
-  check_git_clean: true
+  check_git_clean: true    # WARNING only — never blocks workflows
   auto_refresh_docs: true
 
 models:

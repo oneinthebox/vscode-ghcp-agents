@@ -120,7 +120,7 @@ ng update @angular/core@20 @angular/cli@20
 # Check current versions
 ng version
 
-# Ensure clean git state
+# Check git state (dirty state is not a blocker — warn only)
 git status
 
 # Run tests before upgrade

@@ -30,7 +30,9 @@ preflight:
   # Run a baseline build (ng build / nx build) before starting any migration or refactor.
   check_build_baseline: true
 
-  # Require a clean git working tree (no uncommitted changes) before write operations.
+  # Check git working tree for uncommitted changes. WARNING only — NEVER blocks workflows.
+  # ORCH directories (.github/, .orch/, .vscode/) are always dirty after init — ignored.
+  # Source file changes (src/, libs/, apps/) produce a warning but do not stop execution.
   check_git_clean: true
 
   # Automatically re-fetch stale reference docs before skills that depend on them.
@@ -121,3 +123,20 @@ context:
   prompt_style: lazy          # lazy (file pointers) | inline (current behavior)
   soft_budget_tokens: 8000    # hint to AI, not enforced
   max_inherited_phases: 5     # only show pointers for last N dependency phases
+
+# ═══════════════════════════════════════════════════════════════
+# ORG LIBRARY PREFERENCES
+# ═══════════════════════════════════════════════════════════════
+# These preferences are checked during migration planning.
+# The plan generator flags libraries that don't match org standards.
+
+org_preferences:
+  ui_library: primeng            # prefer PrimeNG over Angular Material
+  grid: ag-grid                  # prefer AG Grid over other grid libraries
+  chart: plotly                  # prefer Plotly over Chart.js, Highcharts, etc.
+  e2e: playwright                # prefer Playwright over Cypress, Protractor
+  test_runner: jest              # prefer Jest over Karma, Vitest
+  state_management: ngrx-signals # prefer NgRx Signal Store over NgRx Store, service-with-subjects
+  di_pattern: inject             # prefer inject() over constructor injection
+  component_style: standalone    # prefer standalone over NgModule
+  control_flow: block            # prefer @if/@for over *ngIf/*ngFor

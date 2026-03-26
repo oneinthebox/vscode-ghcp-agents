@@ -290,7 +290,7 @@ Request a multi-step operation. The coordinator routes through planner, engineer
 
 | Use `@orch` when | Use `@angular` when |
 |---|---|
-| You want pre-flight safety checks (git clean, deps installed) | You know it's Angular and want speed |
+| You want pre-flight safety checks (git state warning, deps installed) | You know it's Angular and want speed |
 | The task spans multiple domains (Docker + Angular + mock) | Single Angular task |
 | You want plan review before execution | You trust the workflow and want immediate action |
 | You're not sure which agent to use | You know the exact skill to invoke |
@@ -335,7 +335,7 @@ preflight:
   check_references: true      # validate reference file paths
   max_stale_days: 30          # flag references older than N days
   check_build_baseline: true  # run ng build before migrations
-  check_git_clean: true       # require clean git working tree
+  check_git_clean: true       # check git state (WARNING only — never blocks workflow)
   auto_refresh_docs: true     # auto-fetch stale references
 
 models:

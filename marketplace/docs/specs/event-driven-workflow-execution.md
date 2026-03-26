@@ -371,7 +371,7 @@ User request
   ↓
 @orch (or @angular directly)
   ↓
-Pre-flight checks (via @orch only): git clean, deps installed, build baseline
+Pre-flight checks (via @orch only): git state (warn only — never blocks), deps installed, build baseline
   ↓
 Domain detection (via @orch only): detect-domains.js reads project files
   ↓

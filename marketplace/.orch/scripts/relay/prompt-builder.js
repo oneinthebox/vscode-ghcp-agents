@@ -242,6 +242,25 @@ function buildPrompt(event, runDir, projectRoot) {
     lines.push('');
   }
 
+  // Execution mode — tells the AI whether to ask for approval or just execute
+  if (evtCtx.auto_mode === 'auto' || evtCtx.auto_mode === 'all') {
+    lines.push('## EXECUTION MODE: AUTO — APPROVAL ALREADY GRANTED');
+    lines.push('The user passed `--auto`. **You have full authority. Approval is already granted.** Act as a senior engineer:');
+    lines.push('');
+    lines.push('1. **Write your plan** to `.orch/plans/` (so it is visible on disk, not just in chat)');
+    lines.push('2. **Execute immediately** — do NOT say "Plan ready, please approve" or "How should I proceed?"');
+    lines.push('3. **Make every decision yourself** — peer dep conflict → --force. Budget exceeded → increase it. Tests fail → fix or skip.');
+    lines.push('4. **Check local docs first** (.orch/references/) for migration guides and compatibility matrices');
+    lines.push('5. **Web search as fallback** — only when local docs don\'t have the answer');
+    lines.push('6. **Document decisions** in the completion marker\'s `collected.decisions` array');
+    lines.push('7. **Write the completion marker and stop** — do NOT offer follow-up questions');
+    lines.push('');
+  } else if (evtCtx.auto_mode === 'safe') {
+    lines.push('## EXECUTION MODE: SAFE');
+    lines.push('You are running in **safe mode**. Present your plan briefly, then execute it. You do not need to wait for explicit approval — the user already approved when they started the workflow.');
+    lines.push('');
+  }
+
   lines.push('## Task');
   if (contextSection) {
     lines.push(contextSection);
@@ -467,6 +486,25 @@ function buildSkeletonPrompt(event, runDir, projectRoot) {
     if (evtCtx.feature_name) {
       lines.push(`**Feature: ${evtCtx.feature_name}** at \`${evtCtx.target_path || 'src/app/features/' + evtCtx.feature_name}\``);
     }
+    lines.push('');
+  }
+
+  // Execution mode — tells the AI whether to ask for approval or just execute
+  if (evtCtx.auto_mode === 'auto' || evtCtx.auto_mode === 'all') {
+    lines.push('## EXECUTION MODE: AUTO — APPROVAL ALREADY GRANTED');
+    lines.push('The user passed `--auto`. **You have full authority. Approval is already granted.** Act as a senior engineer:');
+    lines.push('');
+    lines.push('1. **Write your plan** to `.orch/plans/` (so it is visible on disk, not just in chat)');
+    lines.push('2. **Execute immediately** — do NOT say "Plan ready, please approve" or "How should I proceed?"');
+    lines.push('3. **Make every decision yourself** — peer dep conflict → --force. Budget exceeded → increase it. Tests fail → fix or skip.');
+    lines.push('4. **Check local docs first** (.orch/references/) for migration guides and compatibility matrices');
+    lines.push('5. **Web search as fallback** — only when local docs don\'t have the answer');
+    lines.push('6. **Document decisions** in the completion marker\'s `collected.decisions` array');
+    lines.push('7. **Write the completion marker and stop** — do NOT offer follow-up questions');
+    lines.push('');
+  } else if (evtCtx.auto_mode === 'safe') {
+    lines.push('## EXECUTION MODE: SAFE');
+    lines.push('You are running in **safe mode**. Present your plan briefly, then execute it. You do not need to wait for explicit approval — the user already approved when they started the workflow.');
     lines.push('');
   }
 

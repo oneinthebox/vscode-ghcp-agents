@@ -30,13 +30,19 @@ Upgrades Angular applications across major versions (e.g., 17 to 18 to 19). Uses
 - **Mode** (optional) — `--branch-only` (default) or `--worktree`.
 - **Auto mode** (optional) — `step-by-step`, `auto=safe` (default), or `auto=all`.
 
-### Helper Script
+### Helper Scripts
 
-Run the detection script before executing steps manually:
+**Plan generator** — creates a detailed migration plan from package.json analysis:
+```bash
+node scripts/generate-plan.js [project-root] --to {VERSION}
+```
+Writes `.orch/plans/migration-plan.md` with: current packages, step-by-step upgrade path, commands, requirements, breaking changes, risks. Also outputs JSON summary to stdout.
+
+**Upgrade path checker** — quick version compatibility check:
 ```bash
 node scripts/check-upgrade-path.js [project-root]
 ```
-The script outputs JSON to stdout with the current Angular version, detected packages, and a recommended upgrade path. Use this data to inform the steps below.
+Outputs JSON with current version, detected packages, and recommended upgrade path.
 
 ## Steps
 
@@ -58,45 +64,111 @@ The script outputs JSON to stdout with the current Angular version, detected pac
      - Node.js version required.
      - Angular CDK/Material version.
      - Third-party library compatibility (PrimeNG, AG Grid, NgRx, etc.).
-   - Present the plan to the user.
+   **Step 3a: Generate the base plan (script):**
+   Run the plan generator script first — it analyzes package.json and produces a detailed migration plan:
+   ```bash
+   node .github/skills/angular-migrate-version/scripts/generate-plan.js . --to {TARGET_VERSION}
+   ```
+   This writes a plan to `.orch/plans/migration-plan.md` with: current state (all packages + versions), step-by-step upgrade path, commands for each step, requirements, breaking changes, and risks.
 
-4. **Execute each major version step** (one at a time):
+   **Step 3b: Review and enrich the plan (AI):**
+   Read `.orch/plans/migration-plan.md`. As a senior engineer:
+   - Check the plan against local reference docs (`.orch/references/angular/v19/compatibility-matrix.md`, `.orch/references/angular/v19/migration-guide.md`)
+   - If local docs are insufficient, do a web search for the specific version compatibility
+   - Add any missing risks, known issues, or additional steps
+   - Append your findings to the plan file under a `## AI Review` section
 
-   **a. Pre-step dependency updates.**
-   - Update TypeScript to the version required by the target Angular version.
-   - Update RxJS if required.
-   - Update Zone.js if required.
-   - Update Node.js type definitions.
-   - Build + test to verify pre-step changes.
-   - Commit checkpoint: `migrate: pre-step — TypeScript {version}, RxJS {version}`.
+   **Step 3c: Execute or present:**
+   - **In auto mode:** Execute the plan immediately. The user approved by passing `--auto`.
+   - **In safe mode:** Show a brief summary of the plan and proceed. The user approved when they started the workflow.
 
-   **b. Run ng update for Angular core.**
-   - Execute: `ng update @angular/core@{version} @angular/cli@{version}`.
-   - Review and apply any automatic migrations (schematics).
-   - Build + test to verify.
-   - Commit checkpoint: `migrate: Angular {version} core update`.
+4. **DECISION AUTHORITY (auto mode vs regular mode):**
 
-   **c. Update Angular companion packages.**
-   - `ng update @angular/cdk@{version}` and `@angular/material@{version}` if present.
-   - Update `@angular/animations`, `@angular/forms`, `@angular/router` if not already updated.
-   - Build + test to verify.
-   - Commit checkpoint.
+   **If EXECUTION MODE is AUTO (see prompt header):**
+   You are the senior engineer. Make every decision yourself. Use web search to find answers when unsure. Document your decisions in the completion marker's `collected` field.
 
-   **d. Update third-party packages.**
-   - Update each third-party package to its compatible version per the matrix.
-   - Build + test after each package.
-   - Commit checkpoint.
+   | Situation | Your action | Do NOT |
+   |-----------|------------|--------|
+   | Peer dependency conflict | Search npm for compatible version. If none, use `--force`. Log which package conflicted. | Ask the user |
+   | Bundle budget exceeded | Increase budgets in `angular.json` temporarily. Log the original values. | Stop and ask |
+   | Test failures | Read the error, fix the test. If complex, skip with `--testPathIgnorePatterns` and log it. | Ask "how should I proceed?" |
+   | Deprecated API | Search the Angular update guide (web search if needed) for the replacement. Apply it. | Wait for instructions |
+   | Incompatible third-party lib | Search npm for compatible version of that lib for the target Angular. Install it. If none exists, use `--force` and log. | Say "How do you want to proceed?" |
+   | Unknown error | Search the web for the error message. Apply the top solution. If still stuck, log the error and continue to the next step. | Stop the migration |
+   | Node.js version warning | Ignore. Angular CLI handles compat internally. | Change Node version |
 
-   **e. Address breaking changes.**
-   - Review Angular update guide for the target version.
-   - Apply manual fixes for deprecated APIs, removed features, changed behavior.
-   - Build + test to verify.
-   - Commit checkpoint.
+   **Your decisions go into the completion marker:**
+   ```json
+   "collected": {
+     "decisions": [
+       {"issue": "jest-preset-angular peer conflict", "action": "used --force, jest-preset-angular@14 needed", "risk": "low"},
+       {"issue": "bundle budget exceeded", "action": "increased to 2MB temporarily", "risk": "none — optimize later"}
+     ]
+   }
+   ```
 
-5. **Repeat step 4** for each major version jump until target is reached.
+   **If EXECUTION MODE is SAFE (or not specified):**
+   Present the plan briefly. If you encounter a significant issue (data loss risk, major breaking change), you may ask the user. For routine issues (peer deps, budgets, test fixes), handle them yourself and note in the output.
 
-6. **Final verification.**
+5. **Execute the following commands IN ORDER. Do NOT stop between commands. Do NOT ask "shall I continue?" Run them all sequentially.**
+
+   ```bash
+   # Step A: Update TypeScript and prerequisites
+   npx ng update @angular/core@{TARGET} @angular/cli@{TARGET} --force --allow-dirty
+
+   # Step B: Update CDK and Material (if installed — check package.json first)
+   npx ng update @angular/cdk@{TARGET} @angular/material@{TARGET} --force --allow-dirty
+
+   # Step C: Build to verify
+   npx ng build 2>&1 || echo "Build failed — checking errors"
+
+   # Step D: If build fails on budget, fix it:
+   # Edit angular.json → increase maximumWarning to "4mb" and maximumError to "8mb"
+   # Then rebuild: npx ng build
+
+   # Step E: Run tests
+   npx ng test --watch=false 2>&1 || echo "Some tests failed — will fix after full upgrade"
+   ```
+
+   **Run ALL of the above without pausing.** If a command fails, log the error and continue to the next command. Fix errors after all commands have run.
+
+   **Common errors and what to do (do NOT ask — just do it):**
+   - `peer dependency conflict` → already handled by `--force`
+   - `budget exceeded` → edit angular.json budgets, rebuild
+   - `test failures` → note them, continue. Fix after upgrade.
+   - `package not found at version` → try without version: `npx ng update @angular/cdk --force`
+   - `ERESOLVE` → run `npm install --force` then retry
+
+5. **Handle build/test failures during migration** (NEVER stop — fix and continue):
+
+   **Bundle budget exceeded:**
+   - If `ng build` fails with "initial exceeded the maximum budget", increase the budget in `angular.json`:
+     - Find `budgets` array under `architect > build > configurations > production`
+     - Increase `maximumWarning` and `maximumError` temporarily (e.g., `"maximumWarning": "2mb", "maximumError": "5mb"`)
+     - Continue with the build. Bundle size can be optimized after migration.
+   - NEVER stop the migration for budget issues. Fix and continue.
+
+   **Test failures:**
+   - If tests fail after an upgrade step, fix the tests. Common causes:
+     - Import paths changed — update imports
+     - Deprecated APIs removed — use the replacement API
+     - Test setup changed — update TestBed configuration
+   - If tests cannot be fixed quickly, skip failing tests with `--testPathIgnorePatterns` and note them for follow-up.
+   - NEVER stop the migration for test failures. Fix what you can, skip what you can't, continue.
+
+   **Node.js version incompatibility:**
+   - If `ng update` warns about Node.js version, proceed anyway — the Angular CLI handles most compat itself.
+   - Do NOT change the system Node.js version during migration. Use `npx` which uses the project's local CLI.
+
+   **npm peer dependency warnings:**
+   - These are warnings, not errors. Proceed with `--force` if needed: `ng update @angular/core@{version} --force`.
+   - Peer dep issues resolve themselves as all packages are updated to matching versions.
+
+6. **Repeat step 4** for each major version jump until target is reached.
+
+7. **Final verification.**
    - Full build: `ng build --configuration=production`.
+   - If budget still exceeded: note it in the report as a follow-up optimization item.
    - Full test suite: `ng test`.
    - Full e2e if available.
    - Verify all Angular packages are on the same major version.

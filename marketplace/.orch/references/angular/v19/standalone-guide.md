@@ -202,7 +202,7 @@ export const appConfig: ApplicationConfig = {
 ## Prerequisites
 
 - Angular 15.2.0+ (schematic available from v15.2)
-- Clean git branch
+- Git branch checked (dirty state is not a blocker — warn only)
 - Project compiles without errors
 - Run `ng build` and `ng test` after each step
 

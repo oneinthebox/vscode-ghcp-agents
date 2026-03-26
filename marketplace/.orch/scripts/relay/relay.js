@@ -184,7 +184,7 @@ function processCompletion(event, marker, runDir, events) {
     if (event.checkpoint && event.checkpoint.enabled) {
       try {
         // Stage source files only (exclude ORCH infrastructure)
-        execSync('git add -A -- . ":!.github" ":!.orch" ":!.vscode" ":!.github.pre-orch" 2>/dev/null || true', {
+        execSync('git add -A -- . ":!.github" ":!.orch" ":!.vscode" ":!.github.pre-orch" ":!.angular" ":!.nx" ":!node_modules" 2>/dev/null || true', {
           cwd: projectRoot, stdio: 'pipe'
         });
         // Only commit if there are staged changes
@@ -321,7 +321,7 @@ function dispatchScript(event, runDir, events) {
       // Git checkpoint — NEVER blocks the workflow
       if (event.checkpoint && event.checkpoint.enabled) {
         try {
-          execSync('git add -A -- . ":!.github" ":!.orch" ":!.vscode" ":!.github.pre-orch" 2>/dev/null || true', {
+          execSync('git add -A -- . ":!.github" ":!.orch" ":!.vscode" ":!.github.pre-orch" ":!.angular" ":!.nx" ":!node_modules" 2>/dev/null || true', {
             cwd: projectRoot, stdio: 'pipe'
           });
           try {
@@ -426,7 +426,10 @@ function dispatchAI(event, runDir) {
       'local': 'local'
     };
     const agentName = agentMap[rawAgent] || rawAgent;
-    const cmd = 'code chat --mode agent --reuse-window --add-file "' + promptFile + '" "@' + agentName + ' Execute the phase described in the attached prompt file. When complete, you MUST create the completion marker file specified at the end of the prompt. Do NOT ask follow-up questions. Do NOT offer next steps. Just execute, write the marker, and stop."';
+    var autoNote = (event.context && event.context.auto_mode === 'auto')
+      ? ' AUTO MODE: The user has already approved this phase. You have full authority to proceed. Do NOT ask for approval — it is already granted. Do NOT say \\"How should I proceed?\\" — proceed with your best judgment. If you create a plan, write it to .orch/plans/ AND execute it immediately. Use --force for dependency conflicts. Increase budgets if builds fail. Fix or skip failing tests. Search web if local docs are insufficient. Document decisions in the completion marker. Execute now.'
+      : '';
+    const cmd = 'code chat --mode agent --reuse-window --add-file "' + promptFile + '" "@' + agentName + ' Execute the phase described in the attached prompt file.' + autoNote + ' When complete, create the completion marker file specified at the end of the prompt."';
     const child = spawn('sh', ['-c', cmd], { detached: true, stdio: 'ignore' });
     child.unref();
     log('  Sent to @' + agentName + ' via code chat');
@@ -486,7 +489,17 @@ function poll() {
   const events = store.readAllEvents(runDir);
   if (!events.length) return;
 
-  // 0. Check for user approval signals (safe mode)
+  // 0a. Recover runningAI state from events (handles relay restart)
+  if (!runningAI) {
+    for (var ri = 0; ri < events.length; ri++) {
+      if (events[ri].lifecycle.status === 'running' && events[ri].execution.type === 'ai') {
+        runningAI = events[ri].identity.event_id;
+        break;
+      }
+    }
+  }
+
+  // 0b. Check for user approval signals (safe mode)
   checkApprovalSignals(runDir, events);
 
   // 1. Check completion markers for running AI phases

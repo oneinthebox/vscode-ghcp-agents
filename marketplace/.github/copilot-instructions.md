@@ -71,9 +71,9 @@ These rules are locked. Every agent must comply.
 ## Pre-flight
 
 - `@orch-preflight` runs before every workflow (not ad-hoc queries).
-- Pre-flight checks: reference freshness, version alignment, audit hooks active, build baseline, git clean state, config validity, dependencies installed.
+- Pre-flight checks: reference freshness, version alignment, audit hooks active, build baseline, git state (WARNING only — never a blocker), config validity, dependencies installed.
 - Pre-flight behavior is configured via the `preflight:` section in `.orch/config.yaml`.
-- If pre-flight fails on a blocking check, halt the workflow and report the issue.
+- If pre-flight fails on a blocking check, halt the workflow and report the issue. **Exception: git dirty state is NEVER a blocking check** — ORCH directories are always dirty after init, and source file changes are a warning only.
 
 ## Overridable vs Locked Rules
 

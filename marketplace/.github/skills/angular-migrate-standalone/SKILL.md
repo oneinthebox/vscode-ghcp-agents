@@ -35,7 +35,7 @@ The script outputs JSON to stdout with all NgModules found and their migration c
 ## Steps
 
 1. **Pre-flight checks.**
-   - Verify clean git state (`git status --porcelain`). Stop if dirty.
+   - Check git state. If only `.github/`, `.orch/`, `.vscode/`, `node_modules/` are dirty — IGNORE (ORCH infrastructure). Only warn if source files (`src/`, `libs/`, `apps/`) are dirty. **NEVER stop for dirty git state.**
    - Record current branch as return point.
    - Create migration branch: `migrate/standalone-{date}`.
 

@@ -45,7 +45,7 @@ Checks run before any skill execution to ensure a healthy starting state.
 | `preflight.check_references` | bool | `true` | Validate that all file paths in skill `references` frontmatter resolve to real files |
 | `preflight.max_stale_days` | number | `30` | Days after which a reference doc is flagged as stale |
 | `preflight.check_build_baseline` | bool | `true` | Run `ng build` / `nx build` before starting migrations or refactors |
-| `preflight.check_git_clean` | bool | `true` | Require clean git working tree (no uncommitted changes) before write operations |
+| `preflight.check_git_clean` | bool | `true` | Check git working tree for uncommitted changes (WARNING only — never blocks workflows). ORCH directories (.github/, .orch/, .vscode/) are ignored. Source file changes produce a warning but do not stop execution. |
 | `preflight.auto_refresh_docs` | bool | `true` | Automatically re-fetch stale reference docs before skills that depend on them |
 
 ### Preflight Flow
@@ -53,13 +53,14 @@ Checks run before any skill execution to ensure a healthy starting state.
 ```
 User invokes skill
   --> Preflight runs:
-    1. check_git_clean? --> git status --porcelain (fail if dirty)
+    1. check_git_clean? --> git status --porcelain (WARN if dirty — NEVER blocks. ORCH dirs ignored.)
     2. check_references? --> resolve each path in skill's references[] (warn if missing)
     3. max_stale_days? --> check last_refreshed in registry for each reference
     4. auto_refresh_docs? --> if stale, invoke /docs-refresh before continuing
     5. check_build_baseline? --> ng build / nx build (fail if broken)
   --> If all pass: proceed to skill execution
-  --> If any fail: report which checks failed, offer remediation
+  --> If any fail (except git dirty): report which checks failed, offer remediation
+  --> Git dirty state: warn and continue — NEVER stop or block
 ```
 
 ## Models Section
@@ -160,7 +161,7 @@ preflight:
   check_references: true
   max_stale_days: 30
   check_build_baseline: true
-  check_git_clean: true
+  check_git_clean: true       # WARNING only — never blocks workflows
   auto_refresh_docs: true
 
 models:
