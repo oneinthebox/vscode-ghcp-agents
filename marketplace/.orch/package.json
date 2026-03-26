@@ -1,0 +1,18 @@
+{
+  "name": "@orch/runtime-deps",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ORCH runtime dependencies — installed by orch init, isolated from project deps",
+  "dependencies": {
+    "ts-morph": "^24.0.0",
+    "ts-node": "^10.9.0",
+    "json-server": "^0.17.4",
+    "ws": "^8.18.0"
+  },
+  "optionalDependencies": {
+    "multiple-cucumber-html-reporter": "^3.7.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -81,8 +81,20 @@ const totalSteps = stepsPassed + stepsFailed + stepsSkipped + stepsPending;
 // Generate HTML report
 // ---------------------------------------------------------------------------
 
+// Resolve multiple-cucumber-html-reporter — try ORCH's isolated node_modules first
+let report;
 try {
-  const report = require('multiple-cucumber-html-reporter');
+  report = require(path.join(process.cwd(), '.orch', 'node_modules', 'multiple-cucumber-html-reporter'));
+} catch {
+  try {
+    report = require('multiple-cucumber-html-reporter');
+  } catch {
+    report = null;
+  }
+}
+
+try {
+  if (!report) throw new Error('not installed');
   report.generate({
     jsonDir: REPORT_DIR,
     reportPath: HTML_OUTPUT,
@@ -107,7 +119,7 @@ try {
   console.log(`Report generated: ${HTML_OUTPUT}/index.html`);
 } catch (err) {
   console.error('Warning: multiple-cucumber-html-reporter not installed.');
-  console.error('Install it: npm install --save-dev multiple-cucumber-html-reporter');
+  console.error('Fix: Run "cd .orch && npm install" or "npm install --save-dev multiple-cucumber-html-reporter"');
   console.error('Falling back to summary only.\n');
 }
 

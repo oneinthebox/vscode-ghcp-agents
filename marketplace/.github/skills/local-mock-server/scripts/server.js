@@ -33,16 +33,18 @@ function getFlag(name, defaultVal) {
   return idx !== -1 && args[idx + 1] ? args[idx + 1] : defaultVal;
 }
 
-// Check dependencies
+// Check dependencies — try ORCH's isolated node_modules first, then project-level
+let jsonServer;
 try {
-  require.resolve('json-server');
-} catch (e) {
-  console.error('json-server not found. Install: npm install json-server');
-  console.error('Or run from .orch/mocks/: npm install');
-  process.exit(1);
+  jsonServer = require(path.join(process.cwd(), '.orch', 'node_modules', 'json-server'));
+} catch {
+  try {
+    jsonServer = require('json-server');
+  } catch {
+    console.error('json-server not found. Run: cd .orch && npm install');
+    process.exit(1);
+  }
 }
-
-const jsonServer = require('json-server');
 
 // Check mock data exists
 const dbPath = path.join(mocksDir, 'db.json');
@@ -149,8 +151,22 @@ const httpServer = http.createServer(app);
 // WebSocket setup (if ws-messages.json exists)
 const wsChannels = Object.keys(wsMessages);
 if (wsChannels.length > 0) {
+  // Resolve ws — try ORCH's isolated node_modules first, then project-level
+  let WebSocket;
   try {
-    const WebSocket = require('ws');
+    WebSocket = require(path.join(process.cwd(), '.orch', 'node_modules', 'ws'));
+  } catch {
+    try {
+      WebSocket = require('ws');
+    } catch {
+      WebSocket = null;
+    }
+  }
+
+  if (!WebSocket) {
+    console.warn('ws package not found. WebSocket endpoints disabled.');
+    console.warn('Fix: Run "cd .orch && npm install" or "npm install ws".');
+  } else {
     const wss = new WebSocket.Server({ server: httpServer });
 
     wss.on('connection', (ws, req) => {
@@ -178,8 +194,6 @@ if (wsChannels.length > 0) {
     });
 
     console.log(`WebSocket channels: ${wsChannels.join(', ')}`);
-  } catch (e) {
-    console.warn('ws package not found. WebSocket endpoints disabled. Install: npm install ws');
   }
 }
 

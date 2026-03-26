@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}} - ORCH Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── HDS oklch tokens (deep blue palette, hue 240) ─────────── */
+    :root {
+      --bg:        oklch(0.99 0.005 240);
+      --fg:        oklch(0.15 0.02 240);
+      --fg-muted:  oklch(0.45 0.02 240);
+      --accent:    oklch(0.45 0.15 240);
+      --teal:      oklch(0.55 0.12 170);
+      --amber:     oklch(0.65 0.15 85);
+      --red:       oklch(0.55 0.15 25);
+      --border:    oklch(0.88 0.01 240);
+      --surface:   oklch(0.96 0.005 240);
+      --font-heading: 'Newsreader', Georgia, serif;
+      --font-body:    'Outfit', system-ui, sans-serif;
+      --font-mono:    'IBM Plex Mono', monospace;
+    }
+
+    /* ── Reset & base ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.65;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+    }
+
+    /* ── Typography ────────────────────────────────────────────── */
+    h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: 600; color: var(--fg); }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border); }
+    h3 { font-size: 1.15rem; margin: 1.5rem 0 0.75rem; }
+    p { margin-bottom: 1rem; }
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 0.5rem 1rem;
+      color: var(--fg-muted);
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      background: var(--surface);
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+    }
+    pre {
+      background: oklch(0.97 0.005 240);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      margin: 1rem 0;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Tables (striped, bordered) ────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.6rem 0.8rem; border: 1px solid var(--border); }
+    th {
+      background: var(--surface);
+      color: var(--fg-muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    tbody tr:nth-child(even) { background: oklch(0.98 0.003 240); }
+
+    /* ── Status badges ─────────────────────────────────────────── */
+    .tag-pass {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: var(--teal);
+      color: #fff;
+    }
+    .tag-warn {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: var(--amber);
+      color: #000;
+    }
+    .tag-fail {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: var(--red);
+      color: #fff;
+    }
+
+    /* ── KPI card grid (4-up) ──────────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+    }
+    .kpi-value {
+      font-size: 1.8rem;
+      font-weight: 600;
+      font-family: var(--font-heading);
+      color: var(--accent);
+    }
+    .kpi-label {
+      color: var(--fg-muted);
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Progress bar ──────────────────────────────────────────── */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0.25rem 0;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    .progress-fill.green  { background: var(--teal); }
+    .progress-fill.amber  { background: var(--amber); }
+    .progress-fill.red    { background: var(--red); }
+
+    /* ── Trend arrows ──────────────────────────────────────────── */
+    .trend-up   { color: var(--teal); }   /* green */
+    .trend-down { color: var(--red); }    /* red */
+    .trend-flat { color: var(--fg-muted); } /* gray */
+
+    /* Directional trend colors — good/bad depend on metric type */
+    .trend-up-good { color: oklch(0.55 0.15 150); }    /* green — improvement */
+    .trend-up-bad { color: oklch(0.55 0.15 25); }       /* red — regression */
+    .trend-down-good { color: oklch(0.55 0.15 150); }   /* green — improvement */
+    .trend-down-bad { color: oklch(0.55 0.15 25); }     /* red — regression */
+    .delta { font-size: 0.85em; font-weight: 500; }
+
+    /* ── Lists ─────────────────────────────────────────────────── */
+    ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.35rem; }
+
+    /* ── Report header ─────────────────────────────────────────── */
+    .report-header {
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .report-header .dateline {
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+    }
+
+    /* ── Report footer ─────────────────────────────────────────── */
+    .report-footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      color: var(--fg-muted);
+      font-size: 0.75rem;
+      text-align: center;
+    }
+
+    /* ── Mermaid diagrams ──────────────────────────────────────── */
+    .mermaid {
+      margin: 1rem 0;
+      text-align: center;
+    }
+
+    /* ── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      body { padding: 1rem; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      table { font-size: 0.8rem; }
+      th, td { padding: 0.4rem 0.5rem; }
+    }
+
+    /* ── Print ─────────────────────────────────────────────────── */
+    @media print {
+      body {
+        background: #fff;
+        color: #111;
+        max-width: 100%;
+        padding: 1rem;
+        font-size: 11pt;
+      }
+      .report-header { border-bottom-color: #333; }
+      h2 { border-bottom-color: #ccc; }
+      .kpi-card { border-color: #ccc; background: #f9f9f9; }
+      .tag-pass { background: #d1fae5; color: #065f46; }
+      .tag-warn { background: #fef3c7; color: #92400e; }
+      .tag-fail { background: #fee2e2; color: #991b1b; }
+      pre { background: #f5f5f5; border-color: #ccc; }
+      tbody tr:nth-child(even) { background: #f9f9f9; }
+      a { color: #333; text-decoration: underline; }
+      .mermaid svg { max-width: 100%; }
+      .trend-up-good, .trend-down-good { color: #16a34a; }
+      .trend-up-bad, .trend-down-bad { color: #dc2626; }
+      .trend-flat { color: #6b7280; }
+    }
+  </style>
+</head>
+<body>
+  <header class="report-header">
+    <h1>{{title}}</h1>
+    <p class="dateline">{{date}} &middot; {{agent}}</p>
+  </header>
+
+  <main>
+    {{content}}
+  </main>
+
+  <footer class="report-footer">
+    Generated by ORCH &bull; {{agent}} &bull; {{date}}
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      themeVariables: {
+        primaryColor: '#6366f1',
+        primaryTextColor: '#1e1b4b',
+        lineColor: '#94a3b8',
+        secondaryColor: '#e0e7ff',
+        tertiaryColor: '#f0f0ff'
+      }
+    });
+  </script>
+</body>
+</html>

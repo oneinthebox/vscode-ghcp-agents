@@ -52,7 +52,7 @@ The script outputs JSON to stdout with all NgModules found and their migration c
    - SharedModule migrates last (or is dissolved into individual exports).
 
 5. **Execute migration per module** using ts-morph:
-   - Run: `npx ts-node scripts/semantic/adapters/typescript/transform.ts standalone --scope {module-path}`
+   - Run: `npx --prefix .orch ts-node .orch/scripts/semantic/adapters/typescript/transform.ts standalone --scope {module-path}`
    - ts-morph will:
      - Add `standalone: true` to each component/directive/pipe in the module.
      - Move module imports to each component's `imports` array.

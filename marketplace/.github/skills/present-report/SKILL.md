@@ -44,6 +44,7 @@ This is a shared skill under @orch, available to any agent. Unlike `/present-dec
 **Additional flags:**
 
 - `--output <path>` — Custom output filename (default: same name with format extension)
+- `--template <name>` — Template name to use (loads from `.orch/templates/reports/`); omit for free-form
 - `--theme <name>` — Override theme from `.orch/config.yaml`
 - `--coverage <path>` — Path to Istanbul/lcov coverage JSON to include coverage section
 
@@ -71,7 +72,44 @@ Read `.orch/config.yaml` for branding overrides (logo, colors, theme).
 
 Parse `--format` flag. If `all`, queue: md, html, json, pdf, deck.
 
-### 3. Render Markdown (`--format md`)
+### 3. Templates
+
+Templates define a consistent report structure that gets filled with data from each run. They live in `.orch/templates/reports/` and use a lightweight mustache-style syntax processed by `render-report.js`.
+
+**Built-in templates:**
+
+| Template | Workflow | Purpose |
+|----------|----------|---------|
+| `recap-report` | `angular-project-recap` | Full project overview with architecture, deps, quality, git |
+| `migrate-report` | `angular-migration` | Before/after comparison, phase progress, breaking changes |
+| `create-report` | `angular-new-feature` | Files created, architecture impact, route/service changes |
+| `audit-report` | Audit runs | KPI summary, findings by severity, token cost, compliance |
+
+**Custom templates** can be added to `.orch/templates/reports/custom/` and selected via the `--template` flag.
+
+**Template syntax:**
+
+- `{{var}}` — HTML-escaped value from data
+- `{{{var}}}` — raw value (for markdown content, Mermaid diagrams)
+- `{{#key}}...{{/key}}` — conditional block (render if key exists/truthy) or loop (if key is array)
+- `{{^key}}...{{/key}}` — inverted block (render if key is falsy/missing)
+- Dotted paths supported: `{{#sections.architecture}}{{{content}}}{{/sections.architecture}}`
+
+**How templates connect to workflows:**
+
+Each workflow YAML has a `report: template:` field that maps to a template file:
+
+```yaml
+report:
+  template: recap-report        # loads .orch/templates/reports/recap-report.md
+  title: "Project Recap — {{project-name}}"
+```
+
+When `--template` is passed to `render-report.js`, it loads the template, fills placeholders from the JSON data, and renders the result. When no template is specified, the renderer uses its built-in free-form logic.
+
+**HTML rendering with templates:** When `--format html` is combined with `--template`, the rendered markdown body is inserted into `.orch/templates/base.html` — a shared HTML wrapper with HDS oklch tokens, responsive layout, Mermaid CDN, and print styles.
+
+### 4. Render Markdown (`--format md`)
 
 - Tables rendered as GFM pipe tables
 - Code blocks with language fences
@@ -80,7 +118,7 @@ Parse `--format` flag. If `all`, queue: md, html, json, pdf, deck.
 - Metrics as a summary table with trend indicators (arrows: up/down/flat)
 - Recommendations as numbered list with priority tags
 
-### 4. Render HTML (`--format html`)
+### 5. Render HTML (`--format html`)
 
 Generate a self-contained HTML page with:
 
@@ -103,7 +141,7 @@ Post-generation verification (all checks must pass, max 3 retries):
 | Structure   | Valid HTML, `<thead>`/`<tbody>` on tables, TOC anchors match section IDs   |
 | Content     | No `{{TEMPLATE}}` placeholders, summary is concise, metrics have 4-6 items |
 
-### 5. Render JSON (`--format json`)
+### 6. Render JSON (`--format json`)
 
 Structured output following the report-data schema:
 
@@ -139,7 +177,7 @@ Structured output following the report-data schema:
 - Coverage section follows Istanbul/lcov conventions
 - Version field for forward compatibility
 
-### 6. Render PDF (`--format pdf`)
+### 7. Render PDF (`--format pdf`)
 
 1. First render the HTML format (step 4)
 2. Use Puppeteer `page.pdf()` or `wkhtmltopdf` to convert HTML to PDF
@@ -151,7 +189,7 @@ Structured output following the report-data schema:
 node scripts/render-report.js report-data.json --format pdf --output report.pdf
 ```
 
-### 7. Render Deck (`--format deck`)
+### 8. Render Deck (`--format deck`)
 
 Extract key slides from report sections and generate reveal.js HTML:
 
@@ -178,6 +216,61 @@ Code coverage is a first-class report type:
 node scripts/coverage-to-report.js coverage-summary.json --output report-data.json
 node scripts/render-report.js report-data.json --format html --output coverage-report.html
 ```
+
+## Trend Tracking
+
+When `--template` is used, the report renderer automatically saves a snapshot of the report data and computes deltas against the previous run.
+
+### How it works
+
+1. **Before rendering:** the renderer loads the most recent previous snapshot for the report type (determined by the `--template` flag value)
+2. **Trend computation:** if a previous snapshot exists, each metric in `data.metrics[]` is enriched with `previous`, `delta`, `trend`, and `trend_color` fields
+3. **After rendering:** the current report data is saved as a new timestamped snapshot
+4. **Templates** can conditionally show Previous and Delta columns when `data.has_previous` is true
+
+### Snapshot storage
+
+- Snapshots are saved to `.orch/reports/{type}/{YYYY-MM-DD}T{HH-MM-SS}.json`
+- Maximum 30 snapshots retained per report type (oldest are pruned automatically)
+- The `{type}` comes from the `--template` flag value (e.g., `recap`, `audit`, `coverage`)
+
+### Enriched metrics
+
+Each metric object gains these fields after trend computation:
+
+| Field         | Type     | Description                                          |
+|---------------|----------|------------------------------------------------------|
+| `previous`    | number   | Value from the previous snapshot (null if new metric)|
+| `delta`       | string   | Formatted change, e.g. `"+13%"`, `"-9"`, `"+0.04"`  |
+| `trend`       | string   | Arrow indicator: `\u2191` (up), `\u2193` (down), `\u2192` (flat), or `"new"` |
+| `trend_color` | string   | One of: `good`, `bad`, `flat`, `up`, `down`          |
+
+### Metric direction detection
+
+The system auto-detects whether higher or lower values are "good" based on the metric name:
+
+- **Higher is better** (keywords: `coverage`, `adherence`, `quality`, `documented`, `pass_rate`, `success_rate`, `score`, `compliance`): increase = green, decrease = red
+- **Lower is better** (keywords: `errors`, `warnings`, `violations`, `cost`, `tokens`, `duration`, `stale`, `size`): decrease = green, increase = red
+- **Neutral** (no keyword match): direction shown without good/bad coloring
+
+### CSS classes for trend display
+
+Templates can use these classes from `base.html`:
+
+```css
+.trend-up-good   /* green — metric improved by going up */
+.trend-up-bad    /* red — metric regressed by going up */
+.trend-down-good /* green — metric improved by going down */
+.trend-down-bad  /* red — metric regressed by going down */
+.trend-flat      /* gray — no change */
+.delta           /* compact font for delta values */
+```
+
+### History API
+
+For sparkline rendering and dashboards, the `loadHistory(reportType, limit)` function returns the last N snapshots as an array of `{ date, metrics }` objects.
+
+See `examples/trend-snapshot.json` for raw snapshot format and `examples/trend-enriched.json` for enriched metrics after computation.
 
 ## Output
 

@@ -16,3 +16,7 @@
 .orch/audit/benchmarks/
 .orch/mocks/node_modules/
 .orch/mocks/db.json
+
+# ORCH runtime dependencies (installed by orch init)
+.orch/node_modules/
+.orch/package-lock.json

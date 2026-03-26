@@ -1,0 +1,64 @@
+{
+  "has_previous": true,
+  "metrics": [
+    {
+      "name": "Components",
+      "value": 42,
+      "previous": 38,
+      "delta": "+4",
+      "trend": "\u2191",
+      "trend_color": "up"
+    },
+    {
+      "name": "TSDoc coverage",
+      "value": 78,
+      "unit": "%",
+      "previous": 65,
+      "delta": "+13%",
+      "trend": "\u2191",
+      "trend_color": "good"
+    },
+    {
+      "name": "Test coverage",
+      "value": 82,
+      "unit": "%",
+      "previous": 84,
+      "delta": "-2%",
+      "trend": "\u2193",
+      "trend_color": "bad"
+    },
+    {
+      "name": "Lint errors",
+      "value": 3,
+      "previous": 12,
+      "delta": "-9",
+      "trend": "\u2193",
+      "trend_color": "good"
+    },
+    {
+      "name": "Bundle size",
+      "value": 425,
+      "unit": "KB",
+      "previous": 460,
+      "delta": "-35",
+      "trend": "\u2193",
+      "trend_color": "good"
+    },
+    {
+      "name": "Bus factor",
+      "value": 3,
+      "previous": 2,
+      "delta": "+1",
+      "trend": "\u2191",
+      "trend_color": "up"
+    },
+    {
+      "name": "Compliance score",
+      "value": 0.95,
+      "previous": 0.91,
+      "delta": "+0.04",
+      "trend": "\u2191",
+      "trend_color": "good"
+    }
+  ]
+}

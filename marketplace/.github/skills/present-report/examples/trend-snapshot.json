@@ -1,0 +1,25 @@
+{
+  "type": "recap",
+  "date": "2026-03-25T10:30:00Z",
+  "project": "acme-trading",
+  "title": "Project Recap",
+  "agent": "@orch",
+  "summary": {
+    "status": "PASS",
+    "score": 85,
+    "bullets": [
+      "All components documented and tested",
+      "Bundle size within target",
+      "Compliance score above threshold"
+    ]
+  },
+  "metrics": [
+    { "name": "Components", "value": 42 },
+    { "name": "TSDoc coverage", "value": 78, "unit": "%" },
+    { "name": "Test coverage", "value": 82, "unit": "%" },
+    { "name": "Lint errors", "value": 3 },
+    { "name": "Bundle size", "value": 425, "unit": "KB" },
+    { "name": "Bus factor", "value": 3 },
+    { "name": "Compliance score", "value": 0.95 }
+  ]
+}

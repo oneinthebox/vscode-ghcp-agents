@@ -28,6 +28,7 @@ if (args.length === 0 || args.includes("--help")) {
   console.log(`Usage: node render-report.js <report-data.json> [options]
   --format <md|html|json|pdf|deck|all>  Output format (default: md)
   --output <path>                        Output file path
+  --template <name>                      Template name (loads from .orch/templates/reports/)
   --help                                 Show this help`);
   process.exit(0);
 }
@@ -35,12 +36,15 @@ if (args.length === 0 || args.includes("--help")) {
 const inputPath = args[0];
 let format = "md";
 let outputPath = null;
+let templateName = null;
 
 for (let i = 1; i < args.length; i++) {
   if (args[i] === "--format" && args[i + 1]) {
     format = args[++i];
   } else if (args[i] === "--output" && args[i + 1]) {
     outputPath = args[++i];
+  } else if (args[i] === "--template" && args[i + 1]) {
+    templateName = args[++i];
   }
 }
 
@@ -63,6 +67,29 @@ try {
 }
 
 const basename = path.basename(inputPath, path.extname(inputPath));
+
+// ---------------------------------------------------------------------------
+// Trend tracking integration
+// ---------------------------------------------------------------------------
+const trendsModule = (() => {
+  try {
+    return require(path.resolve(__dirname, "../../../../.orch/hooks/track-trends.js"));
+  } catch (_e) {
+    return null;
+  }
+})();
+
+// Determine report type from --template flag (used for snapshot storage)
+const reportType = templateName || basename;
+
+// Load previous snapshot and enrich metrics with trend data
+if (trendsModule && data.metrics && data.metrics.length) {
+  const previous = trendsModule.loadPreviousSnapshot(reportType);
+  if (previous && previous.metrics) {
+    data.metrics = trendsModule.computeTrends(data.metrics, previous.metrics);
+    data.has_previous = true;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -95,6 +122,114 @@ function statusClass(status) {
   if (s === "WARN") return "badge-warn";
   if (s === "FAIL") return "badge-fail";
   return "";
+}
+
+// ---------------------------------------------------------------------------
+// Template engine — lightweight mustache-style processing (~50 lines)
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve a dotted key path (e.g. "sections.architecture") against a data object.
+ * Returns undefined if any segment is missing.
+ */
+function resolvePath(obj, keyPath) {
+  return keyPath.split(".").reduce((acc, key) => (acc != null ? acc[key] : undefined), obj);
+}
+
+/**
+ * Process a template string with mustache-like syntax against a data object.
+ *
+ * Supported syntax:
+ *   {{var}}                  — HTML-escaped value
+ *   {{{var}}}                — raw value (markdown, Mermaid diagrams, HTML)
+ *   {{#key}}...{{/key}}      — conditional block (truthy) / loop (if array)
+ *   {{^key}}...{{/key}}      — inverted block (render if key is falsy/missing)
+ */
+function processTemplate(template, data) {
+  let output = template;
+
+  // 1. Inverted blocks: {{^key}}...{{/key}} — render if falsy/missing
+  output = output.replace(/\{\{\^(\w[\w.]*)\}\}([\s\S]*?)\{\{\/\1\}\}/g, (_, key, block) => {
+    const val = resolvePath(data, key);
+    if (!val || (Array.isArray(val) && val.length === 0)) {
+      return processTemplate(block, data);
+    }
+    return "";
+  });
+
+  // 2. Section/loop blocks: {{#key}}...{{/key}}
+  output = output.replace(/\{\{#(\w[\w.]*)\}\}([\s\S]*?)\{\{\/\1\}\}/g, (_, key, block) => {
+    const val = resolvePath(data, key);
+    if (val == null) return "";
+    // Array — loop over items
+    if (Array.isArray(val)) {
+      return val.map((item) => {
+        const ctx = typeof item === "object" ? Object.assign({}, data, item) : Object.assign({}, data, { ".": item });
+        return processTemplate(block, ctx);
+      }).join("");
+    }
+    // Object — render block with merged context
+    if (typeof val === "object") {
+      return processTemplate(block, Object.assign({}, data, val));
+    }
+    // Truthy scalar — render block with parent context
+    if (val) {
+      return processTemplate(block, data);
+    }
+    return "";
+  });
+
+  // 3. Triple-brace (raw/unescaped): {{{var}}}
+  output = output.replace(/\{\{\{(\w[\w.]*)\}\}\}/g, (_, key) => {
+    const val = resolvePath(data, key);
+    return val != null ? String(val) : "";
+  });
+
+  // 4. Double-brace (HTML-escaped): {{var}}
+  output = output.replace(/\{\{(\w[\w.]*)\}\}/g, (_, key) => {
+    const val = resolvePath(data, key);
+    return val != null ? escapeHtml(String(val)) : "";
+  });
+
+  return output;
+}
+
+/**
+ * Load a template file from .orch/templates/reports/<name>.md
+ * Searches relative to the script location (up to marketplace root).
+ */
+function loadTemplate(name) {
+  // Walk up from this script to find the .orch/templates directory
+  let dir = __dirname;
+  for (let i = 0; i < 8; i++) {
+    const candidate = path.join(dir, ".orch", "templates", "reports", name + ".md");
+    if (fs.existsSync(candidate)) {
+      return fs.readFileSync(candidate, "utf-8");
+    }
+    // Also check custom templates
+    const custom = path.join(dir, ".orch", "templates", "reports", "custom", name + ".md");
+    if (fs.existsSync(custom)) {
+      return fs.readFileSync(custom, "utf-8");
+    }
+    dir = path.dirname(dir);
+  }
+  console.error(`Template "${name}" not found in .orch/templates/reports/`);
+  process.exit(1);
+}
+
+/**
+ * Load the base HTML wrapper from .orch/templates/base.html
+ */
+function loadBaseHtml() {
+  let dir = __dirname;
+  for (let i = 0; i < 8; i++) {
+    const candidate = path.join(dir, ".orch", "templates", "base.html");
+    if (fs.existsSync(candidate)) {
+      return fs.readFileSync(candidate, "utf-8");
+    }
+    dir = path.dirname(dir);
+  }
+  return null; // fallback to inline HTML renderer
 }
 
 // ---------------------------------------------------------------------------
@@ -581,9 +716,15 @@ function renderPdf(data, pdfOutputPath) {
   const tmpHtml = pdfOutputPath.replace(/\.pdf$/i, ".tmp.html");
   fs.writeFileSync(tmpHtml, htmlContent, "utf-8");
 
-  // Try puppeteer first, then wkhtmltopdf
+  // Try puppeteer first (from .orch/node_modules or project), then wkhtmltopdf
+  let puppeteer;
   try {
-    const puppeteer = require("puppeteer");
+    puppeteer = require(path.join(process.cwd(), '.orch', 'node_modules', 'puppeteer'));
+  } catch {
+    try { puppeteer = require("puppeteer"); } catch { puppeteer = null; }
+  }
+  try {
+    if (!puppeteer) throw new Error('puppeteer not installed');
     (async () => {
       const browser = await puppeteer.launch({ headless: "new" });
       const page = await browser.newPage();
@@ -631,6 +772,42 @@ function writeOutput(content, ext) {
 }
 
 // ---------------------------------------------------------------------------
+// Template-aware rendering
+// ---------------------------------------------------------------------------
+
+/**
+ * Render markdown using a template (if specified) or fall back to free-form.
+ */
+function renderMarkdownWithTemplate(data) {
+  if (!templateName) return renderMarkdown(data);
+  const tpl = loadTemplate(templateName);
+  return processTemplate(tpl, data);
+}
+
+/**
+ * Render HTML using the base.html wrapper + template (if specified),
+ * or fall back to free-form inline HTML.
+ */
+function renderHtmlWithTemplate(data) {
+  if (!templateName) return renderHtml(data);
+
+  // Render the markdown body from template
+  const mdBody = renderMarkdownWithTemplate(data);
+
+  // Load the base HTML wrapper
+  const baseHtml = loadBaseHtml();
+  if (!baseHtml) {
+    // Fallback: wrap in minimal HTML if base.html not found
+    return renderHtml(data);
+  }
+
+  // Fill the base wrapper: {{content}} gets the rendered markdown body,
+  // other {{var}} placeholders get filled from data
+  const htmlData = Object.assign({}, data, { content: mdBody });
+  return processTemplate(baseHtml, htmlData);
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 const formats = format === "all" ? ["md", "html", "json", "pdf", "deck"] : [format];
@@ -644,10 +821,10 @@ formats.forEach((fmt) => {
 
   switch (fmt) {
     case "md":
-      writeOutput(renderMarkdown(data), "md");
+      writeOutput(renderMarkdownWithTemplate(data), "md");
       break;
     case "html":
-      writeOutput(renderHtml(data), "html");
+      writeOutput(renderHtmlWithTemplate(data), "html");
       break;
     case "json":
       writeOutput(renderJson(data), "json");
@@ -670,3 +847,15 @@ formats.forEach((fmt) => {
 
   outputPath = origOutput;
 });
+
+// ---------------------------------------------------------------------------
+// Save snapshot for future trend tracking
+// ---------------------------------------------------------------------------
+if (trendsModule) {
+  try {
+    const snapshotPath = trendsModule.saveSnapshot(reportType, data);
+    console.log(`Snapshot saved to ${snapshotPath}`);
+  } catch (err) {
+    console.warn(`Warning: failed to save trend snapshot: ${err.message}`);
+  }
+}

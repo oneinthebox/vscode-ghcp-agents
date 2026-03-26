@@ -79,6 +79,13 @@ audit:
   verbosity: normal          # minimal | normal | verbose
   export_format: json        # json | csv (for enterprise observability export)
 
+# ORCH runtime dependencies
+# Installed to .orch/node_modules/ by orch init (isolated from project deps)
+# Run 'cd .orch && npm install' to reinstall manually
+dependencies:
+  auto_install: true           # install during orch init
+  # To add custom packages: edit .orch/package.json and run npm install
+
 # Standard directories created by `orch init`:
 #   .orch/runs/            — session telemetry and workflow run data (date-based subdirectories with session JSON files)
 #   .orch/reports/         — generated HTML reports, dashboards, and decks

@@ -46,7 +46,7 @@ The script outputs JSON to stdout with counts of @Input/@Output decorators, Beha
 3. **Load reference.** Read [references/angular/v19/signals-guide.md](references/angular/v19/signals-guide.md) and [references/angular/v19/state-management-guide.md](references/angular/v19/state-management-guide.md) for migration patterns and edge cases.
 
 4. **Phase 1: Migrate @Input/@Output** (mechanical, ts-morph).
-   - Run: `npx ts-node scripts/semantic/adapters/typescript/transform.ts signals --scope {path} --phase inputs`
+   - Run: `npx --prefix .orch ts-node .orch/scripts/semantic/adapters/typescript/transform.ts signals --scope {path} --phase inputs`
    - Converts `@Input() name: string` to `name = input<string>()`.
    - Converts `@Input({ required: true })` to `input.required<string>()`.
    - Converts `@Output() clicked = new EventEmitter<void>()` to `clicked = output<void>()`.

@@ -32,17 +32,28 @@ All adapters implement these operations:
 | `analyze-migrations` | source path + target version | per-file migration plan |
 | `transform` | source path + transform type | transformed source (formatting preserved) |
 
+## Dependencies
+
+Semantic adapters depend on packages installed in `.orch/node_modules/` (isolated from your project's dependencies). The `ts-morph` and `ts-node` packages are listed in `.orch/package.json` and installed automatically by `orch init`.
+
+To reinstall manually:
+```bash
+cd .orch && npm install
+```
+
+Do **not** add `ts-morph` or `ts-node` to your project's `package.json` — ORCH manages its own copies.
+
 ## Usage
 
 ```bash
 # Generate semantic summary for agent consumption
-npx ts-node scripts/semantic/adapters/typescript/generate-summary.ts src/
+npx --prefix .orch ts-node .orch/scripts/semantic/adapters/typescript/generate-summary.ts src/
 
 # Execute a specific transform
-npx ts-node scripts/semantic/adapters/typescript/transform.ts standalone src/app/trade/
+npx --prefix .orch ts-node .orch/scripts/semantic/adapters/typescript/transform.ts standalone src/app/trade/
 
 # Analyze what migration steps are needed
-npx ts-node scripts/semantic/adapters/typescript/analyze-migrations.ts src/ --target angular-19
+npx --prefix .orch ts-node .orch/scripts/semantic/adapters/typescript/analyze-migrations.ts src/ --target angular-19
 ```
 
 ## Adding a new language adapter

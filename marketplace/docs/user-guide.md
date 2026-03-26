@@ -144,7 +144,7 @@ orch new nx-angular trade-app --style scss --angular-version 19
 
 ### `orch init`
 
-Initialize ORCH in an existing project. Detects the project type (Angular, Spring Boot, FastAPI), workspace type (Nx, Angular CLI, vanilla), and installed versions. Installs agents, skills, instructions, hooks, audit config, and creates the docs registry.
+Initialize ORCH in an existing project. Detects the project type (Angular, Spring Boot, FastAPI), workspace type (Nx, Angular CLI, vanilla), and installed versions. Installs agents, skills, instructions, hooks, audit config, and creates the docs registry. Also installs ORCH runtime dependencies into `.orch/node_modules/` (isolated from project deps) by running `npm install` inside `.orch/`.
 
 **Flags:**
 
@@ -619,6 +619,7 @@ The first troubleshooting step is always `orch doctor`. It validates every compo
 | "Manifest MISSING" | ORCH not properly initialized | Run `orch init` to create the manifest |
 | Checksum mismatch (modified files) | Local edits to ORCH-managed files | Run `orch update` to restore originals, or accept local modifications |
 | Pin version not working | `stack.angular_version` not set | Edit `.orch/config.yaml` and set `stack.angular_version: "17"` |
+| `ts-morph` / `json-server` not found | ORCH deps not installed | `cd .orch && npm install` |
 
 ### Context health monitoring
 
